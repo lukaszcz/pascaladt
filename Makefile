@@ -1,10 +1,9 @@
-
 # Note:
 #
 # unit.i - a template interface of a unit (an mcp include file)
 #
 # unit_impl.i - a template implementation of a unit (an mcp
-# include file) 
+# include file)
 #
 # unit.pas.mcp - the unit template to be processed by
 # mcp; it &includes unit.i and unit_impl.i
@@ -13,7 +12,7 @@
 #
 # unit_impl.mac - mcp macros used only in the implementation of the
 # unit
-# 
+#
 # unit.mcp - mcp defines automatically generated from unit.i with
 # mktempl
 #
@@ -77,7 +76,7 @@ override OPTS += -vewn -Sa -gl -dDEBUG_PASCAL_ADT
 endif
 
 ifdef TEST
-override OPTS += -dTEST_PASCAL_ADT -gc
+override OPTS += -dTEST_PASCAL_ADT
 endif
 
 ifdef WINDOWS
@@ -91,7 +90,7 @@ endif
 VPATH = tests:tests/units
 
 obj_suffix :=.o
-prog_suffix := 
+prog_suffix :=
 static_lib_suffix :=.a
 dynamic_lib_suffix :=.so
 

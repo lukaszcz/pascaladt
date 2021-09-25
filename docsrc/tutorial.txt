@@ -1,5 +1,4 @@
-
-			 PascalAdt tutorial.
+                         PascalAdt tutorial.
 
 This document provides an introduction to the PascalAdt library and
 briefly explains its basic functions using an example of a (very)
@@ -8,37 +7,36 @@ orders.
 
 I. What is PascalAdt?
 II. How to use it?
-	1. The customer.pas program.
-	2. The basics.
-	   2.1 Simple type defines.
-	   2.2 Terminology.
-	   2.3 Containers.
-	   2.4 Functors.
-	3. Sets and maps.
-	   3.1 Basic information.
-	   3.2 Searching for items.
-	   3.3 Inserting items.
-	   3.4 Removing items.
-	4. Lists.
-	   4.1 Basic information.
-	   4.2 Inserting items.
-	5. Iterators.
-	   5.1 Basic information.
-	   5.2 Ranges.
-	   5.3 Simplified class hierarchy.
-	       5.3.1 TIterator.
-	       5.3.2 TForwardIterator.
-	       5.3.3 TBidirectionalIterator.
-	       5.3.4 TRandomAccessIterator.
-	       5.3.5 TSetIterator.
-	   5.4 The invalidation of iterators.
-	   5.5 Ownership issues.
-	   5.6 Example.
-	6. Algorithms.
-	7. Compositions of functors.
+        1. The customer.pas program.
+        2. The basics.
+           2.1 Simple type defines.
+           2.2 Terminology.
+           2.3 Containers.
+           2.4 Functors.
+        3. Sets and maps.
+           3.1 Basic information.
+           3.2 Searching for items.
+           3.3 Inserting items.
+           3.4 Removing items.
+        4. Lists.
+           4.1 Basic information.
+           4.2 Inserting items.
+        5. Iterators.
+           5.1 Basic information.
+           5.2 Ranges.
+           5.3 Simplified class hierarchy.
+               5.3.1 TIterator.
+               5.3.2 TForwardIterator.
+               5.3.3 TBidirectionalIterator.
+               5.3.4 TRandomAccessIterator.
+               5.3.5 TSetIterator.
+           5.4 The invalidation of iterators.
+           5.5 Ownership issues.
+           5.6 Example.
+        6. Algorithms.
+        7. Compositions of functors.
 III. Where to find more information?
 IV. Author.
-V. Copymiddle.
 
 I. What is PascalAdt?
 
@@ -87,7 +85,7 @@ something like this:
    public
       constructor Create(aFirstName, aSurname, aAddress : String);
       destructor Destroy; override;
-      
+
       property FirstName : String read FFirstName write FFirstName;
       property Surname : String read FSurname write FSurname;
       property Address : String read FAddress write FAddress;
@@ -163,7 +161,7 @@ instance, there are two classes derived directly from TDoubleListAdt
 with almost the same methods, implementing the same functionality, but
 in two different ways. These are namely TDoubleList - a standard
 doubly-linked list - and TXorList - a memory-saving implementation of
-a doubly-linked list, but a somewhat messy one. 
+a doubly-linked list, but a somewhat messy one.
 
 All abstract -Adt classes, except for TContainerAdt, are defined in
 adtcont.pas. TContainerAdt is defined in adtcontbase.pas.
@@ -278,18 +276,18 @@ block.
       allCustomers := nil;
       try
          allCustomers := TObjectHashTable.Create(TCustomerHasher.Create,
-	                                         TCustomerComparer.Create);
-	 // ...
+                                                 TCustomerComparer.Create);
+         // ...
 
          { do the main job }
          Run;
-	 
+
       finally
          allOrders.Free;
          allCustomers.Free;
       end;
    end.
-   
+
 Note that TObjectHashTable is used instead of THashTable. Strictly
 speaking, this is not necessary. It's just a mere typing convenience.
 The disposer appropriate for destroying objects is created
@@ -303,7 +301,7 @@ declarations.
    public
       function Compare(ptr1, ptr2 : Pointer) : IndexType;
    end;
-   
+
    TCustomerHasher = class (TFunctor, IHasher)
    public
       function Hash(ptr : Pointer) : UnsignedType;
@@ -457,42 +455,42 @@ database.
       New(order);
 
       try
-	 WriteLn('Enter order data.');
-	 with order^ do
-	 begin
-	    Write('Product name: '); ReadLn(productName);
-	    Write('Price: '); ReadLn(price);      
-	 end;
-	 Write('Customer first name: '); ReadLn(firstName);
-	 Write('Customer surname: '); ReadLn(surname);
+         WriteLn('Enter order data.');
+         with order^ do
+         begin
+            Write('Product name: '); ReadLn(productName);
+            Write('Price: '); ReadLn(price);
+         end;
+         Write('Customer first name: '); ReadLn(firstName);
+         Write('Customer surname: '); ReadLn(surname);
 
-	 { check if the specified customer is present in the database }
-	 customerKey := TCustomerKey.Create(firstName, surname);
-	 try
-	    order^.customer := TCustomer(allCustomers.Find(customerKey));
-	 finally
-	    customerKey.Free;
-	 end;
+         { check if the specified customer is present in the database }
+         customerKey := TCustomerKey.Create(firstName, surname);
+         try
+            order^.customer := TCustomer(allCustomers.Find(customerKey));
+         finally
+            customerKey.Free;
+         end;
 
-	 if order^.customer <> nil then
-	 begin
-	    order^.orderId := unusedOrderId;
-	    Inc(unusedOrderId);
-	    order^.customer.Orders.PushBack(order);
-	    if not allOrders.Insert(order) then
-	       WriteLn('Error! Impossible!');
-	    WriteLn('Order successfully added.');
-	    WriteLn('Order ID: ', order^.orderId);
-	 end else
-	 begin
-	    Dispose(order);
-	    WriteLn('Invalid customer specified.');
-	 end;
+         if order^.customer <> nil then
+         begin
+            order^.orderId := unusedOrderId;
+            Inc(unusedOrderId);
+            order^.customer.Orders.PushBack(order);
+            if not allOrders.Insert(order) then
+               WriteLn('Error! Impossible!');
+            WriteLn('Order successfully added.');
+            WriteLn('Order ID: ', order^.orderId);
+         end else
+         begin
+            Dispose(order);
+            WriteLn('Invalid customer specified.');
+         end;
       except
-	 { if an exception occurs the order is not automatically disposed
-	   (even if it occurs in allOrders.Insert) }
-	 Dispose(order);
-	 raise;
+         { if an exception occurs the order is not automatically disposed
+           (even if it occurs in allOrders.Insert) }
+         Dispose(order);
+         raise;
       end;
    end;
 
@@ -542,20 +540,20 @@ order.
       order := POrder(allOrders.Find(@orderKey));
       if order <> nil then
       begin
-	 { remove the order from the list of the customer associated with
-	   it }
-	 comparer := TOrderComparer.Create;
-	 DeleteIf(order^.customer.Orders.ForwardStart, MAXINT,
-		  EqualTo(comparer, order));
+         { remove the order from the list of the customer associated with
+           it }
+         comparer := TOrderComparer.Create;
+         DeleteIf(order^.customer.Orders.ForwardStart, MAXINT,
+                  EqualTo(comparer, order));
 
-	 { remove the order itself }
-	 if allOrders.Delete(@orderKey) = 0 then
-	    WriteLn('Error! Impossible!');
+         { remove the order itself }
+         if allOrders.Delete(@orderKey) = 0 then
+            WriteLn('Error! Impossible!');
 
-	 WriteLn('Order ', orderId, ' successfully removed.');
+         WriteLn('Order ', orderId, ' successfully removed.');
       end else
       begin
-	 WriteLn('Invaid order ID.');
+         WriteLn('Invaid order ID.');
       end;
    end;
 
@@ -752,7 +750,7 @@ Provides an access to an item at the distance ind from self. So, for
 instance, iter[0] is roughly equivatent to iter.Item, iter[5] to
 iter.Advance(5); iter.Item; iter.Advance(-5);.
 
-   function Distance(const Pos : TRandomAccessIterator) : IndexType; 
+   function Distance(const Pos : TRandomAccessIterator) : IndexType;
 
 Returns the distance from self to pos, i.e. the number of positions
 that must be traversed to get to pos. If pos is closer to the
@@ -808,8 +806,8 @@ procedure.
       iter := allOrders.Start;
       while not iter.IsFinish do
       begin
-	 PrintOrder(iter.Item);
-	 iter.Advance;
+         PrintOrder(iter.Item);
+         iter.Advance;
       end;
    end;
 
@@ -885,14 +883,14 @@ the data associated with a customer.
       customer := TCustomer(ptr);
       with customer do
       begin
-	 WriteLn;
-	 WriteLn('--------------------------------------------');
-	 WriteLn('Name: ', FirstName, ' ', Surname);
-	 WriteLn('Address: ', Address);
-	 WriteLn('Current number of orders: ', Orders.Size);
-	 WriteLn('Orders: ');
-	 ForEach(Orders.ForwardStart, Orders.ForwardFinish,
-		 Adapt(@PrintOrderWithoutCustomerInfo));
+         WriteLn;
+         WriteLn('--------------------------------------------');
+         WriteLn('Name: ', FirstName, ' ', Surname);
+         WriteLn('Address: ', Address);
+         WriteLn('Current number of orders: ', Orders.Size);
+         WriteLn('Orders: ');
+         ForEach(Orders.ForwardStart, Orders.ForwardFinish,
+                 Adapt(@PrintOrderWithoutCustomerInfo));
       end;
    end;
 
@@ -941,20 +939,20 @@ to relax a bit.
       i := 0;
       while not iter.IsFinish do
       begin
-	 buff[i] := iter.Item;
-	 Inc(i);
-	 iter.Advance;
+         buff[i] := iter.Item;
+         Inc(i);
+         iter.Advance;
       end;
 
       a := TPascalArray.Create(buff);
       try
-	 comparer := TCustomerComparer.Create;
+         comparer := TCustomerComparer.Create;
 
-	 Sort(a.Start, a.Finish, comparer);
-	 WriteLn('Registered customers:');
-	 ForEach(a.Start, a.Finish, Adapt(@PrintCustomerName));
+         Sort(a.Start, a.Finish, comparer);
+         WriteLn('Registered customers:');
+         ForEach(a.Start, a.Finish, Adapt(@PrintCustomerName));
       finally
-	 a.Free;
+         a.Free;
       end;
    end;
 
@@ -1029,11 +1027,11 @@ functors.
 
 Functor functions are vary handy and sometimes save much
 typing. However, they should be used with caution. Basically,
-'nesting' too many functor functions should be avoided. 
+'nesting' too many functor functions should be avoided.
 
 Let's take the following call as an example.
 
-   r := PredOr(PredAnd(Negate(EqualTo(f, obj1)), LessThan(g, obj2)), 
+   r := PredOr(PredAnd(Negate(EqualTo(f, obj1)), LessThan(g, obj2)),
                EqualTo(h, obj2));
 
 Assuming f, g and h are IBinaryComparers, r is an IUnaryPredicate
@@ -1072,14 +1070,3 @@ IV. Author.
 
 The author of this tutorial and the PascalAdt library is Lukasz
 Czajka.
-
-V. Copymiddle.
-
-This tutorial is Non-Copyright, Non-Copyleft, but Copymiddle.
-
-Copymiddle (M) 2004 by Lukasz Czajka
-
-No rights reserved. Any part of this file may be reproduced, stored in
-a retrieval system, or transmitted by any means, including, but not
-limited to, photocopying, recording, the internet, mimeograph or even
-your flushing toilet.

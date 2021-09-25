@@ -237,8 +237,6 @@ var
    i, ii : IndexType;
    lastSize, Size : SizeType;
 begin
-   TestForwardIterator(start, finish);
-
    { -------------------------- Retreat ----------------------- }
    iter := CopyOf(finish);
    iter.Retreat;
@@ -344,6 +342,8 @@ begin
 
       CheckRange(start, finish, true, 0, start.Owner.Size, 'Insert');
    end;
+
+   TestForwardIterator(start, finish);
 end;
 
 procedure TestRandomAccessIterator(start, finish : TRandomAccessIterator);
@@ -351,8 +351,6 @@ var
    iter : TRandomAccessIterator;
    Size : SizeType;
 begin
-   TestBidirectionalIterator(start, finish);
-
    size := start.Owner.Size;
 
    { -------------------------- Index ----------------------- }
@@ -386,6 +384,8 @@ begin
    TestIter(not finish.Less(finish), 'Less', 'finish < finish returns true');
    StopSilentMode;
    TestIter(not finish.Less(start), 'Less', 'finish < start returns true');
+
+   TestBidirectionalIterator(start, finish);
 end;
 
 procedure TestTraversalIterator(start : TTreeTraversalIterator; iname : String);
