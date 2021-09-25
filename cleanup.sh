@@ -17,22 +17,22 @@ fi
 
 FILES_TO_RETAIN='(\.pas$)|(\.inc$)|(\.i$)|(\.sh$)|(\.mcp$)|(\.mac$)|(^\.backup\.bpl$)'
 
-if [ $REPLY = "yes" ]; then
+if [ "$REPLY" = "yes" ]; then
     rm -f `ls -1 | grep '~'`;
     if [ $FAST = 0 ]; then
-	rm -f uninstall*.sh
+        rm -f uninstall*.sh
     fi
     rm -f -r `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(Makefile)|(Makefile\.fpc)|(INSTALL)|(README)|(LICENSE)|(NEWS)|(tests$)|(^docs$)|(docsrc)|(versions)|(delphi)|(^demo$)|(^tools$)'`;
     for FILENAME in *.mcp
     do
       if [ ! `ls -1 *.pas.mcp | grep $FILENAME` ]; then
-	  rm $FILENAME
+          rm $FILENAME
       fi
     done
-    for FILENAME in adt*.pas 
+    for FILENAME in adt*.pas
     do
       if [ -f ${FILENAME}.mcp ]; then
-	  rm ${FILENAME}
+          rm ${FILENAME}
       fi
     done
 
@@ -44,7 +44,7 @@ if [ $REPLY = "yes" ]; then
     rm -f `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(cpu)'`;
     cd cpu
     rm -f `ls -1 | grep '~'`
-    rm -f `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(license.txt)'`;    
+    rm -f `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(license.txt)'`;
     cd ../../../demo
     rm -f `ls -1 | grep '~'`
     rm -f `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(customer)|(Makefile)'`;
@@ -56,5 +56,3 @@ if [ $REPLY = "yes" ]; then
     cd ../docsrc
     rm -f `ls -1 | grep '~'`
 fi
-
-

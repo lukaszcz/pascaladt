@@ -136,12 +136,12 @@ else
     MAKE_STATIC=1
 fi
 
-read -n 1 -p "Install debug version also? (y/n) "
+read -n 1 -p "Install debug version also? (n/y) "
 echo
-if [ "$REPLY" == n ]; then
-    INSTALL_DEBUG=0
-else
+if [ "$REPLY" == y ]; then
     INSTALL_DEBUG=1
+else
+    INSTALL_DEBUG=0
 fi
 
 if [ $INSTALL_DEBUG == 1 ]; then
