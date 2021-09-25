@@ -1,20 +1,20 @@
 {@discard
- 
+
  This file is a part of the PascalAdt library, which provides commonly
  used algorithms and data structures for the FPC and Delphi compilers.
- 
+
  Copyright (C) 2004, 2005 by Lukasz Czajka
- 
+
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
  published by the Free Software Foundation; either version 2.1 of the
  License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -52,8 +52,8 @@ type
         O(n). }
       function Size : SizeType; override;
    end;
-   
-   
+
+
 { ----------------------- TDefinedOrderContainerAdt --------------------------- }
 
 function TDefinedOrderContainerAdt.IsDefinedOrder : Boolean;
@@ -74,7 +74,7 @@ begin
    inherited CreateCopy(TContainerAdt(cont));
    Fcomparer := cont.ItemComparer;
 end;
-      
+
 procedure TPriorityQueueAdt.DeleteFirst;
 var
    aitem : ItemType;
@@ -82,7 +82,7 @@ begin
    aitem := ExtractFirst;
    DisposeItem(aitem);
 end;
-      
+
 function TPriorityQueueAdt.InsertItem(aitem : ItemType) : Boolean;
 begin
    Insert(aitem);
@@ -246,7 +246,7 @@ end;
 
 function TSortedSetAdt.ExtractFirst : ItemType;
 var
-   iter : TBidirectionalIterator;   
+   iter : TBidirectionalIterator;
 begin
    iter := Start;
    Result := iter.Extract;
@@ -351,7 +351,7 @@ end;
 
 { ------------------------- TRandomAccessContainerAdt -------------------------- }
 
-function TRandomAccessContainerAdt.ForwardStart : TForwardIterator; 
+function TRandomAccessContainerAdt.ForwardStart : TForwardIterator;
 begin
    Result := RandomAccessStart;
 end;
@@ -360,7 +360,7 @@ function TRandomAccessContainerAdt.ForwardFinish : TForwardIterator;
 begin
    Result := RandomAccessFinish;
 end;
-      
+
 procedure TRandomAccessContainerAdt.Insert(iter : TForwardIterator;
                                            aitem : ItemType);
 begin
@@ -421,7 +421,7 @@ begin
    Inc(FIndex);
 end;
 
-procedure TRandomAccessContainerIterator.Advance(i : integer);
+procedure TRandomAccessContainerIterator.Advance(i : IndexType);
 begin
    Inc(FIndex, i);
 end;
@@ -483,7 +483,7 @@ begin
    if iter.Owner = FCont then
    begin
       Assert((iter is TRandomAccessContainerIterator), msgInvalidIterator);
-      
+
       { ExchangeItemsAt works with indicies relative to self.Index }
       ExchangeItemsAt(0, TRandomAccessContainerIterator(iter).FIndex - FIndex);
    end else
@@ -505,7 +505,7 @@ begin
    Result := FCont.Delete(FIndex, n);
 end;
 
-function TRandomAccessContainerIterator.Index : Integer;
+function TRandomAccessContainerIterator.Index : IndexType;
 begin
    Result := FIndex;
 end;
@@ -522,7 +522,7 @@ end;
 
 function TRandomAccessContainerIterator.IsFinish : Boolean;
 begin
-   Result := (FIndex = FCont.HighIndex + 1); 
+   Result := (FIndex = FCont.HighIndex + 1);
 end;
 
 { -------------------- TSortedSetPriorityQueueInterface --------------------- }
@@ -596,4 +596,3 @@ begin
 end;
 
 {$endif OVERLOAD_DIRECTIVE }
-

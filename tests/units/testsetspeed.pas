@@ -7,10 +7,10 @@ unit testsetspeed;
 interface
 
 uses
-   SysUtils, Classes, adtcont, adtlog, adtfunct, adthashfunct, adtdarray, cpu_timer;
+   SysUtils, Classes, adtcont, adtlog, adtfunct, adthashfunct, adtdarray;
 
 procedure BenchmarkSet(aset : TStringSetAdt; className : String);
-   
+
 implementation
 
 var
@@ -36,134 +36,128 @@ end;
 
 procedure BenchmarkSet(aset : TStringSetAdt; className : String);
 var
-   dict : TFileStream;
-   ln : String;
-   timeInsert, timeSearchFound, timeSearchNotFound, timeDelete : TZenTimer;
-   words : TStringDynamicArray;
+   dict    : TFileStream;
+   ln      : String;
+   tm, timeSearchFound, timeSearchNotFound, timeInsert, timeDelete : Comp;
+   words   : TStringDynamicArray;
    i, maxi : IndexType;
-   
+
 begin
    WriteLn('Benchmarking ', className, '...');
    dict := TFileStream.Create('/usr/share/dict/words', fmOpenRead);
    lastByteLeft := false;
-   
+
    WriteLogStream('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
    WriteLogStream('Benchmark for ' + className);
 
-   timeInsert := TZenTimer.Create;
-   timeSearchFound := TZenTimer.Create;
-   timeSearchNotFound := TZenTimer.Create;
-   timeDelete := TZenTimer.Create;
-   
    ArrayAllocate(words, 100000, 0);
-   
+
    try
       aset.Clear;
       aset.RepeatedItems := true;
-   
+
       repeat
          ln := ReadToken(dict);
          for i := 1 to 2 do
             ArrayPushBack(words, ln);
       until dict.Position >= dict.Size;
-      
+
       maxi := words^.Size - 1;
-      
-      timeInsert.Start;
+
+      timeInsert := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := 0 to maxi do
       begin
          aset.Insert(words^.Items[i]);
       end;
-      timeInsert.Stop;
-      
-{$ifdef TEST_PASCAL_ADT }      
+      timeInsert := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - timeInsert;
+
+{$ifdef TEST_PASCAL_ADT }
       if className <> 'TString23Tree' then
          aset.LogStatus('BenchmarkSet (after inserting all items)');
 {$endif }
-      
-      timeSearchFound.Start;
+
+      timeSearchFound := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := 0 to maxi do
       begin
          aset.Has(words^.Items[i]);
       end;
-      timeSearchFound.Stop; 
-      
+      timeSearchFound := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - timeSearchFound;
+
       ln := 'AAAAAAAAAAXXXXXXXXXX';
-      timeSearchNotFound.Start;
+      timeSearchNotFound := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := 0 to maxi do
       begin
          aset.Has(ln);
-         
+
          Inc(ln[(i mod 20) + 1]);
       end;
-      timeSearchNotFound.Stop; 
-      
-      timeDelete.Start;
+      timeSearchNotFound := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - timeSearchNotFound;
+
+      timeDelete := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := 0 to maxi div 2 do
       begin
          aset.Delete(words^.Items[i]);
       end;
-      timeDelete.Stop; 
-      
-{$ifdef TEST_PASCAL_ADT }      
+      timeDelete := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - timeDelete;
+
+{$ifdef TEST_PASCAL_ADT }
       if className <> 'TString23Tree' then
          aset.LogStatus('BenchmarkSet (after deleting half of the items)');
-{$endif }      
-      
-      timeSearchFound.Start;
+{$endif }
+
+      tm := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := maxi div 2 + 1 to maxi do
       begin
          aset.Has(words^.Items[i]);
       end;
-      timeSearchFound.Stop; 
-      
-      timeDelete.Start;
+      tm := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - tm;
+      timeSearchFound := timeSearchFound + tm;
+
+      tm := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := maxi div 2 + 1 to maxi do
       begin
          aset.Delete(words^.Items[i]);
       end;
-      timeDelete.Stop; 
-            
+      tm := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - tm;
+      timeDelete := timeDelete + tm;
+
       ln := 'AAAAAAAAAAXXXXXXXXXX';
-      timeSearchNotFound.Start;
+      tm := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := maxi div 2 + 1 to maxi do
       begin
          aset.Has(ln);
-         
+
          Inc(ln[(i mod 20) + 1]);
       end;
-      timeSearchNotFound.Stop; 
-      
+      tm := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - tm;
+      timeSearchNotFound := timeSearchNotFound + tm;
+
       WriteLogStream('');
       WriteLogStream('*******************************************');
       WriteLogStream('Benchmark for ' + className + ' results:');
       WriteLogStream('Total number of words inserted: ' +
                         IntToStr(words^.Size));
-      WriteLogStream('Total time for Insert (microsecs): ' + IntToStr(timeInsert.Time));
-      WriteLogStream('Total time for Has (searching existing item, *1.5, microsecs): ' +
-                        IntToStr(timeSearchFound.Time));
-      WriteLogStream('Total time for Has (searching non-existing item, *1.5, microsecs): '
-                     + IntToStr(timeSearchNotFound.Time));
-      WriteLogStream('Total time for Delete (microsecs): ' + IntToStr(timeDelete.Time));
-      WriteLogStream('Time per item for Insert (microsecs): ' +
-                        FloatToStr(Double(timeInsert.Time) / words^.Size));
-      WriteLogStream('Time per item for Has (existing, microsecs): ' +
-                        FloatToStr(Double(timeSearchFound.Time) / (words^.Size * 1.5)));
-      WriteLogStream('Time per item for Has (non-existing, microsecs): ' +
-                        FloatToStr(Double(timeSearchNotFound.Time) /
+      WriteLogStream('Total time for Insert (ms): ' + FloatToStr(timeInsert));
+      WriteLogStream('Total time for Has (searching existing item, *1.5, ms): ' +
+                        FloatToStr(timeSearchFound));
+      WriteLogStream('Total time for Has (searching non-existing item, *1.5, ms): '
+                     + FloatToStr(timeSearchNotFound));
+      WriteLogStream('Total time for Delete (ms): ' + FloatToStr(timeDelete));
+      WriteLogStream('Time per item for Insert (ms): ' +
+                        FloatToStr(Double(timeInsert) / words^.Size));
+      WriteLogStream('Time per item for Has (existing, ms): ' +
+                        FloatToStr(Double(timeSearchFound) / (words^.Size * 1.5)));
+      WriteLogStream('Time per item for Has (non-existing, ms): ' +
+                        FloatToStr(Double(timeSearchNotFound) /
                                       (words^.Size * 1.5)));
-      WriteLogStream('Time per item for Delete (microsecs): ' +
-                        FloatToStr(Double(timeDelete.Time) / words^.Size));
+      WriteLogStream('Time per item for Delete (ms): ' +
+                        FloatToStr(Double(timeDelete) / words^.Size));
       WriteLogStream('');
       WriteLogStream('End Of Benchmark');
       WriteLogStream('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-      
+
    finally
       ArrayDeallocate(words);
-      timeInsert.Free;
-      timeDelete.Free;
-      timeSearchFound.Free;
-      timeSearchNotFound.Free;
       dict.Free;
    end;
 end;

@@ -1,4 +1,3 @@
-
 &ifndef adtdefs__inc
 &define adtdefs__inc
 
@@ -37,7 +36,7 @@
   library for this system; used mainly by the logging facilities }
 { DELPHI - compiling with some version of Delphi (set in this include
   file automatically) }
-  
+
 { Most of the above defines are set automatically. However, if you use a Delphi
   compiler you will have to set these defines manually at the compiler level.
   The minimum workable set is: OVERLOAD_DIRECTIVE;WIDE_CHARACTERS;DELPHI
@@ -156,25 +155,25 @@ type
      size of PointerValueType. SizeType may be signed or unsigned, but
      must be of at least the size of IndexType. UnsignedType must be
      unsigned and of at least the size of SizeType.  }
-   PointerValueType = Longword;
-   UnsignedType = Longword;
-   SizeType = Longint;
-   IndexType = Longint;
+   PointerValueType = PtrUInt;
+   UnsignedType = PtrUInt;
+   SizeType = PtrInt;
+   IndexType = PtrInt;
 {$ifdef WIDE_CHARACTERS }
    CharType = WideChar;
 {$else }
    CharType = Char;
 {$endif WIDE_CHARACTERS }
-   
+
    PPointerValueType = ^PointerValueType;
    PUnsignedType = ^UnsignedType;
    PSizeType = ^SizeType;
    PIndexType = ^IndexType;
    PCharType = ^CharType;
-      
+
    PPointer = ^Pointer;
    PByte = ^Byte;
-   
+
 { @header Constants. }
 const
    adtUnlimitedArrayIndex = 1;
@@ -185,12 +184,12 @@ const
 &ifndef KeyType
    &define KeyType 1
 &endif
-   
+
 &ifdef MCP_NO_MULTITHREADING
    &define threadvar var
 &endif
 
-&# arg1 - type to dispose   
+&# arg1 - type to dispose
 &macro _mcp_default_disposer
    nil
 &endm
@@ -218,8 +217,8 @@ const
       _MCP_TRUE
    &endif
 &endm
-             
-&# arg1, arg2 - arguments to subtract                  
+
+&# arg1, arg2 - arguments to subtract
 &macro _mcp_diff
    &if (&_mcp_substractable)
       &arg2& - &arg1&
@@ -259,7 +258,7 @@ const
    &endif
 &endm
 
-&# arg1, arg2 - arguments to compare; 
+&# arg1, arg2 - arguments to compare;
 &# arg3 - comparison operator (<, >, =, ...)
 &# arg4 (optional) - the name of the comparer; defaults to ItemComparer
 &macro _mcp_compare
@@ -277,7 +276,7 @@ const
    )) or ((&arg4& <> nil) and (&arg4&.Compare(&arg1&, &arg2&) &arg3& 0)))
 &endm
 
-&# arg1, arg2 - arguments to compare; 
+&# arg1, arg2 - arguments to compare;
 &# arg3 (optional) - the name of the comparer; defaults to ItemComparer
 &macro _mcp_lt
    &ifdef arg3
@@ -297,7 +296,7 @@ const
    &endif
 &endm
 
-&# arg1, arg2 - arguments to compare; 
+&# arg1, arg2 - arguments to compare;
 &# arg3 (optional) - the name of the comparer; defaults to ItemComparer
 &macro _mcp_lte
    &ifdef arg3
@@ -307,7 +306,7 @@ const
    &endif
 &endm
 
-&# arg1, arg2 - arguments to compare; 
+&# arg1, arg2 - arguments to compare;
 &# arg3 (optional) - the name of the comparer; defaults to ItemComparer
 &macro _mcp_gte
    &ifdef arg3
@@ -317,7 +316,7 @@ const
    &endif
 &endm
 
-&# arg1, arg2 - arguments to compare; 
+&# arg1, arg2 - arguments to compare;
 &# arg3 (optional) - the name of the comparer; defaults to ItemComparer
 &macro _mcp_equal
    &ifdef arg3
@@ -354,13 +353,13 @@ const
          &define ItemType Integer
          &include &arg1&
       &endif
-   
+
       &ifdef MCP_CARDINAL
          &define _mcp_prefix Cardinal
          &define ItemType Cardinal
          &include &arg1&
       &endif
-   
+
       &ifdef MCP_REAL
          &define _mcp_prefix Real
          &define ItemType Real
@@ -400,7 +399,7 @@ const
       &define ItemType String
       &define KeyType String
       &include &arg1&
-   
+
       &ifdef MCP_POINTER
          &define _mcp_map_prefix StringPointer
          &define _mcp_item_prefix Pointer
@@ -425,7 +424,7 @@ const
          &define KeyType String
          &include &arg1&
       &endif
-   
+
       &ifdef MCP_CARDINAL
          &define _mcp_map_prefix StringCardinal
          &define _mcp_item_prefix Cardinal
@@ -434,7 +433,7 @@ const
          &define KeyType String
          &include &arg1&
       &endif
-   
+
       &ifdef MCP_REAL
          &define _mcp_map_prefix StringReal
          &define _mcp_item_prefix Real
@@ -457,7 +456,7 @@ const
       nil
    &endif
 &endm
-         
+
 &macro DefaultItem
    &_mcp_default_instance(&ItemType&)
 &endm
@@ -557,7 +556,7 @@ const
 &macro DisposeItem
    &_mcp_dispose_item(&arg1&, &<DisposeItem>, OwnsItems, ItemDisposer)
 &endm
-      
+
 &macro DisposeKey
    &_mcp_dispose_key(&arg1&, &<DisposeKey>, OwnsKeys, KeyDisposer)
 &endm

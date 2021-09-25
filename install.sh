@@ -9,7 +9,7 @@
 VERSION="0.5.0"
 
 # VERSION_SUFFIX must have a dash ("-") prepended and nothing should be
-# appended to the version number 
+# appended to the version number
 
 VERSION_SUFFIX="-$VERSION"
 DYNAMIC_LIB_STEM=libpascaladt
@@ -26,8 +26,8 @@ function checked_eval()
 {
     echo $*
     if ! eval $* ; then
-	echo "install.sh: Error - exiting"
-	exit 3
+        echo "install.sh: Error - exiting"
+        exit 3
     fi
 }
 
@@ -35,24 +35,24 @@ function check_persent()
 {
     eval "$1 --version >/dev/null 2>&1"
     if [ "$?" != 127 ]; then
-	return 0;
+        return 0;
     else
-	return 1;
+        return 1;
     fi;
 }
 
 function check_dir()
 {
     if [ ! -d "$1" ]; then
-	read -n 1 -p "Directory $1 does not exist. Create? (y/n) "
-	echo
-	if [ "$REPLY" = n ]; then
-	    echo "Not confirmed - exiting."
-	    exit 1
-	else
-	    checked_eval mkdir $1
-	fi
-    fi    
+        read -n 1 -p "Directory $1 does not exist. Create? (y/n) "
+        echo
+        if [ "$REPLY" = n ]; then
+            echo "Not confirmed - exiting."
+            exit 1
+        else
+            checked_eval mkdir $1
+        fi
+    fi
 }
 
 function should_overwrite_ppu()
@@ -65,7 +65,7 @@ function process_dirname()
 {
     REPLY=`eval 'echo -n '$REPLY` # to have path/tidle expansion work
     if [ ! "${REPLY:${#REPLY}-1:1}" == '/' ]; then
-	REPLY=$REPLY/
+        REPLY=$REPLY/
     fi
 }
 
@@ -81,19 +81,19 @@ function install_release()
     checked_eval "make fastclean > /dev/null 2>&1"
     checked_eval make release $1 OPTS="$4" VER="$VERSION_SUFFIX" MCP_OPTS="$5"
     LIB_FILES=`eval "echo -n $2"`
-    
+
     checked_eval install $3 $INSTALL_OPTS $LIB_FILES $LIB_DIR
-	
+
     if [ $MAKE_UNINST_SCRIPT == 1 ]; then
-	echo "cd ${LIB_DIR}" >> $UNINST_SCRIPT_FILE
-	echo "rm ${LIB_FILES}" >> $UNINST_SCRIPT_FILE
+        echo "cd ${LIB_DIR}" >> $UNINST_SCRIPT_FILE
+        echo "rm ${LIB_FILES}" >> $UNINST_SCRIPT_FILE
     fi
 } # end install_release
 
 echo
 echo "PascalAdt $VERSION installation script."
 echo
-echo "You may pass additional options to the copiler by invoking this"
+echo "You may pass additional options to the compiler by invoking this"
 echo "script like this: install.sh <additional compiler options>"
 echo "See the INSTALL file."
 echo
@@ -155,18 +155,18 @@ fi
 if [ $INSTALL_DEBUG == 1 ]; then
     read -e -p "Enter the library directory for the debug version (default ${LIB_DIR}debug/): "
     if [ $REPLY ]; then
-	process_dirname
-	DEBUG_LIB_DIR=$REPLY
+        process_dirname
+        DEBUG_LIB_DIR=$REPLY
     else
-	DEBUG_LIB_DIR="${LIB_DIR}debug/"
+        DEBUG_LIB_DIR="${LIB_DIR}debug/"
     fi
 
     read -e -p "Enter the include directory for the debug version (default ${INCLUDE_DIR}debug/): "
     if [ $REPLY ]; then
-	process_dirname
-	DEBUG_INCLUDE_DIR=$REPLY
+        process_dirname
+        DEBUG_INCLUDE_DIR=$REPLY
     else
-	DEBUG_INCLUDE_DIR="${INCLUDE_DIR}debug/"
+        DEBUG_INCLUDE_DIR="${INCLUDE_DIR}debug/"
     fi
 fi
 
@@ -196,9 +196,9 @@ if [ $SRCDOC_PRESENT == 1 ]; then
     read -n 1 -p "Make documentation also? (y/n) "
     echo
     if [ "$REPLY" == n ]; then
-	MAKE_DOCUMENTATION=0
+        MAKE_DOCUMENTATION=0
     else
-	MAKE_DOCUMENTATION=1
+        MAKE_DOCUMENTATION=1
     fi
 else
     MAKE_DOCUMENTATION=0
@@ -212,7 +212,6 @@ else
     MAKE_UNINST_SCRIPT=1
     rm $UNINST_SCRIPT_FILE > /dev/null 2>&1
 fi
-
 echo
 
 # create directories if not already exist
@@ -235,21 +234,21 @@ if [ -f ${INCLUDE_DIR}${CRITICAL_INCLUDE_FILE} ]; then
     echo
     echo
     if [ "$REPLY" == "y" ]; then
-	FILE_OVERWRITE=1
+        FILE_OVERWRITE=1
     fi
 fi
 
 if [ $INSTALL_DEBUG == 1 ]; then
     if [ -f ${DEBUG_INCLUDE_DIR}${CRITICAL_INCLUDE_FILE} ]; then
-	echo "Another debug version of PascalAdt found. The binary library files"
-	echo "will be preserved, but if the .ppu files are overwritten linking "
-	echo "with the old debug version may no longer be possible."
-	read -n 1 -p "Overwrite files? (n/y) "
-	echo
-	echo
-	if [ "$REPLY" == "y" ]; then
-	    DEBUG_FILE_OVERWRITE=1
-	fi
+        echo "Another debug version of PascalAdt found. The binary library files"
+        echo "will be preserved, but if the .ppu files are overwritten linking "
+        echo "with the old debug version may no longer be possible."
+        read -n 1 -p "Overwrite files? (n/y) "
+        echo
+        echo
+        if [ "$REPLY" == "y" ]; then
+            DEBUG_FILE_OVERWRITE=1
+        fi
     fi
 fi
 
@@ -286,15 +285,15 @@ if [ $INSTALL_DEBUG == 1 ]; then
     checked_eval make debug static OPTS=$* VER="$VERSION_SUFFIX" MCP_OPTS="$MCPOPTS"
     checked_eval install -m 644 $INSTALL_OPTS ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a ${DEBUG_LIB_DIR}
     if should_overwrite_ppu DEBUG_ ; then
-	checked_eval install -m 664 $INSTALL_OPTS *.ppu ${DEBUG_INCLUDE_DIR}
+        checked_eval install -m 664 $INSTALL_OPTS *.ppu ${DEBUG_INCLUDE_DIR}
     fi
 
     if [ $MAKE_UNINST_SCRIPT == 1 ]; then
-	echo "rm ${DEBUG_LIB_PATH}" >> $UNINST_SCRIPT_FILE
-	if should_overwrite_ppu DEBUG_ ; then
-	    echo "cd ${DEBUG_INCLUDE_DIR}" >> $UNINST_SCRIPT_FILE
-	    echo rm *.ppu >> $UNINST_SCRIPT_FILE
-	fi
+        echo "rm ${DEBUG_LIB_PATH}" >> $UNINST_SCRIPT_FILE
+        if should_overwrite_ppu DEBUG_ ; then
+            echo "cd ${DEBUG_INCLUDE_DIR}" >> $UNINST_SCRIPT_FILE
+            echo rm *.ppu >> $UNINST_SCRIPT_FILE
+        fi
     fi
 fi
 

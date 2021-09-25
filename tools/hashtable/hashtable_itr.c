@@ -35,18 +35,6 @@ hashtable_iterator(struct hashtable *h)
 }
 
 /*****************************************************************************/
-/* key      - return the key of the (key,value) pair at the current position */
-/* value    - return the value of the (key,value) pair at the current position */
-
-void *
-hashtable_iterator_key(struct hashtable_itr *i)
-{ return i->e->k; }
-
-void *
-hashtable_iterator_value(struct hashtable_itr *i)
-{ return i->e->v; }
-
-/*****************************************************************************/
 /* advance - advance the iterator to the next element
  *           returns zero if advanced to end of table */
 
@@ -157,23 +145,23 @@ hashtable_iterator_search(struct hashtable_itr *itr,
 /*
  * Copyright (c) 2002, 2004, Christopher Clark
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * * Neither the name of the original author; nor the names of any contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
- * 
- * 
+ *
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR

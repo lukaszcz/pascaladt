@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -35,7 +35,7 @@
 
 type
    { --------------------- General functor interfaces ------------------------ }
-   
+
    { a functor taking one pointer argument and returning a pointer
      obtained by somehow transforming the argument; this functor
      should be prepared to handle nil-pointers }
@@ -58,7 +58,7 @@ type
      whether the test was positive }
    IUnaryPredicate = interface (IFunctor)
       { returns the boolean result of applying the predicate to the element }
-      function Test(aitem : ItemType) : Boolean; 
+      function Test(aitem : ItemType) : Boolean;
    end;
 
    { a binary predicate; returns a boolean value basing on the values
@@ -98,35 +98,35 @@ type
    TUnaryObjectProcedure = procedure(aitem : ItemType) of object;
    TBinaryProcedure = procedure(aitem1, aitem2 : ItemType);
    TBinaryObjectProcedure = procedure(aitem1, aitem2 : ItemType) of object;
-   
+
    TUnaryFunction = function(aitem : ItemType) : ItemType;
    TUnaryObjectFunction = function(aitem : ItemType) : ItemType of object;
    TBinaryFunction = function(aitem1, aitem2 : ItemType) : ItemType;
    TBinaryObjectFunction = function(aitem1, aitem2 : ItemType) : ItemType of object;
-   
+
    TUnaryBoolFunction = function(aitem : ItemType) : Boolean;
    TUnaryObjectBoolFunction = function(aitem : ItemType) : Boolean of object;
    TBinaryBoolFunction = function(aitem1, aitem2 : ItemType) : Boolean;
    TBinaryObjectBoolFunction = function(aitem1, aitem2 : ItemType) : Boolean of object;
-   
+
    TBinaryIntegerFunction = function(aitem1, aitem2 : ItemType) : Integer;
    TBinaryObjectIntegerFunction =
       function(aitem1, aitem2 : ItemType) : Integer of object;
-      
+
    { ---------------------- adaptors (wrappers) ---------------------------- }
-   
+
    { TLess, TGreater and TEqual functors are wrappers around
      IBinaryComparer, which adapt it to the IBinaryPredicate
      interface; @until-next-comment; }
-   
+
    TLess = class (TFunctor, IBinaryPredicate)
    private
       cmp : IBinaryComparer;
    public
       constructor Create(const c : IBinaryComparer);
       function Test(aitem1, aitem2 : ItemType) : Boolean;
-   end;  
-   
+   end;
+
    TGreater = class (TFunctor, IBinaryPredicate)
    private
       cmp : IBinaryComparer;
@@ -134,15 +134,15 @@ type
       constructor Create(const c : IBinaryComparer);
       function Test(aitem1, aitem2 : ItemType) : Boolean;
    end;
-   
+
    TEqual = class (TFunctor, IBinaryPredicate)
    private
       cmp : IBinaryComparer;
    public
       constructor Create(const c : IBinaryComparer);
       function Test(aitem1, aitem2 : ItemType) : Boolean;
-   end;  
-   
+   end;
+
    { the TxxxBinder functors are provided purely for efficiency
      reasons; they perfrom the same work as the functor obtained from
      the consequent appliance of Txxx (TLess, TEqual, ...) and then
@@ -162,7 +162,7 @@ type
       function Test(p : ItemType) : Boolean;
       property Item : ItemType read aitem2 write aitem2;
    end;
-   
+
    TGreaterBinder = class (TFunctor, IUnaryPredicate)
    private
       cmp : IBinaryComparer;
@@ -176,7 +176,7 @@ type
       function Test(p : ItemType) : Boolean;
       property Item : ItemType read aitem2 write aitem2;
    end;
-   
+
    TEqualBinder = class (TFunctor, IUnaryPredicate)
    private
       cmp : IBinaryComparer;
@@ -190,9 +190,9 @@ type
       function Test(p : ItemType) : Boolean;
       property Item : ItemType read aitem2 write aitem2;
    end;
-   
+
    { ---------------------- Specific functors --------------------------- }
-      
+
    { a projection functor; useful in connection with functions
      manipulating functors }
    TProjection = class (TFunctor, IUnaryFunctor)
@@ -201,9 +201,9 @@ type
         containers but not items themselves }
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
 { ----------------------- routines ---------------------- }
-      
+
 { adapts <f> to the unary functor interface so that it performs its
   operation and then nil returned instead of returning the argument;
   appropriate for disposers }
@@ -323,4 +323,3 @@ function Compose_F_Gx_Hy(const f : IBinaryFunctor;
   instead of creating TProjection directly, because here an existing
   object is reused intead of creating a new one }
 function &_mcp_prefix&Projection : IUnaryFunctor;
-

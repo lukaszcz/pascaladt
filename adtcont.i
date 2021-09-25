@@ -1,21 +1,21 @@
 {@discard
-  
+
    This file is a part of the PascalAdt library, which provides
    commonly used algorithms and data structures for the FPC and Delphi
    compilers.
-   
+
    Copyright (C) 2004, 2005 by Lukasz Czajka
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -39,7 +39,7 @@ type
       { returns true; @see TContainerAdt.IsDefinedOrder }
       function IsDefinedOrder : Boolean; override;
    end;
-   
+
    { An abstract interface of a priority queue. }
    TPriorityQueueAdt = class (TContainerAdt)
    private
@@ -76,7 +76,7 @@ type
       procedure Merge(aqueue : TPriorityQueueAdt); virtual; abstract;
       { returns the comparer used to compare items }
       property ItemComparer : IBinaryComparer read FComparer write FComparer;
-      
+
       { inserts <aitem> somewhere into the container; returns true if
         successful, false if <aitem> could not be inserted; implemented with
         Insert }
@@ -91,10 +91,10 @@ type
       { returns true by default }
       function IsDefinedOrder : Boolean; override;
    end;
-   
-   
+
+
    { -------------------- associative containers ------------------------ }
-   
+
    { represents a set or a multiset; items that are equal must be
      adjacent; remember that pointers given in arguments of methods
      are never disposed, unless they become owned by the set (i.e. are
@@ -106,7 +106,7 @@ type
    private
       FRepeatedItems : Boolean;
       FComparer : IBinaryComparer;
-      
+
       procedure SetRepeatedItems(b : Boolean);
       procedure SetComparer(comp : IBinaryComparer);
    protected
@@ -117,14 +117,14 @@ type
 
       procedure BasicSwap(cont : TContainerAdt); override;
 
-   public         
+   public
       { returns true if the set needs a hasher to work; false by
         default; overriden in THashSetAdt; if you want to create a map
         from TSetAdt class reference and you don't know the actual
         type of the class, then you should always call this function
         to determine whether to provide a hasher or not; }
-      class function NeedsHasher : Boolean; virtual;     
-      
+      class function NeedsHasher : Boolean; virtual;
+
       { returns the start iterator }
       function Start : TSetIterator; virtual; abstract;
       { returns the finish iterator }
@@ -208,7 +208,7 @@ type
       { returns true if multiple items with the same key (i.e. equal
         according to @<ItemComparer>) are allowed; false by default; }
       property RepeatedItems : Boolean read FRepeatedItems write SetRepeatedItems;
-      
+
       { inserts <aitem> somewhere into the container; returns true if
         successful, false if <aitem> could not be inserted; implemented with
         Insert }
@@ -219,13 +219,13 @@ type
       { @fetch-related }
       { implemented with not Empty }
       function CanExtract : Boolean; override;
-      
-      
+
+
       { @inv not RepeatedItems implies foreach x in self holds
                                          not exists(y : y in self and x = y) }
       { @inv Empty <=> Start.Equal(Finish) }
    end;
-   
+
    { a set or multiset with sorted item; any container inheriting from
      this must keep items in sorted order (defined by
      @<ItemComparer>); @see adtavltree.TAvlTree,
@@ -253,10 +253,10 @@ type
         you access to a sorted set through the methods of a priority
         queue }
       function PriorityQueueInterface : TPriorityQueueAdt; virtual;
-      
+
       { @inv self is sorted }
    end;
-   
+
    { a sorted set that supports Concatenate and Split operations, so
      it can be used as a concatenable priority queue; @see adt23tree.T23Tree }
    TConcatenableSortedSetAdt = class (TSortedSetAdt)
@@ -277,20 +277,20 @@ type
       function Split(aitem : ItemType) :
          TConcatenableSortedSetAdt; virtual; abstract;
    end;
-   
+
    { a set that uses hashing; @see adthash }
    THashSetAdt = class (TSetAdt)
    private
       FHasher : IHasher;
       FAutoShrink : Boolean; { true if the table is shrunk automatically }
-      
+
    protected
-      
+
       {$warnings off }
       constructor Create; overload;
       constructor CreateCopy(const cont : THashSetAdt); overload;
       {$warnings on }
-      
+
       procedure BasicSwap(cont : TContainerAdt); override;
       { by default calls Rehash }
       procedure SetCapacity(cap : SizeType); virtual;
@@ -303,14 +303,14 @@ type
       procedure SetMaxFillRatio(fr : SizeType); virtual; abstract;
       function GetMinFillRatio : SizeType; virtual; abstract;
       procedure SetMinFillRatio(fr : SizeType); virtual; abstract;
-      
+
    public
 {$ifdef TEST_PASCAL_ADT }
       procedure LogStatus(mname : String); override;
 {$endif }
       { returns true }
       class function NeedsHasher : Boolean; override;
-      
+
       { rehashes the set making it approximately 2^EX times larger
         (i.e. the capacity is increased (decreased)); ex may be
         negative, but the resulting capacity of the set cannot be less
@@ -341,13 +341,13 @@ type
         time Size/Capacity goes below MinFillRatio; this may be useful
         for sparing memory; false by default }
       property AutoShrink : Boolean read FAutoShrink write FAutoShrink;
-      
+
       { @inv MinCapacity > 0 }
       { @inv Capacity >= MinCapacity }
    end;
-   
+
    { -------------------- tree containers ------------------------ }
-   
+
    { An abstract interface of a tree. Both ordinary and binary trees
      inherit from this class.  }
    TBasicTreeAdt = class (TContainerAdt)
@@ -376,7 +376,7 @@ type
          SizeType; virtual; abstract;
       { inserts <aitem> as the root of the tree }
       procedure InsertAsRoot(aitem : ItemType); virtual; abstract;
-      
+
       { inserts <aitem> somewhere into the container; returns true if
         successful, false if <aitem> could not be inserted; implemented with
         @<InsertAsRoot> }
@@ -389,9 +389,9 @@ type
       { implemented with not Empty }
       function CanExtract : Boolean; override;
    end;
-   
-   { -------------------- sequential containers ------------------------ }   
-   
+
+   { -------------------- sequential containers ------------------------ }
+
    { An abstract interface of a queue. }
    TQueueAdt = class (TContainerAdt)
    public
@@ -401,7 +401,7 @@ type
       procedure PopFront; virtual; abstract;
       { returns the item at the front }
       function Front : ItemType; virtual; abstract;
-      
+
       { inserts <aitem> somewhere into the container; returns true if
         successful, false if <aitem> could not be inserted; implemented with
         @<PushBack> }
@@ -416,7 +416,7 @@ type
       { returns false }
       function IsDefinedOrder : Boolean; override;
    end;
-   
+
    { An abstract interface of a double-ended queue. }
    TDequeAdt = class (TQueueAdt)
    public
@@ -427,10 +427,10 @@ type
       { returns the item at the back }
       function Back : ItemType; virtual; abstract;
    end;
-   
+
    { there are no separate stacks for the sake of simplicity }
    T&_mcp_prefix&StackAdt = TDequeAdt;
-   
+
    { represents a sequential list of items supporting forward
      iterators; the requirement that the pointers stored in the
      container be pairwise unequal does not have to be satisifed for
@@ -472,11 +472,11 @@ type
         the position <pos> }
       procedure Insert(pos : TForwardIterator;
                        aitem : ItemType); overload; virtual; abstract;
-      
+
       { ------ algorithms (may take a considerable amount of time) -------- }
       { for each algorithm here a default implementation is provided
         using the general algorithms @discard-recent-comment }
-      
+
       { moves elements from the range [SourceStart, SourceFinish) to before
         <Dest>; }
       procedure Move(SourceStart, SourceFinish,
@@ -491,7 +491,7 @@ type
                                    write FSizeCanRecalc;
 {$endif DEBUG_PASCAL_ADT }
    end;
-   
+
    { TDoubleListAdt is essentially TListAdt with support for
      bidirectional iterators. Its two new methods are implemented by
      means of casting the result of ForwardStart (ForwardFinish) to
@@ -504,9 +504,9 @@ type
       { returns an iterator to the first element in the container }
       function BidirectionalStart : TBidirectionalIterator;
       { returns an iterator pointing to the one beyond last element }
-      function BidirectionalFinish : TBidirectionalIterator;      
+      function BidirectionalFinish : TBidirectionalIterator;
    end;
-   
+
    { Represents a container with random access to items.  }
    TRandomAccessContainerAdt = class (TDoubleListAdt)
    protected
@@ -515,7 +515,7 @@ type
       { sets the capacity to <cap>; sets only if <cap> is bigger than
         the current capacity }
       procedure SetCapacity(cap : SizeType); virtual; abstract;
-      
+
    public
       { returns an iterator to the first element in the container }
       function ForwardStart : TForwardIterator; override;
@@ -535,41 +535,41 @@ type
       procedure Insert(index : IndexType;
                        aitem : ItemType); overload; virtual; abstract;
       procedure Insert(iter : TForwardIterator;
-                       aitem : ItemType); overload; override; 
+                       aitem : ItemType); overload; override;
       { deletes the item at <index>; all items after index are moved
         leftwards }
-      procedure Delete(index : IndexType); overload; virtual; abstract; 
-      procedure Delete(iter : TForwardIterator); overload; override; 
+      procedure Delete(index : IndexType); overload; virtual; abstract;
+      procedure Delete(iter : TForwardIterator); overload; override;
       { deletes at most n items beginning with start, less if the end
         of the container is reached; returns the number of items
         actually deleted; @complexity O(n) }
       function Delete(start : IndexType; n : SizeType) :
-         SizeType; overload; virtual; abstract; 
+         SizeType; overload; virtual; abstract;
       { deletes all the items from the range [starti,finishi); returns
         the number of items deleted; @complexity O(n) }
       function Delete(start, finish : TForwardIterator) :
-         SizeType; overload; override; 
+         SizeType; overload; override;
       { Removes the item at <index> from the container, but does not
         dispose it. Returns the removed item. }
       function Extract(index : IndexType) : ItemType; overload; virtual; abstract;
-      function Extract(iter : TForwardIterator) : ItemType; overload; override; 
+      function Extract(iter : TForwardIterator) : ItemType; overload; override;
       { returns the lowest index in the collection; for containers
         with fixed, zero-based indices always returns 0 (default) }
       function LowIndex : IndexType; virtual;
       { returns the highest index in the collection; for containers
         with fixed, zero-based indices always returns Size - 1 (default) }
       function HighIndex : IndexType; virtual;
-      
+
       property Capacity : SizeType read GetCapacity write SetCapacity;
    end;
-   
+
    { Represents an array. }
    TArrayAdt = class (TRandomAccessContainerAdt)
    public
       property Items[index : IndexType] : ItemType read GetItem
                                            write SetItem; default;
    end;
-   
+
    { a class used as a base class for most random access iterators;
      the only abstract methods left in this class are @<TIterator.ExchangeItemsAt>
      and @<TIterator.CopySelf> }
@@ -577,10 +577,10 @@ type
    protected
       FIndex : IndexType;
       FCont : TRandomAccessContainerAdt;
-      
-   public      
+
+   public
       constructor Create(ind : IndexType;
-                         const cont : TRandomAccessContainerAdt);      
+                         const cont : TRandomAccessContainerAdt);
       { computes the distance between pos and self (pos - self) }
       function Distance(const Pos : TRandomAccessIterator) :
          IndexType; override;
@@ -612,7 +612,7 @@ type
 {$endif OVERLOAD_DIRECTIVE }
 
       { moves self by i positions }
-      procedure Advance(i : integer); overload; override;
+      procedure Advance(i : IndexType); overload; override;
       { moves iter one position back }
       procedure Retreat; override;
       { inserts <aitem> into the container; after insertion the iterator
@@ -623,7 +623,7 @@ type
         of the container is reached; returns the number of items
         actually deleted; after the deletion self points to the next
         item after the deleted sequence }
-      function Delete(n : SizeType) : SizeType; overload; override; 
+      function Delete(n : SizeType) : SizeType; overload; override;
       { returns index of iterator within container into which it
         points }
       function Index : IndexType; override;
@@ -634,12 +634,11 @@ type
       { returns true if self is the 'one beyond last' iterator }
       function IsFinish : Boolean; override;
    end;
-      
+
 
 {$ifdef OVERLOAD_DIRECTIVE }
-   
+
 function CopyOf(const iter : TRandomAccessContainerIterator) :
    TRandomAccessContainerIterator; overload;
 
 {$endif OVERLOAD_DIRECTIVE }
-

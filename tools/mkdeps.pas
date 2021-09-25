@@ -7,13 +7,13 @@ var
    f : file of char;
    leftChar : Char;
    wasLeftChar : Boolean;
-   
+
 type
    TCharType = (ctWhitespace, ctAlnum, ctOther);
-   
+
 const
    TAB = #9;
-   
+
 function CharType(c : Char) : TCharType;
 begin
    if c in [' ', #13, #10, TAB] then
@@ -36,24 +36,24 @@ var
    ct : TCharType;
 begin
    Result := '';
-   
+
    if wasLeftChar then
       c := leftChar
    else
       Read(f, c);
-   
+
    while IsWhitespace(c) and not Eof(f) do
    begin
       Read(f, c);
    end;
-   
+
    ct := CharType(c);
    while (CharType(c) = ct) and not Eof(F) do
    begin
       Result := Result + c;
       Read(f, c);
    end;
-   
+
    if (Result <> '') and (Result[1] = '{') then
    begin
       while (c <> '}') and not Eof(f) do
@@ -94,14 +94,14 @@ begin
       if Result[i] = '.' then
          break;
    end;
-   SetLength(Result, i - 1);   
+   SetLength(Result, i - 1);
 end;
 
 procedure OpenFile(str : String);
 begin
    wasLeftChar := false;
    Assign(f, str);
-   Reset(f);   
+   Reset(f);
 end;
 
 procedure CloseFile;
@@ -116,7 +116,7 @@ var
    testunits_deps : array[1..100] of String;
    is_mcp, is_program : Boolean;
    dependsOnCpuTimer : Boolean;
-   
+
    procedure AddTestutilsDeps;
    begin
       deps[k] := 'adtiters';
@@ -126,18 +126,18 @@ var
       deps[k] := 'adthashfunct';
       Inc(k);
    end;
-   
+
    procedure ReadDeps;
    begin
       k := 1;
       kk := 1;
-      
+
       dependsOnCpuTimer := false;
       for i := 0 to 1 do
       begin
          while not Eof(f) and (ReadToken <> 'uses') do
             ;
-         
+
          while not Eof(f) do
          begin
             token := ReadToken;
@@ -157,7 +157,7 @@ var
             begin
                dependsOnCpuTimer := true;
             end;
-            
+
             if not Eof(f) then
             begin
                if ReadToken = ';' then
@@ -166,7 +166,7 @@ var
          end;
       end; { end for }
    end; { end procedure ReadDeps }
-   
+
 begin
    { this is needed because of circular dependencies between adtiters
      and adtcont - adding dependencies of adtcont to adtiters at the
@@ -178,7 +178,7 @@ begin
       begin
          OpenFile(ParamStr(j));
          ReadDeps;
-         
+
          Write('adtiters$(obj_suffix) : ');
          for i := 1 to k - 1 do
          begin
@@ -187,7 +187,7 @@ begin
          CloseFile;
       end;
    end;
-   
+
    for j := 1 to ParamCount do
    begin
       OpenFile(ParamStr(j));
@@ -195,9 +195,9 @@ begin
          is_program := true
       else
          is_program := false;
-      
+
       ReadDeps;
-      
+
       if ExtractFileExt(ParamStr(j)) = '.mcp' then
          is_mcp := true
       else
@@ -224,9 +224,9 @@ begin
       if dependsOnCpuTimer then
          Write('tests/units/cpu/cpu_timer$(obj_suffix)');
       WriteLn;
-            
+
       if is_mcp then
-      begin         
+      begin
          { dependencies for the *.pas file  }
          Write(str, '.pas : ', str, '.pas.mcp adtdefs.inc ');
          if FileExists(str + '.i') or FileExists(str + '_impl.i') then
@@ -250,7 +250,7 @@ begin
             Write(str, '_impl.mac ');
          end;
          WriteLn;
-         
+
          if FileExists(str + '.i') or FileExists(str + '_impl.i') then
          begin
             { dependencies for the *.defs file  }
@@ -276,7 +276,7 @@ begin
                end;
             end;
             WriteLn;
-            Write(TAB, 'echo -e "&include ', str, '.mcp\n');
+            Write(TAB, 'echo "&include ', str, '.mcp\n');
             for i := 1 to k - 1 do
             begin
                if FileExists(deps[i] + '.i') then
@@ -291,7 +291,7 @@ begin
             WriteLn('" > ', str, '.defs');
          end; { end if should generate the *.defs file }
       end; { end if is_mcp }
-      
+
       CloseFile;
    end;
 end.

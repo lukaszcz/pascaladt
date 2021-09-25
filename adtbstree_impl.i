@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -143,7 +143,7 @@ begin
          break;
       end;
    end;
-   
+
    if Result = nil then
    begin
       if i < 0 then
@@ -189,7 +189,7 @@ begin
             break;
          end;
       end;
-      
+
       if i < 0 then
       begin
          BinaryTree.InsertNode(parent^.LeftChild, parent, aitem);
@@ -216,7 +216,7 @@ begin
          end else
             Result := nil;
       end;
-      
+
    end else { not node <> nil }
    begin
       if node = FBinaryTree.RootNode then
@@ -234,7 +234,7 @@ begin
    ExchangePtr(FBinaryTree, tree.FBinaryTree);
 end;
 
-function TBinarySearchTreeBase.Start : TSetIterator; 
+function TBinarySearchTreeBase.Start : TSetIterator;
 begin
    Result := TBinarySearchTreeBaseIterator.Create(nil, self);
    TBinarySearchTreeBaseIterator(Result).GoToStartNode;
@@ -291,7 +291,7 @@ var
 begin
    Result := 0;
    node := FindNode(aitem, FBinaryTree.RootNode, parent);
-   
+
    if node <> nil then
    begin
       repeat
@@ -312,7 +312,7 @@ var
    node, node2 : PBinaryTreeNode;
 begin
    Assert(pos is TBinarySearchTreeBaseIterator, msgInvalidIterator);
-   
+
    node := TBinarySearchTreeBaseIterator(pos).Node;
    if (node <> nil) then
    begin
@@ -366,10 +366,10 @@ var
 begin
    node := LowerBoundNode(aitem, FBinaryTree.RootNode);
    iter1 := TBinarySearchTreeBaseIterator.Create(node, self);
-   
+
    while (node <> nil) and (_mcp_equal(aitem, node^.Item)) do
       node := NextInOrderNode(node);
-   
+
    iter2 := TBinarySearchTreeBaseIterator.Create(node, self);
    Result := TSetIteratorRange.Create(iter1, iter2);
 end;
@@ -413,21 +413,21 @@ end;
 function TBinarySearchTreeBaseIterator.Equal(const Pos : TIterator) : Boolean;
 begin
    Assert(pos is TBinarySearchTreeBaseIterator, msgInvalidIterator);
-   
+
    Result := TBinarySearchTreeBaseIterator(pos).Node = Node;
 end;
 
 function TBinarySearchTreeBaseIterator.GetItem : ItemType;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    Result := Node^.Item;
 end;
 
 procedure TBinarySearchTreeBaseIterator.SetItem(aitem : ItemType);
 begin
    Assert(Node <> nil, msgInvalidIterator);
-   
+
    with FTree do
    begin
       if _mcp_equal(Node^.Item, aitem) then
@@ -449,7 +449,7 @@ var
 begin
    Assert(Node <> nil, msgInvalidIterator);
    aitem := Node^.Item;
-   FTree.BinaryTree.ExtractNodeInOrder(Node, false);
+   FTree.BinaryTree.ExtractNodeInOrder(FNode, false);
    Node := FTree.InsertNode(aitem, FTree.BinaryTree.RootNode);
    Assert(Node <> nil, msgChangedRepeatedItems);
 end;
@@ -457,7 +457,7 @@ end;
 procedure TBinarySearchTreeBaseIterator.Advance;
 begin
    Assert(Node <> nil, msgInvalidIterator);
-   
+
    Node := NextInOrderNode(Node);
 end;
 
@@ -474,7 +474,7 @@ end;
 function TBinarySearchTreeBaseIterator.Extract : ItemType;
 begin
    Assert(Node <> nil, msgDeletingInvalidIterator);
-   
+
    Result := node^.Item;
    FTree.BinaryTree.ExtractNodeInOrder(FNode, true);
 end;
@@ -549,10 +549,9 @@ var
    node : PBinaryTreeNode;
 begin
    Assert(pos is TBinarySearchTreeBaseIterator, msgInvalidIterator);
-   
+
    node := TBinarySearchTreeBaseIterator(pos).Node;
    DisposeItem(node^.Item);
    BinaryTree.ExtractNodeInOrder(node, true);
    TBinarySearchTreeBaseIterator(pos).Node := node;
 end;
-
