@@ -128,14 +128,6 @@ else
     MAKE_DYNAMIC=0
 fi
 
-read -n 1 -p "Make a smartlinked static library? (y/n) "
-echo
-if [ "$REPLY" != "n" ]; then
-    MAKE_SMART=1
-else
-    MAKE_SMART=0
-fi
-
 read -n 1 -p "Make a non-smartlinked static library? (n/y) "
 echo
 if [ "$REPLY" != "y" ]; then
@@ -256,10 +248,6 @@ fi
 
 if [ $MAKE_DYNAMIC == 1 ]; then
     install_release dynamic ${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so " " "$*" "$MCPOPTS";
-fi
-
-if [ $MAKE_SMART == 1 ]; then
-    install_release smart '*.a' "-m 644" "$*" "$MCPOPTS";
 fi
 
 if [ $MAKE_STATIC == 1 ]; then
