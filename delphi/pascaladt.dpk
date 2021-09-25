@@ -1,0 +1,63 @@
+package pascaladt;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS ON}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$IMPLICITBUILD OFF}
+{$DEFINE OVERLOAD_DIRECTIVE}
+{$DEFINE WIDE_CHARACTERS}
+{$DEFINE DELPHI}
+{$DEFINE DEBUG_PASCAL_ADT}
+{$DEFINE TEST_PASCAL_ADT}
+
+requires
+  rtl;
+
+contains
+  adt23tree in '..\adt23tree.pas',
+  adtalgs in '..\adtalgs.pas',
+  adtarray in '..\adtarray.pas',
+  adtavltree in '..\adtavltree.pas',
+  adtbintree in '..\adtbintree.pas',
+  adtbstree in '..\adtbstree.pas',
+  adtcont in '..\adtcont.pas',
+  adtcontbase in '..\adtcontbase.pas',
+  adtdarray in '..\adtdarray.pas',
+  adtexcept in '..\adtexcept.pas',
+  adtfunct in '..\adtfunct.pas',
+  adthash in '..\adthash.pas',
+  adthashfunct in '..\adthashfunct.pas',
+  adtheap in '..\adtheap.pas',
+  adtiters in '..\adtiters.pas',
+  adtlist in '..\adtlist.pas',
+  adtlog in '..\adtlog.pas',
+  adtmem in '..\adtmem.pas',
+  adtmsg in '..\adtmsg.pas',
+  adtqueue in '..\adtqueue.pas',
+  adtsegarray in '..\adtsegarray.pas',
+  adtsplaytree in '..\adtsplaytree.pas',
+  adtstralgs in '..\adtstralgs.pas',
+  adtstring in '..\adtstring.pas',
+  adttree in '..\adttree.pas',
+  adtutils in '..\adtutils.pas';
+
+end.

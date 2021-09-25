@@ -1,0 +1,107 @@
+(* This file is a part of the PascalAdt library, which provides
+   commonly used algorithms and data structures for the fpc and
+   Delphi compilers.
+   
+   Copyright (C) 2004 by Lukasz Czajka
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+   02110-1301 USA *)
+
+unit adtlog;
+
+{ This unit provides logging facilities. All routines here work only
+  when compiled in the debug mode, otherwise they do nothing. }
+
+interface
+
+uses
+   SysUtils, Classes;
+
+&include adtdefs.inc
+
+const
+   pascal_adt_log_file_name = 'pascaladt.log';
+
+{ sets <newstream> to be the current logging stream. The old logging
+  stream is destroyed; }
+procedure SetLogStream(newstream : TStream);
+{ Writes a specified message to the logging stream; appends newline; }
+procedure WriteLogStream(const msg : String);
+{ Opens pascal_adt_log_file_name as a log stream. Makes a backup if
+  this file exists. Destroys the previous stream. }
+procedure OpenLogStream;
+
+
+implementation
+
+var
+   logStream : TStream;
+
+{ this function is not present in Delphi }
+procedure WriteByte(b : Byte);
+begin
+   logStream.Write(b, 1);
+end;
+
+procedure SetLogStream(newstream : TStream);
+begin
+   if newstream <> nil then
+   begin
+      logStream.Free;
+      logStream := newstream;
+   end;
+end;
+
+procedure WriteLogStream(const msg : string);
+begin
+   if logStream <> nil then
+   begin
+      with logStream do
+      begin
+         Write((@msg[1])^, Length(msg));
+         {$ifdef PASCAL_ADT_WINDOWS }
+         WriteByte(13);
+         {$endif }
+         WriteByte(10);
+      end;
+   end;
+end;
+
+procedure OpenLogStream;
+begin
+   logStream.Free;
+   
+   if FileExists(pascal_adt_log_file_name) then
+   begin
+      if FileExists(pascal_adt_log_file_name + '.bak') then
+         DeleteFile(pascal_adt_log_file_name + '.bak');
+      RenameFile(pascal_adt_log_file_name, pascal_adt_log_file_name + '.bak');
+   end;
+   
+   logStream := TFileStream.Create(pascal_adt_log_file_name,
+                                   fmCreate);
+end;
+
+
+initialization
+   logStream := nil;
+{$ifdef DEBUG_PASCAL_ADT }      
+   OpenLogStream;
+{$endif DEBUG_PASCAL_ADT }   
+   
+finalization
+   
+   logStream.Free;
+end.

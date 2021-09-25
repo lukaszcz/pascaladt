@@ -1,0 +1,22 @@
+
+PascalAdt library news.
+
+Version 0.4.2
+	+ added the documentation
+	+ added the adtstack.pas unit with TStack and TStackWrapper
+	+ added the Extract method to TSetAdt and TMapAdt
+	+ added CountSubstrings to adtstralgs.pas
+	* improved installation script
+	* reimplemented adtstring.pas
+	- removed TIterator.IsValid - confusing and useless
+
+Version 0.4.1
+	+ Delphi support
+	+ added a tutorial
+	+ added TPascalArray
+	+ new functor functions
+	* bug fixes
+
+Version 0.4.0 beta
+	* The first public release of the library. Lots of bugs. No
+	documentation

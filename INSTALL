@@ -1,0 +1,100 @@
+
+			PascalAdt installation
+
+1. Compilation modes.
+2. Compiling with the Free Pascal Compiler.
+3. Compiling with Delphi.
+4. FPC and the heaptrace unit.
+
+1. Compilation modes.
+
+The PascalAdt library may be compiled in three modes: release, debug
+and test.
+
+The release mode is the default one. No assertions or argument
+validity checks are generated. Use the library compiled in this mode
+to link with the release versions of your programs.
+
+The debug mode is intended for debugging the programs using the
+library. Argument validity checks are generated plus some assertions
+which test the validity of the user data, and the gdb debug
+information. Use the library compiled in this mode to link with the
+debug versions of your programs.
+
+The test mode is intended for testing the library itself. It
+automatically turns on everything in the debug mode and adds many
+additional, sometime time-consuming checks. There are also logging
+facilities added. All the checks may impose a considerable overhead,
+so it is generally discouraged to use this mode. You may, however,
+find the extra checks useful when debugging some of your code.
+
+2. Compiling with the Free Pascal Compiler.
+
+If you are running Linux the simplest way to have the library
+installed is to execute the install.sh shell script. The script will
+ask you several questions. You may just hit enter to accept a default
+for any question. The default is either pointed out explicitly or it
+is the first proposed choice.
+
+The two most important things the script prompts for are the library
+directory - the directory where to copy the library files, and the
+include directory - the directory where to copy the .ppu files. It
+also asks whether you want a dynamic (shared) .so library or a static
+.a library, whether to install the debug version as well, and whether
+to generate a script that may be used to uninstall the library later
+on.
+
+To later use the library in your programs add the following command
+line options.
+
+   $ fpc -Fu<your include directory> -Fl<your library directory> ...
+
+If you compiled a dynamic library you should also add -XD.
+
+If you are running windows you may use the Makefile. You might need to
+change something in it.
+
+There are also several additional make targets not available through
+the installation script.
+
+   $ make tests
+
+Makes the programs used to test the library. They are located in the
+tests/ subdirectory.
+
+   $ make demo
+
+Makes the demo programs. The library must be installed earlier to do
+that.
+
+   $ make clean
+
+Removes all files produced by the compiler.
+
+2. Compiling with Delphi.
+
+In the delphi/ subdirectory there is a package file
+pascaladt.dpk. Compile this package and install.
+
+Since in Delphi things defined in an .inc file are not defined at the
+unit level, you will have to define numerous symbols used interanlly
+by the PascalAdt library by hand at the compiler level.
+
+The minimum workable set to compile in the release mode is: 
+    OVERLOAD_DIRECTIVE;WIDE_CHARACTERS;DELPHI
+
+To compile in the debug mode add: 
+    PASCAL_ADT_DEBUG
+
+For memory tracing add: 
+    MEMORY_TRACING;BLOCK_SIZE_STORED_BEFORE
+
+To compile in the test mode add: 
+    TEST_PASCAL_ADT + the defines for debugging and memory tracing 
+
+4. FPC and the heaptrace unit.
+
+The library does not work correctly if compiled with FPC using the
+heaptrace unit. I don't know whether this is a bug in the compiler,
+the heaptrace unit or the library, but when heaptrace is not used
+everything seems to work just fine.

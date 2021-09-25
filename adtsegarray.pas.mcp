@@ -1,0 +1,60 @@
+(* This file is a part of the PascalAdt library, which provides
+   commonly used algorithms and data structures for the FPC and Delphi
+   compilers.
+   
+   Copyright (C) 2004, 2005 by Lukasz Czajka
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+   02110-1301 USA *)
+
+unit adtsegarray;
+
+{ This unit implements a dynamic low-level segmented array
+  (TSegArray). It is not intended for normal use except for
+  implementing higher level data structures. It is used mainly to
+  implement TSegDequeue and in some time-critical algorithms that need
+  to use queues (as it is a bit faster than the object-oriented
+  implementation of queues). }
+{ }
+{ Note: the distinction between normal, const and var parameters is
+  important semantically. Normal parameters mean that the pointer
+  to the array cannot be changed, but the contents of the array can
+  (and probably will) change. Const parameters mean that both the
+  array pointer and the contents will not change, and var
+  parameters imply that both can, and probably will, change. }
+
+interface
+
+uses
+   adtdarray, adtfunct, adtmem;
+
+&include adtdefs.inc
+
+const
+   { The capacity of one segment of a TSegArray. }
+   saSegmentCapacity = 256;
+   
+&_mcp_generic_include(adtsegarray.i)
+   
+
+
+implementation
+
+uses
+   adtmsg, adtutils;
+
+&_mcp_generic_include(adtsegarray_impl.i)
+
+end.

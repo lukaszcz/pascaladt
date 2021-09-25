@@ -1,0 +1,47 @@
+
+@title(Notational conventions regarding complexity.)
+@no-description
+
+@heading(Notational conventions regarding complexity.)
+
+@para
+
+The complexity of every method or algorithm is given under the
+'Complexity' heading. If no such heading is present for some
+declaration, it means that the routine takes constant time (worst-case
+O(1)), except for abstract mehtods, where it means that there is no
+time restriction imposed on the implementation of the
+method. Complexity may be denoted as worst-case, average, amortized,
+guaranteed or without anything. Worst-case means that the routine
+takes at worst the specified time, but may take less. Average means
+that the routine takes the specified time on average, provided that
+the input data is also average. With regard to algorithms operating on
+ranges it means that every possible item is equally likely to occupy a
+given position. Amortized means that in a 'longer run' the complexity
+of the routine is close to the specified value, but one invocation may
+be considerably more time-demanding. Guaranteed time may be present
+only for abstract mehtods. It indicates that the implementing method
+may have the time complexity not worse than stated. If there is
+nothing before the big O, it means that the routine always takes the
+specified time, no more, no less. It should thus rather be denoted by
+theta, but it's hard to place this character in source-code comments
+;).
+
+@para
+
+The letter n inside the O denotes the number of items in the
+container, range or any main group of items the routine operates
+on. If the routine operates on two containers or ranges, then n
+denotes the number of items in the first one, m the number of items in
+the second one. The letter h means the height of a tree.
+
+@para
+
+When any ambiguity may arise from the use of this notation, it is
+explicitly noted what each letter means.
+
+@para
+
+Memory complexity is given under the heading 'Memory usage'. It
+follows the same rules as time complexity.
+

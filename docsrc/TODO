@@ -1,0 +1,43 @@
+
+Small things to fix/add:
+
+1. Check if ArrayPushBack/ArrayPopFront is not used unnecessarily
+instead of ArrayCircularPushBack in cases in which it reduces
+performance.
+
+2. Check if the general algorithms taking two ranges work if these
+ranges point into the same container.
+
+3. Create some methods implementing the most commonly used algorithms
+in general container interfaces, in order to make it easy to use
+implementation-specific, optimized algorithms.
+
+4. Add the Insert method for an iterator range to TListAdt and
+implement it in all descended classes.
+
+5. The Inline directive DOES work for private methods in the interface section
+of a unit (with FPC 1.0 compiler), but 'inline' must be also present in
+the definition, and the definition must precede every call to the
+method. Fix it! However, there are many bugs in the version 1.0.10, so
+it's better not to enable inlining for this version.
+
+6. Check more thoroughly for possible exception cases. Remember that
+any allocation of resources may raise an exception as well as any
+user-supplied routine (except for destructors, hashers and comparers),
+such as copiers or other functors. The routines where possible
+exception sources are marked with { may raise } have already been
+thoruoghly analysed with respect to exceptions.
+
+7. Check if everything works in a multi-threaded environment.
+
+
+Long term objectives:
+
+1. Implement STL-like MakeHeap, PushHeap, etc. algorithms.
+
+2. Implement the Fibonacci heap, and possibly other priority queues.
+
+3. Implement the general FindRange algorithm using the
+Knuth-Morris-Pratt algorithm.
+
+4. Implement red-black trees.

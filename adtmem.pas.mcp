@@ -1,0 +1,313 @@
+(* This file is a part of the PascalAdt library, which provides
+   commonly used algorithms and data structures for the FPC and Delphi
+   compilers.
+   
+   Copyright (C) 2004 by Lukasz Czajka
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+   02110-1301 USA *)
+
+unit adtmem;
+
+{ This unit provides facilities for memory-management. }
+
+interface
+
+&include adtdefs.inc
+
+type
+   PGCNode = ^TGCNode;
+   TGCNode = record
+      obj : TObject;
+      next : PGCNode;
+   end;
+   
+   { a handle to an object registered in TGrabageCollector }
+   TCollectorObjectHandle = PGCNode;
+   
+   { A quasi-(grabage collector). This is used in container classes to
+     keep track of their iterators. The idea is that each container
+     object creates its own TGrabageCollector and uses it to track its
+     iterators. When a container is destroyed or all iterators are
+     invalidated by some operation, it calls FreeObjects to destroy
+     all iterators. Each iterator calls UnregisterObject in its
+     destructor, so that it is also safe (and efficient) to destroy
+     them manually. This will work as long as you don't destroy (or
+     otherwise use) 'grabage-collected' objects in another
+     grabage-collected object's destructor. If you do this the
+     behaviour is undefined!!! }
+   TGrabageCollector = class
+   private
+      StartNode : PGCNode;
+      FinishNode : PGCNode;
+      FCapacity : Cardinal;
+      { this field is set to true in a method that modifies the state
+        of TGrabageCollector object. It is also checked at the
+        beginning of such methods and if already set to true the
+        method is exitted. This is to allow the object being destroyed
+        to call these methods from its destructor. When the object is
+        destroyed by the user they will be normally executed. When it
+        is destroyed from within TGrabageCollector they are not
+        executed to avoid infinite recursion. }
+      IsInMethod : Boolean;
+{$ifdef TEST_PASCAL_ADT }
+      FRegistered : Cardinal;
+{$endif TEST_PASCAL_ADT }  
+      
+      procedure PreallocateNodes(howmany : Cardinal);
+   public
+      constructor Create;
+      destructor Destroy; override;
+      { Registers obj in grabage collector. Returns handle which can
+        be later used to unregister the object. Do NOT call this
+        method when obj is already registered within any grabage
+        collector! }
+      function RegisterObject(const obj : TObject) : TCollectorObjectHandle;
+      { unregisters the object associated with the given
+        handle. Returns the unregistered object. }
+      function UnregisterObject(handle : TCollectorObjectHandle) : TObject;
+      { returns object corresponding to the given handle. }
+      function GetObject(handle : TCollectorObjectHandle) : TObject;
+      { destroys all registered objects. All handles that had been
+        returned from RegisterObject are no longer valid }
+      procedure FreeObjects;
+      { returns true if the piece of code which calls it was invoked
+        from inside this grabage collector; htis may be useful to
+        avoid destroying grabage-collected objects in a destructor of
+        another grabage-collected object, when the destructor is
+        invoked from a grabage collector, but to destroy them
+        otherwise }
+      property IsInGrabageCollector : Boolean read IsInMethod;
+{$ifdef TEST_PASCAL_ADT }
+      property RegisteredObjects : Cardinal read FRegistered;
+{$endif TEST_PASCAL_ADT }      
+   end;
+   
+   { an object implementing reference-counting; no class should
+     inherit from this one; this is now unused since interfaces were
+     introduced to Free Pascal; @obsolete }
+   TReferenceCountedObject = class
+   private
+      obj : TObject;
+      refs : SizeType;
+   public
+      { sets reference count to 1 and o to be the underlying object }
+      constructor Create(o : TObject);
+      { this is overriden to make Destroy work like RemoveReference }
+      procedure FreeInstance; override;
+      { increments reference count }
+      procedure AddReference;
+      { decrements reference count; if it reaches 0 then destroys the
+        underlying object }
+      procedure RemoveReference;
+      { returns by how many objects self is referenced }
+      function References : SizeType;
+      { returns the underlying object }
+      function GetObject : TObject;
+   end;
+      
+   
+implementation
+
+uses
+   adtmsg;
+
+const
+   InitialGrabageNodes = 32;
+
+{ ------------------------ TGrabageCollector ----------------------------- }
+
+procedure TGrabageCollector.PreallocateNodes(howmany : Cardinal);
+var
+   i : Integer;
+   node : PGCNode;
+begin
+   Assert(FinishNode^.Next = nil, msgInternalError);
+   
+   node := FinishNode;
+   for i := 1 to howmany do
+   begin
+      New(node^.Next); { may raise }
+      node := node^.Next;
+      node^.obj := nil;
+      node^.next := nil; { in case of an exception }
+   end;
+end;
+
+constructor TGrabageCollector.Create;
+begin
+   New(StartNode);
+   StartNode^.obj := nil;
+   StartNode^.Next := nil;
+   FinishNode := StartNode;
+   FCapacity := InitialGrabageNodes + 1;
+   PreallocateNodes(FCapacity - 1);
+   {   IsInMethod := false;}
+   {FRegistered := 0;}
+end;
+
+destructor TGrabageCollector.Destroy;
+var
+   nnode : PGCNode;
+begin
+   if IsInMethod then
+      Exit;
+   IsInMethod := true;
+   
+   try
+      
+      while StartNode <> FinishNode do
+      begin
+         StartNode^.obj.Free; { to avoid destroying nil objs }
+         nnode := StartNode^.Next;
+         Dispose(StartNode);
+         StartNode := nnode;
+      end;
+      while StartNode <> nil do
+      begin
+         nnode := StartNode^.Next;
+         Dispose(StartNode);
+         StartNode := nnode;
+      end;
+   
+   finally
+      IsInMethod := false;
+   end;
+end;
+
+function TGrabageCollector.RegisterObject(const obj :
+                                             TObject) : TCollectorObjectHandle;
+begin
+   if IsInMethod then
+   begin
+      Result := nil;
+      Exit;
+   end;
+   
+   if FinishNode^.Next = nil then
+   begin
+      PreallocateNodes(FCapacity);
+      FCapacity := FCapacity + FCapacity;
+   end;
+   FinishNode^.obj := obj;   
+   Result := FinishNode;
+   FinishNode := FinishNode^.Next;
+   
+{$ifdef TEST_PASCAL_ADT }
+   Inc(FRegistered);
+{$endif TEST_PASCAL_ADT }      
+end;
+
+function TGrabageCollector.
+   UnregisterObject(handle : TCollectorObjectHandle) : TObject;
+begin
+   if IsInMethod then
+   begin
+      Result := nil;
+      Exit;
+   end;
+   
+   with PGCNode(handle)^ do
+   begin
+      Result := obj;
+      obj := nil;
+   end;
+{$ifdef TEST_PASCAL_ADT }
+   Dec(FRegistered);
+{$endif TEST_PASCAL_ADT }
+end;
+
+function TGrabageCollector.GetObject(handle : TCollectorObjectHandle) : TObject;
+begin
+   Assert((handle <> nil) and (PGCNode(handle)^.Next <> nil));
+   Result := PGCNode(handle)^.obj;
+end;
+
+procedure TGrabageCollector.FreeObjects;
+var
+   node : PGCNode;
+begin
+   if IsInMethod then
+      Exit;
+   IsInMethod := true;
+   
+   try
+      node := StartNode;
+      while node <> FinishNode do
+      begin
+         with node^ do
+         begin
+            obj.Free; { Free needed instead of Destroy to avoid
+                        previously unregistered nil objs }
+            obj := nil;
+{$ifdef TEST_PASCAL_ADT }
+            Dec(FRegistered);
+{$endif TEST_PASCAL_ADT }      
+         end;
+         node := node^.Next;
+      end;
+      FinishNode := StartNode;
+     
+   finally
+      IsInMethod := false;
+   end;
+end;
+
+{ -------------------------- TReferenceCountedObject --------------------------- }
+
+constructor TReferenceCountedObject.Create(o : TObject);
+begin
+   inherited Create;
+   refs := 1;
+   obj := o;
+end;
+
+procedure TReferenceCountedObject.FreeInstance;
+begin
+   Dec(refs);
+   if refs <= 0 then
+   begin
+      obj.Free;
+      inherited FreeInstance;
+   end;
+end;
+
+procedure TReferenceCountedObject.AddReference;
+begin
+   Inc(refs);
+end;
+
+procedure TReferenceCountedObject.RemoveReference;
+begin
+   Dec(refs);
+   if refs = 0 then
+   begin
+      obj.Free;
+      Destroy;
+   end;
+end;
+
+function TReferenceCountedObject.References : SizeType;
+begin
+   Result := refs;
+end;
+
+function TReferenceCountedObject.GetObject : TObject;
+begin
+   Result := obj;
+end;
+
+
+end.

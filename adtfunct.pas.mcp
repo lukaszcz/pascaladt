@@ -1,0 +1,250 @@
+(* This file is a part of the PascalAdt library, which provides
+   commonly used algorithms and data structures for the FPC and Delphi
+   compilers.
+   
+   Copyright (C) 2004 by Lukasz Czajka
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+   02110-1301 USA *)
+
+unit adtfunct;
+
+{ this unit provides abstract functor interfaces as well as some
+  commonly used concrete functors; functors are just object which are
+  primarily used as an enhanced kind of functions; there are several
+  types of functors: 1) ordinary functors (IUnaryFunctor,
+  IBinaryFunctor), which just transform their pointer argument(s) into
+  a pointer or only perform some operation on their argument(s); 2)
+  predicates, which return either true or false basing on the values
+  of their arguments; used primarily for testing certain attributes of
+  objects; 3) comparers, which compare two objects and return the
+  result 4) subtractors, which subtract the values of two objects 5)
+  hashers, which compute 32-bit unsigned hash values of their
+  argument.  The concrete classes in this unit are either descendants
+  of the above or function/procedure adaptors, which adapt their
+  arguments to abstract functor interfaces so as to make it possible
+  to use an ordinary function/procedure pointer where a functor is
+  required. }
+
+interface
+
+&# we need the following specializations even if not chosen by the user
+&define MCP_POINTER
+&define MCP_INTEGER
+
+&include adtdefs.inc
+
+type
+   { a base for all functors }
+   IFunctor = interface (IInterface)
+      { returns the object implementing the interface }
+      function GetObject : TObject;
+   end;
+
+   { every class implementing functor interfaces should inherit from
+     this one }
+   TFunctor = class (TInterfacedObject)
+   public
+{$ifdef DEBUG_PASCAL_ADT }
+      constructor Create;
+      destructor Destroy; override;
+{$endif }
+      { Returns self. }
+      function GetObject : TObject;
+   end;
+   
+&_mcp_generic_include(adtfunct.i)
+   
+type   
+   { a functor for disposing objects; }
+   TObjectDisposer = class (TFunctor, IUnaryFunctor)
+   public
+      { assumes the given argument is a pointer to an object; destroys
+        it and returns nil; invokes TObject(aitem).Free; }
+      function Perform(aitem : TObject) : TObject;
+   end;
+
+   { a functor comparing the items by the values of the pointer
+     addresses exclusively }
+   TPointerValueComparer = class (TFunctor, IBinaryComparer, ISubtractor)
+   public
+      { compares pointers according to their values interpreted as
+        numbers }
+      function Compare(aitem1, aitem2 : TObject) : Integer;
+   end;
+   
+   TNoCaseStringComparer = class (TFunctor, IStringBinaryComparer)
+   public
+      { compares the two strings case-insensitively }
+      function Compare(aitem1, aitem2 : String) : Integer;
+   end;
+   TTextComparer = TNoCaseStringComparer;
+   
+&ifdef MCP_POINTER 
+   { a functor used to dispose PChars }
+   TPCharDisposer = class (TFunctor, IPointerUnaryFunctor)
+   public
+      { assumes the given argument is a pointer to a PChar; destroys
+        it and returns nil }
+      function Perform(aitem : Pointer) : Pointer;
+   end;
+
+   { a functor for comparing PChars case-sensitively }
+   TPCharComparer = class (TFunctor, IPointerBinaryComparer)
+   public
+      { interprets its arguments as PChar's and calls StrComp to
+        compare them }
+      function Compare(aitem1, aitem2 : Pointer) : Integer;
+   end;
+   
+   { a functor for comparing PChars case-insensitively }
+   TNoCasePCharComparer = class (TFunctor, IPointerBinaryComparer)
+   public
+      function Compare(aitem1, aitem2 : Pointer) : Integer;
+   end;
+&endif  
+  
+{ returns a TObjectDisposer; it is more efficient to call this
+  function instead of creating TObjectDisposer directly, because here
+  an existing object is reused intead of creating a new one }
+function ObjectDisposer : IUnaryFunctor;
+   
+function PointerValueComparer : IBinaryComparer;
+function NoCaseStringComparer : IStringBinaryComparer;
+
+
+implementation
+
+uses
+{$ifdef DEBUG_PASCAL_ADT }
+   adtlog,
+{$endif }   
+   SysUtils;
+
+{$ifdef DEBUG_PASCAL_ADT }
+const
+   existingFunctors : Cardinal = 0;
+{$endif }
+   
+var
+   varObjectDisposer : IUnaryFunctor;
+   varPointerValueComparer : IBinaryComparer;
+   varNoCaseStringComparer : IStringBinaryComparer;
+   
+&_mcp_generic_include(adtfunct_impl.i)      
+   
+{ ------------------------ TFunctor ---------------------------- }
+
+{$ifdef DEBUG_PASCAL_ADT }
+constructor TFunctor.Create;
+begin
+   Inc(existingFunctors);
+end;
+
+destructor TFunctor.Destroy;
+begin
+   Dec(existingFunctors);
+end;
+{$endif }
+
+function TFunctor.GetObject : TObject;
+begin
+   Result := self;
+end;
+   
+{ ------------------------- TObjectDisposer --------------------------------- }
+
+function TObjectDisposer.Perform(aitem : TObject) : TObject;
+begin
+   aitem.Free;
+   Result := nil;
+end;
+
+{ -------------------------- TPointerValueComparer -------------------------- }
+
+function TPointerValueComparer.Compare(aitem1, aitem2 : TObject) : IndexType;
+begin
+   Result := PointerValueType(aitem1) - PointerValueType(aitem2);
+end;
+
+function TNoCaseStringComparer.Compare(aitem1, aitem2 : String) : Integer;
+begin
+   Result := CompareText(aitem1, aitem2);
+end;
+
+
+&ifdef MCP_POINTER
+{ ------------------------- TPCharDisposer --------------------------------- }
+
+function TPCharDisposer.Perform(aitem : Pointer) : Pointer;
+begin
+   StrDispose(PChar(aitem));
+   Result := nil;
+end;
+
+{ ---------------------------- TPCharComparer ----------------------------- }
+
+function TPCharComparer.Compare(aitem1, aitem2 : Pointer) : IndexType;
+begin
+   Result := StrComp(PChar(aitem1), PChar(aitem2));
+end;
+
+{ ---------------------------- TNoCasePCharComparer ------------------------- }
+
+function TNoCasePCharComparer.Compare(aitem1, aitem2 : Pointer) : IndexType;
+var
+   pch1, pch2 : PChar;
+begin
+   pch1 := PChar(aitem1);
+   pch2 := PCHar(aitem2);
+   while (pch1^ <> #0) and (pch2^ <> #0) and
+            (Lowercase(pch1^) = Lowercase(pch2^)) do
+   begin
+      Inc(pch1);
+      Inc(pch2);
+   end;
+   Result := Ord(pch1^) - Ord(pch2^);
+end;
+
+&endif &# end MCP_POINTER
+   
+function ObjectDisposer : IUnaryFunctor;
+begin
+   Result := varObjectDisposer;
+end;
+
+function PointerValueComparer : IBinaryComparer;
+begin
+   Result := varPointerValueComparer;
+end;
+
+function NoCaseStringComparer : IStringBinaryComparer;
+begin
+   Result := varNoCaseStringComparer;
+end;
+
+initialization
+   varProjection := TProjection.Create;
+   varStringProjection := TStringProjection.Create;
+&ifdef MCP_POINTER
+   varPointerProjection := TPointerProjection.Create;
+&endif      
+   varObjectDisposer := TObjectDisposer.Create;
+   varPointerValueComparer := TPointerValueComparer.Create;
+   varNoCaseStringComparer := TNoCaseStringComparer.Create;
+   
+finalization
+   
+end.

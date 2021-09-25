@@ -1,0 +1,74 @@
+(* This file is a part of the PascalAdt library, which provides
+   commonly used algorithms and data structures for the FPC and Delphi
+   compilers.
+   
+   Copyright (C) 2004, 2005 by Lukasz Czajka
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+   02110-1301 USA *)
+
+unit adtcont;
+
+{ This unit provides abstract base classes (interfaces) for many
+  different types of containers. It also introduces some concrete
+  wrapper (adaptor) classes.  }
+
+{ * Note on qualifiers * }
+{ The const qualifier before an iterator, when the iterator does not
+  denote a range, means that neither the value pointed to by the
+  iterator nor the iterator itself is changed by the routine; it
+  doesn't mean however that nothing in the container structure can be
+  changed; the lack of this qualifier means that the routine might
+  invalidate the iterator, change its item's value or make it point
+  somewhere else, but it doesn't have to; it basically depends on the
+  implementation. The const qualifiers before two (or sometimes one)
+  iterators denoting a range mean that the range is not changed by the
+  routine, i.e. neither the values of the items in the range nor the
+  relative order of the items are changed; the iterators themselves
+  are also not changed; other things may be changed; The const
+  qualifier before a string means that the string is not changed by
+  the routine. The const qualifier is always used before an interface
+  for efficiency reasons. This is to avoid calling _AddRef every time
+  the routine is invoked. }
+
+{ * Notes on ownership issues * }
+{ When a pointer is inserted into a container it is owned by it only
+  after the insertion is successfully completed. It will be than
+  automatically disposed by the container. However, if an exception is
+  raised the insertion is not yet completed and a pointer passed as an
+  argument is not owned by the container. It must be disposed by the
+  calling code. The reason for such behaviour is not to make any any
+  user data 'sink' without trace in case of an exception. This
+  eventuality should be handled with a try ... except block around
+  suitable parts of code which would dispose or otherwise handle any
+  pointers not inserted due to an exception. }
+
+interface
+
+uses
+   SysUtils, adtfunct, adtcontbase, adtiters;
+
+&include adtdefs.inc
+   
+&_mcp_generic_include(adtcont.i)
+   
+implementation
+
+uses
+   adtmsg, adtexcept, adtutils, adthashfunct, adtalgs;
+
+&_mcp_generic_include(adtcont_impl.i)
+
+end.

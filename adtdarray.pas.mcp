@@ -1,0 +1,70 @@
+(* This file is a part of the PascalAdt library, which provides
+   commonly used algorithms and data structures for the FPC and Delphi
+   compilers.
+   
+   Copyright (C) 2004, 2005 by Lukasz Czajka
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public License
+   as published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+   02110-1301 USA *)
+
+unit adtdarray;
+
+{ This unit handles low-level memory management via TDynamicArray. For
+  all but the most performance-critical parts of code @<TArray> or
+  @<TCircularDeque> are more appropriate.  }
+{
+}
+{ Note: the distinction between normal, const and var parameters is
+  important semantically. Normal parameters mean that the pointer to
+  the array cannot be changed, but the contents of the array can (and
+  probably will) change. Const parameters mean that both the array
+  pointer and the contents will not change, and var parameters imply
+  that both may, and probably will, change. }
+
+interface
+
+uses
+   adtfunct, adtmem;
+
+&# we need the following specializations even if not chosen by the user
+&define MCP_POINTER
+&define MCP_INTEGER
+
+&include adtdefs.inc   
+   
+const
+   daUnlimitedUpperIndex = adtUnlimitedArrayIndex;
+   { The factor by which the Size of the array is grown when calling
+     ArrayExpand }
+   daGrowRate = 2;
+   { when the capacity of TDynamicArray reaches this value it is no
+     longer increased by the factor of daGrowRate, but each time by
+     this amount }
+   daMaxMemChunk = 256 * 1024;
+   { The same as daGrowRate, but applies to TDynamicBuffer. }
+   bufGrowRate = daGrowRate;
+   { The same as daMaxMemChunk, but applies to TDynamicBuffer. }
+   bufMaxMemChunk = daMaxMemChunk;
+
+&_mcp_generic_include(adtdarray.i)
+
+implementation
+
+uses
+   adtutils, adtmsg, SysUtils;
+
+&_mcp_generic_include(adtdarray_impl.i)
+
+end.

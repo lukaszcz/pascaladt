@@ -1,0 +1,18 @@
+PascalAdt library version 0.5.0 readme.
+
+The PascalAdt library is free software. See LICENSE for details.
+
+PascalAdt is a library of data atructures and algorithms, similar (to
+some extent) to the C++ STL library. It offers a wide variety of data
+structures including lists, queues, double-ended queues, binary trees,
+binary search trees, AVL-trees, 2-3-trees, splay-trees and hash
+tables. This version is 0.5.0.
+
+For information on how to install the library see INSTALL.
+For new features in this version see NEWS.
+For a brief description of the library's functionality see docs/tutorial.txt
+
+For new versions see:
+http://students.mimuw.edu.pl/~lc235951/pascaladt/
+
+
