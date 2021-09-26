@@ -124,11 +124,13 @@ read -n 1 -p "Make a dynamic library? (y/n) "
 echo
 if [ "$REPLY" != n ]; then
     MAKE_DYNAMIC=1
+    XD="-XD"
 else
     MAKE_DYNAMIC=0
+    XD=""
 fi
 
-read -n 1 -p "Make a non-smartlinked static library? (n/y) "
+read -n 1 -p "Make a static library? (n/y) "
 echo
 if [ "$REPLY" != "y" ]; then
     MAKE_STATIC=0
@@ -298,8 +300,15 @@ echo
 echo "Installation finished."
 if [ $MAKE_UNINST_SCRIPT == 1 ]; then
     chmod +x $UNINST_SCRIPT_FILE
+    echo
     echo "Uninstallation script written to $UNINST_SCRIPT_FILE"
 fi
-if [ $MAKE_DOCUMENTATION == 0 ]; then
-    echo "You may download the documentation from http://students.mimuw.edu.pl/~lc235951/pascaladt/"
-fi
+
+echo
+echo "To use the library in your programs invoke fpc with the following"
+echo "command line options."
+echo
+echo "fpc $(XD) -Fu$(INCLUDE_DIR) -Fl$(INCLUDE_DIR) ..."
+echo
+echo "Documentation is available at https://pascaladt.github.io"
+echo
