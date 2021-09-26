@@ -61,7 +61,7 @@ ifneq ($(findstring docs, $(MAKECMDGOALS)),)
 DOCS = true
 endif
 
-override OPTS += -Si -S2 -Sh -Futests/units -Futests/units/cpu
+override OPTS += -Si -S2 -Sh -Futests/units
 
 ifdef SMART
 override OPTS += -CX
@@ -72,7 +72,7 @@ override OPTS += -Ur -O3 -v0
 endif
 
 ifdef DEBUG
-override OPTS += -vewn -Sa -gl -dDEBUG_PASCAL_ADT
+override OPTS += -vewn -Sa -g -gl -dDEBUG_PASCAL_ADT
 endif
 
 ifdef TEST
@@ -119,15 +119,13 @@ install :
 	./install.sh
 
 static : units
-	ppumove -q -s -o pascaladt$(VER)$(static_lib_suffix) *.ppu
-	mv libpascaladt$(VER)$(static_lib_suffix) libppascaladt$(VER)$(static_lib_suffix)
+	ppumove -s -o pascaladt$(VER)$(static_lib_suffix) *.ppu
 
 dynamic : units
-	ppumove -q -o pascaladt$(VER)$(dynamic_lib_suffix) *.ppu
+	ppumove -o pascaladt$(VER)$(dynamic_lib_suffix) *.ppu
 
 smart : units
-
-release : units
+	ppumove -s -o pascaladt$(VER)$(static_lib_suffix) *.ppu
 
 all : units tests
 

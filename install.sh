@@ -78,8 +78,8 @@ function process_dirname()
 
 function install_release()
 {
-    checked_eval "make fastclean > /dev/null 2>&1"
-    checked_eval make release $1 OPTS="$4" VER="$VERSION_SUFFIX" MCP_OPTS="$5"
+    checked_eval make fastclean
+    checked_eval make $1 RELEASE=true OPTS="$4" VER="$VERSION_SUFFIX" MCP_OPTS="$5"
     LIB_FILES=`eval "echo -n $2"`
 
     checked_eval install $3 $INSTALL_OPTS $LIB_FILES $LIB_DIR
@@ -130,12 +130,20 @@ else
     XD=""
 fi
 
-read -n 1 -p "Make a static library? (n/y) "
+read -n 1 -p "Make a smartlinked static library? (n/y) "
 echo
-if [ "$REPLY" != "y" ]; then
-    MAKE_STATIC=0
+if [ "$REPLY" == "y" ]; then
+    MAKE_SMART=1
 else
+    MAKE_SMART=0
+fi
+
+read -n 1 -p "Make a non-smartlinked static library? (n/y) "
+echo
+if [ "$REPLY" == "y" ]; then
     MAKE_STATIC=1
+else
+    MAKE_STATIC=0
 fi
 
 read -n 1 -p "Install debug version also? (n/y) "
@@ -165,29 +173,29 @@ if [ $INSTALL_DEBUG == 1 ]; then
 fi
 
 MCPOPTS=
-read -n 1 -p "Generate template instatiations for Pointer? (n/y) "
+read -n 1 -p "Generate template instantiations for Pointer? (n/y) "
 echo
 if [ "$REPLY" == "y" ]; then
     MCPOPTS="-dMCP_POINTER $MCPOPTS"
 fi
-read -n 1 -p "Generate template instatiations for Integer? (n/y) "
+read -n 1 -p "Generate template instantiations for Integer? (n/y) "
 echo
 if [ "$REPLY" == "y" ]; then
     MCPOPTS="-dMCP_INTEGER $MCPOPTS"
 fi
-read -n 1 -p "Generate template instatiations for Cardinal? (n/y) "
+read -n 1 -p "Generate template instantiations for Cardinal? (n/y) "
 echo
 if [ "$REPLY" == "y" ]; then
     MCPOPTS="-dMCP_CARDINAL $MCPOPTS"
 fi
-read -n 1 -p "Generate template instatiations for Real? (n/y) "
+read -n 1 -p "Generate template instantiations for Real? (n/y) "
 echo
 if [ "$REPLY" == "y" ]; then
     MCPOPTS="-dMCP_REAL $MCPOPTS"
 fi
 
 if [ $SRCDOC_PRESENT == 1 ]; then
-    read -n 1 -p "Make documentation also? (y/n) "
+    read -n 1 -p "Make documentation? (y/n) "
     echo
     if [ "$REPLY" == n ]; then
         MAKE_DOCUMENTATION=0
@@ -205,6 +213,7 @@ if [ "$REPLY" == n ]; then
 else
     MAKE_UNINST_SCRIPT=1
     rm $UNINST_SCRIPT_FILE > /dev/null 2>&1
+    echo -e "#!/bin/bash\n" > $UNINST_SCRIPT_FILE
 fi
 echo
 
@@ -252,6 +261,10 @@ if [ $MAKE_DYNAMIC == 1 ]; then
     install_release dynamic ${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so " " "$*" "$MCPOPTS";
 fi
 
+if [ $MAKE_SMART == 1 ]; then
+    install_release smart ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a "-m 644" "$*" "$MCPOPTS";
+fi
+
 if [ $MAKE_STATIC == 1 ]; then
     install_release static ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a "-m 644" "$*" "$MCPOPTS";
 fi
@@ -269,11 +282,11 @@ fi
 # compile and install the debug version
 
 if [ $INSTALL_DEBUG == 1 ]; then
-    DEBUG_LINK_PATH=${DEBUG_LIB_DIR}${STATIC_LIB_STEM}.a
-    DEBUG_LIB_PATH=${DEBUG_LIB_DIR}${STATIC_LIB_STEM}${VERSION_SUFFIX}.a
-    checked_eval "make fastclean > /dev/null 2>&1"
-    checked_eval make debug static OPTS=$* VER="$VERSION_SUFFIX" MCP_OPTS="$MCPOPTS"
-    checked_eval install -m 644 $INSTALL_OPTS ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a ${DEBUG_LIB_DIR}
+    DEBUG_LINK_PATH=${DEBUG_LIB_DIR}${DYNAMIC_LIB_STEM}.so
+    DEBUG_LIB_PATH=${DEBUG_LIB_DIR}${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so
+    checked_eval make fastclean
+    checked_eval make dynamic DEBUG=true OPTS="$*" VER="$VERSION_SUFFIX" MCP_OPTS="$MCPOPTS"
+    checked_eval install -m 644 $INSTALL_OPTS ${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so ${DEBUG_LIB_DIR}
     if should_overwrite_ppu DEBUG_ ; then
         checked_eval install -m 664 $INSTALL_OPTS *.ppu ${DEBUG_INCLUDE_DIR}
     fi
@@ -287,6 +300,8 @@ if [ $INSTALL_DEBUG == 1 ]; then
     fi
 fi
 
+checked_eval make fastclean
+
 
 # make the documentation
 
@@ -299,7 +314,7 @@ fi
 echo
 echo "Installation finished."
 if [ $MAKE_UNINST_SCRIPT == 1 ]; then
-    chmod +x $UNINST_SCRIPT_FILE
+    chmod a+x $UNINST_SCRIPT_FILE
     echo
     echo "Uninstallation script written to $UNINST_SCRIPT_FILE"
 fi
@@ -308,7 +323,6 @@ echo
 echo "To use the library in your programs invoke fpc with the following"
 echo "command line options."
 echo
-echo "fpc $(XD) -Fu$(INCLUDE_DIR) -Fl$(INCLUDE_DIR) ..."
+echo "fpc $XD -Fu$INCLUDE_DIR -Fl$INCLUDE_DIR ..."
 echo
 echo "Documentation is available at https://pascaladt.github.io"
-echo
