@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -30,7 +30,7 @@
 
 { turn range checking off }
 {$R-}
-   
+
 { **************************************************************************** }
 {   Notes on the implementation of THashTable: }
 { THashTable is implemented as a closed hash table. FBuckets is an
@@ -69,11 +69,11 @@
 { Calling CheckMaxFillRatio, CheckMinFillRatio. }
 { Caution must be taken when calling one of these methods. It should
   be remembered that any of them may potentially call Rehash and
-  invalidate all pointers into the table.  }   
+  invalidate all pointers into the table.  }
 {  Graphical representation of THashTable: }
 {
-Bucket       
-index   
+Bucket
+index
      +-----+    +-----+    +-----+
   0  | 2n  |--->|  n  |--->|  0  |
      +-----+    +-----+    +-----+
@@ -81,7 +81,7 @@ index
      +-----+  +-->|  1  |--->| n+1 |--->| n+1 |
   2  | nil |      +-----+    +-----+    +-----+
      +-----+
-       ... 
+       ...
      |     |
      +-----+    +-----+
  n-3 |2n-3 |--->| n-3 |
@@ -96,7 +96,7 @@ index
   as an index into the Fbuckets array. It is then mod'ed by n (the
   capacity) and an appropriate node in the list is
   located. RepeatedItems is true for this table.  }
-{ **************************************************************************** }   
+{ **************************************************************************** }
 
 
 { ------------------------ non-member routines ------------------------------- }
@@ -117,9 +117,9 @@ var
    dest, src : PHashNode;
 begin
    inherited CreateCopy(ht);
-   
+
    FSize := 0;
-   
+
    if itemCopier <> nil then
    begin
       FTableSize := ht.FTableSize;
@@ -137,7 +137,7 @@ begin
                dest^.Next := nil;
                dest^.Item := itemCopier.Perform(src^.Item);
                Inc(FSize);
-               
+
                src := src^.Next;
                while src <> nil do
                begin
@@ -153,7 +153,7 @@ begin
                dest^.Next := dest;
             end;
          end; { end for }
-         i := FCapacity;         
+         i := FCapacity;
       except
          Inc(i);
          while i < FCapacity do
@@ -231,7 +231,7 @@ begin
    FTableSize := htInitialTableSize;
    FCapacity := CalculateCapacity(FTableSize);
    GetMem(Pointer(FBuckets), FCapacity * SizeOf(THashNode));
-   
+
    for i := 0 to FCapacity - 1 do
    begin
       _mcp_set_zero(FBuckets^.Bucket[i].Item);
@@ -247,7 +247,7 @@ begin
       node := nil;
       Inc(bucket);
    end;
-   
+
    if node = nil then
    begin
       while (bucket < FCapacity) and
@@ -255,14 +255,14 @@ begin
       begin
          Inc(bucket);
       end;
-   end;   
+   end;
 end;
 
 procedure THashTable.RetreatToNearestItem(var bucket : IndexType;
                                           var node : PHashNode);
 begin
    Assert(bucket <= FCapacity, msgInvalidIterator);
-   
+
    if node = nil then
    begin
       while (bucket >= 0) and
@@ -291,21 +291,21 @@ begin
       Assert(node^.Next <> nil, msgInternalError);
       node := node^.Next;
    end;
-   
+
    Assert(_mcp_equal(node^.Item, aitem), msgInternalError);
-   
+
    while (node^.Next <> nil) and
             (_mcp_equal(node^.Next^.Item, aitem)) do
    begin
       Inc(Result);
       node := node^.Next;
    end;
-   
+
    if node^.Next = nil then
    begin
       node := nil;
       Inc(bucket);
-   end;  
+   end;
 end;
 
 
@@ -327,14 +327,14 @@ begin
          begin
             node := node^.Next;
          end;
-         
+
          if node^.Next <> nil then
          begin
             Result := true;
          end else
             Result := false;
       end;
-      
+
    end else begin
       node := nil;
       Result := false;
@@ -373,7 +373,7 @@ begin
          node := @FBuckets^.Bucket[bucket];
       end;
    end;
-   
+
    Inc(FSize);
    FFirstUsedBucket := -1;
 end;
@@ -387,7 +387,7 @@ begin
    begin
       node := @FBuckets^.Bucket[bucket];
       Result := node^.Item;
-      
+
       nnode := node^.Next;
       if nnode <> nil then
       begin
@@ -398,17 +398,17 @@ begin
          node^.Next := node;
          node^.Item := DefaultItem;
       end;
-   end else 
+   end else
    begin
       Assert(node^.Next <> nil, msgDeletingInvalidIterator);
-      
+
       nnode := node^.Next;
       Result := nnode^.Item;
-      
+
       node^.Next := nnode^.Next;
       DisposeNode(nnode);
    end;
-   
+
    Dec(FSize);
    FFirstUsedBucket := -1;
 end;
@@ -424,7 +424,7 @@ begin
       begin
          node := @FBuckets^.Bucket[i];
          DisposeItem(node^.Item);
-         
+
          node := node^.Next;
          while node <> nil do
          begin
@@ -488,18 +488,18 @@ end;
 {$ifdef TEST_PASCAL_ADT }
 procedure THashTable.LogStatus(mname : String);
 var
-   maxItemsInBucket, m2ItemsInBucket : SizeType;  
+   maxItemsInBucket, m2ItemsInBucket : SizeType;
    BucketsEmpty, BucketsUsed, itemsInBucket : SizeType;
    avgItemsInBucket, varItemsInBucket, avgAll, varAll : Double;
    i : IndexType;
    node : PHashNode;
 begin
    inherited;
-   
+
    m2ItemsInBucket := 0;
    BucketsEmpty := 0;
    maxItemsInBucket := 0;
-   
+
    for i := 0 to FCapacity - 1 do
    begin
       node := @FBuckets^.Bucket[i];
@@ -514,20 +514,20 @@ begin
             Inc(itemsInBucket);
             node := node^.Next;
          end;
-         
+
          Inc(m2ItemsInBucket, itemsInBucket * itemsInBucket);
          if itemsInBucket > maxItemsInBucket then
             maxItemsInBucket := itemsInBucket;
       end;
    end;
-   
+
    BucketsUsed := FCapacity - BucketsEmpty;
    avgItemsInBucket := FSize / BucketsUsed;
    varItemsInBucket :=
       m2ItemsInBucket / BucketsUsed - Sqr(avgItemsInBucket);
    avgAll := FSize / FCapacity;
    varAll := m2ItemsInBucket / FCapacity - Sqr(avgAll);
-   
+
    WriteLog('Total buckets: ' + IntToStr(FCapacity));
    WriteLog('Empty buckets: ' + IntToStr(BucketsEmpty));
    WriteLog('Used buckets: ' + IntToStr(BucketsUsed));
@@ -548,7 +548,7 @@ begin
 end;
 {$endif TEST_PASCAL_ADT }
 
-function THashTable.CopySelf(const ItemCopier : IUnaryFunctor) : TContainerAdt; 
+function THashTable.CopySelf(const ItemCopier : IUnaryFunctor) : TContainerAdt;
 begin
    Result := THashTable.CreateCopy(self, itemCopier);
 end;
@@ -580,7 +580,7 @@ begin
                         THashTableIterator(Result).FNode);
 end;
 
-function THashTable.Finish : TSetIterator; 
+function THashTable.Finish : TSetIterator;
 begin
    Result := THashTableIterator.Create(FCapacity, nil, self);
 end;
@@ -678,13 +678,13 @@ var
    aitem : ItemType;
 begin
    Assert(pos is THashTableIterator, msgInvalidIterator);
-   
+
    aitem := ExtractNode(THashTableIterator(pos).FBucket,
                         THashTableIterator(pos).FNode);
    DisposeItem(aitem);
 end;
 
-function THashTable.Delete(aitem : ItemType) : SizeType; 
+function THashTable.Delete(aitem : ItemType) : SizeType;
 var
    bucket : IndexType;
    node, nnode, fnode : PHashNode;
@@ -698,7 +698,7 @@ begin
       begin
          DisposeItem(FBuckets^.Bucket[bucket].Item);
          Inc(Result);
-         
+
          node := FBuckets^.Bucket[bucket].Next;
          while (node <> nil) and
                   (_mcp_equal(node^.Item, aitem)) do
@@ -709,7 +709,7 @@ begin
             node := nnode;
             Inc(Result);
          end;
-         
+
          if node = nil then
          begin
             with FBuckets^.Bucket[bucket] do
@@ -738,13 +738,13 @@ begin
             Inc(Result);
             node := nnode;
          until (node = nil) or (not _mcp_equal(node^.Item, aitem));
-         
+
          fnode^.Next := node;
       end;
-      
+
       FFirstUsedBucket := -1;
    end;
-   
+
    Dec(FSize, Result);
 end;
 
@@ -757,7 +757,7 @@ begin
    Result := THashTableIterator.Create(bucket, node, self);
 end;
 
-function THashTable.UpperBound(aitem : ItemType) : TSetIterator; 
+function THashTable.UpperBound(aitem : ItemType) : TSetIterator;
 var
    bucket : IndexType;
    node : PHashNode;
@@ -799,7 +799,7 @@ var
    lastItem : ItemType;
    lastItemValid : Boolean;
    blist : PHashNode; { list of buckets that can be reused }
-   
+
    procedure GetNewNode(var node : PHashNode);
    begin
       if blist <> nil then
@@ -809,7 +809,7 @@ var
       end else
          NewNode(node); { may raise }
    end;
-   
+
    procedure ReInsert(aitem : ItemType);
    begin
       if (lastItemValid) and (_mcp_equal(aitem, lastItem)) then
@@ -842,7 +842,7 @@ var
       lastItem := aitem;
       lastItemValid := true;
    end; { end ReInsert }
-   
+
    procedure ReInsertItems;
    var
       i : IndexType;
@@ -851,7 +851,7 @@ var
       blist := nil;
       lastItem := DefaultItem;
       lastItemValid := false;
-   
+
       for i := 0 to oldCap - 1 do
       begin
          if buckets^.Bucket[i].Next <> @buckets^.Bucket[i] then
@@ -860,8 +860,8 @@ var
             { may raise here (and only here) if there are no more
               nodes left in blist and there is not enough memory to
               allocate a new node; this is possible only if ex < 0 }
-            ReInsert(node^.Item); 
-            
+            ReInsert(node^.Item);
+
             node := node^.Next;
             while node <> nil do
             begin
@@ -869,7 +869,7 @@ var
                { add node to the list of unused bucket nodes }
                node^.Next := blist;
                blist := node;
-               
+
                { cannot raise here because there is now at least one
                  node in blist }
                ReInsert(node^.Item);
@@ -883,13 +883,13 @@ var
                { this should not be &<_mcp_set_zero>'ed; &<_mcp_set_zero>
                  should (and must!) be used only for newly allocated
                  items }
-               Item := DefaultItem; 
+               Item := DefaultItem;
                Next := @buckets^.Bucket[i];
             end;
          end;
       end; { end for }
    end; { end ReInsertItems }
-   
+
    procedure DeallocateOldBuckets;
    begin
       while blist <> nil do
@@ -900,10 +900,10 @@ var
       end;
       FreeMem(buckets);
    end;
-   
+
 begin
    Assert(FTableSize + ex >= htMinTableSize, msgContainerTooSmall);
-   
+
 {$ifdef TEST_PASCAL_ADT }
 {   LogStatus('Rehash'); }
 {$endif }
@@ -911,14 +911,14 @@ begin
    oldCap := FCapacity;
    NewTableSize := FTableSize + ex;
    NewCapacity := CalculateCapacity(NewTableSize);
-   
+
    GetMem(Pointer(buckets), NewCapacity * SizeOf(THashNode)); { may raise }
-   
+
    ExchangePtr(buckets, FBuckets);
    FCapacity := NewCapacity;
    FTableSize := NewTableSize;
    FFirstUsedBucket := -1;
-   
+
    for i := 0 to FCapacity - 1 do
    begin
       with FBuckets^.Bucket[i] do
@@ -927,7 +927,7 @@ begin
          Next := @FBuckets^.Bucket[i];
       end;
    end;
-     
+
    try
       ReInsertItems;
    except
@@ -950,7 +950,7 @@ begin
       raise;
    end;
    DeallocateOldBuckets;
-   
+
    FCanShrink := false;
    { it is desirable not to shrink the table if it were rehashed by a
      user to make place for data that is going to be inserted, so we
@@ -966,7 +966,7 @@ begin
    GrabageCollector.FreeObjects;
 end;
 
-function THashTable.Empty : Boolean; 
+function THashTable.Empty : Boolean;
 begin
    Result := FSize = 0;
 end;
@@ -1010,7 +1010,7 @@ end;
 function THashTableIterator.GetItem : ItemType;
 begin
    Assert(not IsFinish, msgReadingInvalidIterator);
-   
+
    if FNode <> nil then
       Result := FNode^.Next^.Item
    else
@@ -1023,12 +1023,12 @@ var
    oldItem : ItemType;
 begin
    Assert(not IsFinish, msgInvalidIterator);
-   
+
    if FNode <> nil then
       pi := @FNode^.Next^.Item
    else
       pi := @FTable.FBuckets^.Bucket[FBucket].Item;
-   
+
    oldItem := pi^;
    pi^ := aitem;
    with FTable do
@@ -1074,7 +1074,7 @@ end;
 procedure THashTableIterator.Advance;
 begin
    Assert(FBucket < FTAble.FCapacity, msgAdvancingInvalidIterator);
-   
+
    if (FNode <> nil) and (FNode^.Next <> nil) then
    begin
       FNode := FNode^.Next;
@@ -1082,7 +1082,7 @@ begin
    begin
       FNode := @FTable.FBuckets^.Bucket[FBucket];
    end;
-   
+
    if (FNode^.Next = nil) then
    begin
       FTable.AdvanceToNearestItem(FBucket, FNode);
@@ -1244,7 +1244,7 @@ end;
 { TScatterTable graphically: }
 {
  Index   Items  Chain  Probe Seqs.
-        +-----+  
+        +-----+
    0    |  0  |   0    (0)
         +-----+
    1    |  1  |   1    (1, 0)
@@ -1276,7 +1276,7 @@ end;
   position belongs; the numbers in brackets show all sequences of
   probes the given position belongs to (all sequences starting from
   positions not shown in the picture are omitted). }
-  
+
 { ============================================================================ }
 
 
@@ -1294,15 +1294,15 @@ var
    i : IndexType;
 begin
    inherited CreateCopy(st);
-   
+
    if itemCopier <> nil then
    begin
       InitBasicFields;
       FTableSize := st.FTableSize;
-      
+
       ArrayAllocate(FArray, st.FArray^.Capacity, 0);
       ZeroOutFArray;
-      
+
       for i := 0 to st.FArray^.Capacity - 1 do
       begin
          if (st.FArray^.Items[i] <> stFree) and
@@ -1328,7 +1328,7 @@ begin
 end;
 
 function TScatterTable.FirstProbe : SizeType;
-{$ifdef INLINE_DIRECTIVE_REPEAT }      
+{$ifdef INLINE_DIRECTIVE_REPEAT }
 inline;
 {$endif }
 begin
@@ -1336,7 +1336,7 @@ begin
 end;
 
 function TScatterTable.NextProbe(off : UnsignedType) : SizeType;
-{$ifdef INLINE_DIRECTIVE_REPEAT }      
+{$ifdef INLINE_DIRECTIVE_REPEAT }
 inline;
 {$endif }
 begin
@@ -1347,7 +1347,7 @@ begin
 end;
 
 function TScatterTable.GetIndex(val : UnsignedType) : IndexType;
-{$ifdef INLINE_DIRECTIVE_REPEAT }      
+{$ifdef INLINE_DIRECTIVE_REPEAT }
 inline;
 {$endif }
 begin
@@ -1355,7 +1355,7 @@ begin
 end;
 
 procedure TScatterTable.CheckDeletedFields;
-{$ifdef INLINE_DIRECTIVE_REPEAT }      
+{$ifdef INLINE_DIRECTIVE_REPEAT }
 inline;
 {$endif }
 var
@@ -1372,7 +1372,7 @@ begin
 end;
 
 procedure TScatterTable.CheckMinFillRatio;
-{$ifdef INLINE_DIRECTIVE_REPEAT }      
+{$ifdef INLINE_DIRECTIVE_REPEAT }
 inline;
 {$endif }
 var
@@ -1389,7 +1389,7 @@ begin
 end;
 
 procedure TScatterTable.CheckMaxFillRatio;
-{$ifdef INLINE_DIRECTIVE_REPEAT }      
+{$ifdef INLINE_DIRECTIVE_REPEAT }
 inline;
 {$endif }
 var
@@ -1455,7 +1455,7 @@ begin
             i := GetIndex(h + bug);
             p := bug;
          end;
-         
+
          while (h < FArray^.Capacity) and (Items[i] = stFree) do
          begin
             Inc(h);
@@ -1477,7 +1477,7 @@ begin
      returned offset and base may be invalid! The re-hashing of the
      table could possibly invalidate them. }
    CheckMaxFillRatio;
-   
+
    h := GetIndex(Hasher.Hash(aitem));
    { find the first item equal to aitem, if not found insert at the back
      of the collision chain; if found find the nearest item not equal
@@ -1488,13 +1488,13 @@ begin
      chains should be skipped; special care must be taken with
      exceptions, because if we exchange aitem with some item already in
      the container this item cannot be leaked! }
-   
+
    orgPtr := aitem; { original aitem }
    wasMoreThanOne := false;
 
    i := 0; { only to shut the compiler up }
    try
-      
+
       if (FArray^.Items[h] = stFree) then
       begin
          FArray^.Items[h] := aitem;
@@ -1508,7 +1508,7 @@ begin
       begin
          p := FirstProbe;
          i := GetIndex(h + p);
-               
+
          if _mcp_equal(FArray^.Items[h], aitem) then
          begin
             if not RepeatedItems then
@@ -1534,7 +1534,7 @@ begin
                end;
             end;
          end;
-         
+
          while (FArray^.Items[i] <> stFree) and (FArray^.Items[i] <> stDeleted) do
          begin
             if not _mcp_equal(FArray^.Items[i], aitem) then { may raise }
@@ -1560,7 +1560,7 @@ begin
                      p := NextProbe(p);
                      i := GetIndex(h + p);
                   end;
-                  
+
                   if (FArray^.Items[i] <> stFree) and
                         (FArray^.Items[i] <> stDeleted) then
                   begin
@@ -1576,7 +1576,7 @@ begin
             Dec(FDeletedFields);
          FArray^.Items[i] := aitem;
       end; { end main if }
-      
+
    except
       { The exception could have been raised in three circumstances: }
       { 1. The original aitem passed by the user has not yet been placed
@@ -1600,24 +1600,24 @@ begin
       { 2.b) There is only one item equal to aitem in the whole
         container -> just remove orgPtr and place aitem at the very end
         of the collision chain; }
-      
+
       { orgPtr can't be at the first pos }
       p := FirstProbe;
       ii2 := GetIndex(h + p);
-      
+
       while (ii2 <> i) and (FArray^.Items[ii2] <> orgPtr) do
       begin
          p := NextProbe(p);
          ii2 := GetIndex(h + p);
       end;
-      
+
       if i <> ii2 then
          { aitem is not the pointer passed by the user  }
       begin
          ii := ii2;
          p := NextProbe(p);
          ii2 := GetIndex(h + p);
-        
+
          if wasMoreThanOne then
             { 2.a }
          begin
@@ -1649,13 +1649,13 @@ begin
                ii2 := GetIndex(h + p);
             end;
          end;
-         
+
          FArray^.Items[ii] := aitem;
       end;
-      
+
       raise;
    end;
-   
+
    Result := p;
    Inc(FArray^.Size);
    FFirstUsedIndex := -1;
@@ -1674,32 +1674,32 @@ begin
       Result := false;
 end;
 
-function TScatterTable.GetCapacity : SizeType; 
+function TScatterTable.GetCapacity : SizeType;
 begin
    Result := FArray^.Capacity;
 end;
 
-function TScatterTable.CalculateCapacity(ex : SizeType) : SizeType; 
+function TScatterTable.CalculateCapacity(ex : SizeType) : SizeType;
 begin
    Result := 1 shl ex;
 end;
 
-function TScatterTable.GetMaxFillRatio : SizeType; 
+function TScatterTable.GetMaxFillRatio : SizeType;
 begin
    Result := (FMaxFillRatio*100) shr stRatioFactor;
 end;
 
-procedure TScatterTable.SetMaxFillRatio(fr : SizeType); 
+procedure TScatterTable.SetMaxFillRatio(fr : SizeType);
 begin
    FMaxFillRatio := (fr shl stRatioFactor) div 100;
 end;
 
-function TScatterTable.GetMinFillRatio : SizeType; 
+function TScatterTable.GetMinFillRatio : SizeType;
 begin
    Result := (FMinFillRatio * 100) shr stRatioFactor;
 end;
 
-procedure TScatterTable.SetMinFillRatio(fr : SizeType); 
+procedure TScatterTable.SetMinFillRatio(fr : SizeType);
 begin
    FMinFillRatio := (fr shl stRatioFactor) div 100;
 end;
@@ -1717,14 +1717,14 @@ var
 
 begin
    inherited;
-   
+
    deletedPlaces := 0;
    totalItemsInChains := 0;
    totalStepsSearchEx := 0;
    m2ItemsInChain := 0;
    m2stepsSearchEx := 0;
    maxStepsSearchEx := 0;
-   
+
    with FArray^ do
    begin
       for h := 0 to FArray^.Capacity - 1 do
@@ -1755,7 +1755,7 @@ begin
                   maxStepsSearchEx := stepsSearchEx;
                Inc(m2StepsSearchEx, stepsSearchEx * stepsSearchEx);
             end;
-            
+
             p := FirstProbe;
             i := GetIndex(h + p);
             while Items[i] <> stFree do
@@ -1771,9 +1771,9 @@ begin
       end;
    end;
    Inc(m2ItemsInChain, FArray^.Capacity - FArray^.Size);
-   
+
    Assert(deletedPlaces = FDeletedFields);
-   
+
    avgStepsSearchUnex :=
       (FArray^.Capacity - FArray^.Size + totalItemsInChains) / FArray^.Capacity;
    varStepsSearchUnex := (m2ItemsInChain / FArray^.Capacity) -
@@ -1800,7 +1800,7 @@ begin
 end;
 {$endif TEST_PASCAL_ADT }
 
-function TScatterTable.CopySelf(const ItemCopier : IUnaryFunctor) : TContainerAdt; 
+function TScatterTable.CopySelf(const ItemCopier : IUnaryFunctor) : TContainerAdt;
 begin
    Result := TScatterTable.CreateCopy(self, itemcopier);
 end;
@@ -1825,12 +1825,12 @@ begin
       inherited;
 end;
 
-function TScatterTable.Start : TSetIterator; 
+function TScatterTable.Start : TSetIterator;
 begin
    Result := TScatterTableIterator.Create(0, 0, self);
 end;
 
-function TScatterTable.Finish : TSetIterator; 
+function TScatterTable.Finish : TSetIterator;
 begin
    Result := TScatterTableIterator.Create(FArray^.Capacity, 0, self);
 end;
@@ -1848,9 +1848,9 @@ begin
    end else
    begin
       CheckDeletedFields;
-      
+
       h := GetIndex(Hasher.Hash(aitem));
-      
+
       if (FArray^.Items[h] = stFree) then
       begin
          FArray^.Items[h] := aitem;
@@ -1872,7 +1872,7 @@ begin
             p := NextProbe(p);
             i := GetIndex(h + p);
          end;
-         
+
          if FArray^.Items[i] <> stFree then
          begin
             Result := FArray^.Items[i];
@@ -1893,9 +1893,9 @@ var
    p : SizeType;
 begin
    CheckDeletedFields;
-   
+
    h := GetIndex(Hasher.Hash(aitem));
-   
+
    if (FArray^.Items[h] = stFree) then
    begin
       Result := nil;
@@ -1926,7 +1926,7 @@ var
 begin
    CheckDeletedFields;
    h := GetIndex(Hasher.Hash(aitem));
-   
+
    if (FArray^.Items[h] = stFree) then
    begin
       Result := false;
@@ -1957,7 +1957,7 @@ begin
    CheckDeletedFields;
    Result := 0;
    h := GetIndex(Hasher.Hash(aitem));
-   
+
    if (FArray^.Items[h] = stFree) then
    begin
       Exit;
@@ -1973,19 +1973,19 @@ begin
          p := NextProbe(p);
          i := GetIndex(h + p);
       end;
-      
+
       if FArray^.Items[i] <> stFree then
       begin
          Inc(Result);
          p := NextProbe(p);
       end;
-      
+
    end else
    begin
       Inc(Result);
       p := FirstProbe;
    end;
-   
+
    i := GetIndex(h + p);
    while (FArray^.Items[i] <> stFree) do
    begin
@@ -1996,7 +1996,7 @@ begin
          else if GetIndex(Hasher.Hash(FArray^.Items[i])) = h then
             break;
       end;
-      
+
       p := NextProbe(p);
       i := GetIndex(h + p);
    end;
@@ -2018,11 +2018,11 @@ var
 begin
    Assert(pos is TScatterTableIterator, msgInvalidIterator);
    Assert(not pos.IsFinish, msgInvalidIterator);
-   
+
    i := GetIndex(TScatterTableIterator(pos).FBase +
                     TScatterTableIterator(pos).FOffset);
    FFirstUsedIndex := -1;
-   
+
    DisposeItem(FArray^.Items[i]);
    FArray^.Items[i] := stDeleted;
    Inc(FDeletedFields);
@@ -2037,19 +2037,19 @@ begin
    CheckDeletedFields;
    Result := 0;
    h := GetIndex(Hasher.Hash(aitem));
-   
+
    if h = FFirstUsedIndex then
    begin
       FFirstUsedIndex := -1;
       FFirstUsedOffset := -1;
    end; { otherwise the first used bucket is before h and our deleting
           cannot affect its position }
-   
+
    if (FArray^.Items[h] <> stFree) then
    begin
       p := FirstProbe;
       i := GetIndex(h + p);
-      
+
       if (FArray^.Items[h] <> stDeleted) and
             (_mcp_equal(FArray^.Items[h], aitem)) then
       begin
@@ -2068,7 +2068,7 @@ begin
             i := GetIndex(h + p);
          end;
       end;
-      
+
       if FArray^.Items[i] <> stFree then
       begin
          repeat
@@ -2102,7 +2102,7 @@ var
 begin
    CheckDeletedFields;
    h := GetIndex(Hasher.Hash(aitem));
-   
+
    if (FArray^.Items[h] = stFree) or ((FArray^.Items[h] <> stDeleted) and
             (_mcp_equal(FArray^.Items[h], aitem))) then
    begin
@@ -2120,22 +2120,22 @@ begin
       end;
       Result := TScatterTableIterator.Create(h, p, self);
    end;
-   
+
    AdvanceToNearestItem(TScatterTableIterator(Result).FBase,
                         TScatterTableIterator(Result).FOffset);
 end;
 
-function TScatterTable.UpperBound(aitem : ItemType) : TSetIterator; 
+function TScatterTable.UpperBound(aitem : ItemType) : TSetIterator;
 var
    i, h : IndexType;
    p : SizeType;
 begin
    CheckDeletedFields;
    h := GetIndex(Hasher.Hash(aitem));
-   
+
    p := FirstProbe;
    i := GetIndex(h + p);
-   
+
    if (FArray^.Items[h] <> stFree) and ((FArray^.Items[h] = stDeleted) or
             (not _mcp_equal(FArray^.Items[h], aitem))) then
    begin
@@ -2147,7 +2147,7 @@ begin
          i := GetIndex(h + p);
       end;
    end;
-   
+
    while (FArray^.Items[i] <> stFree) and
             ((FArray^.Items[i] = stDeleted) or
                 (_mcp_equal(FArray^.Items[i], aitem)) or
@@ -2156,14 +2156,14 @@ begin
       p := NextProbe(p);
       i := GetIndex(h + p);
    end;
-   
+
    Result := TScatterTableIterator.Create(h, p, self);
-   
+
    AdvanceToNearestItem(TScatterTableIterator(Result).FBase,
                         TScatterTableIterator(Result).FOffset);
 end;
 
-function TScatterTable.EqualRange(aitem : ItemType) : TSetIteratorRange; 
+function TScatterTable.EqualRange(aitem : ItemType) : TSetIteratorRange;
 var
    i, h : IndexType;
    p : SizeType;
@@ -2171,7 +2171,7 @@ var
 begin
    CheckDeletedFields;
    h := GetIndex(Hasher.Hash(aitem));
-   
+
    if (FArray^.Items[h] = stFree) or ((FArray^.Items[h] <> stDeleted) and
             (_mcp_equal(FArray^.Items[h], aitem))) then
    begin
@@ -2191,9 +2191,9 @@ begin
       iter1 := TScatterTableIterator.Create(h, p, self);
       p := NextProbe(p);
    end;
-   
+
    i := GetIndex(h + p);
-   
+
    while (FArray^.Items[i] <> stFree) and
             ((FArray^.Items[i] = stDeleted) or
                 (_mcp_equal(FArray^.Items[i], aitem)) or
@@ -2202,12 +2202,12 @@ begin
       p := NextProbe(p);
       i := GetIndex(h + p);
    end;
-   
+
    iter2 := TScatterTableIterator.Create(h, p, self);
-   
+
    AdvanceToNearestItem(iter1.FBase, iter1.FOffset);
    AdvanceToNearestItem(iter2.FBase, iter2.FOffset);
-   
+
    Result := TSetIteratorRange.Create(iter1, iter2);
 end;
 
@@ -2218,19 +2218,19 @@ var
    oldDelFields : SizeType;
 begin
    Assert(FTableSize + ex >= stMinTableSize, msgWrongRehashArg);
-   
+
 {$ifdef TEST_PASCAL_ADT }
 {   LogStatus('Rehash'); }
 {$endif }
-   
+
    oldtab := FArray;
    ArrayAllocate(FArray, CalculateCapacity(FTableSize + ex), 0); { may raise }
    FTableSize := FTableSize + ex;
    oldDelFields := FDeletedFields;
    FDeletedFields := 0;
-   
+
    ZeroOutFArray;
-   
+
    try
       for ii := 0 to oldtab^.Capacity - 1 do
       begin
@@ -2239,16 +2239,16 @@ begin
             DoInsert(oldtab^.Items[ii], dummy); { may raise }
          end;
       end;
-      
+
    except
       ArrayDeallocate(FArray);
       FArray := oldtab;
       FTableSize := FTableSize - ex;
       FDeletedFields := oldDelFields;
    end;
-   
+
    ArrayDeallocate(oldtab);
-   
+
    FCanShrink := false;
 end;
 
@@ -2266,7 +2266,7 @@ begin
    end;
    FArray^.Size := 0;
    FDeletedFields := 0;
-   
+
    GrabageCollector.FreeObjects;
 end;
 
@@ -2275,12 +2275,12 @@ begin
    Result := FArray^.Size = 0;
 end;
 
-function TScatterTable.Size : SizeType; 
+function TScatterTable.Size : SizeType;
 begin
    Result := FArray^.Size;
 end;
 
-function TScatterTable.MinCapacity : SizeType; 
+function TScatterTable.MinCapacity : SizeType;
 begin
    Result := 1 shl stMinTableSize;
 end;
@@ -2298,12 +2298,12 @@ begin
    FTable.AdvanceToNearestItem(FBase, FOffset);
 end;
 
-function TScatterTableIterator.CopySelf : TIterator; 
+function TScatterTableIterator.CopySelf : TIterator;
 begin
    Result := TScatterTableIterator.Create(FBase, FOffset, FTable);
 end;
 
-function TScatterTableIterator.Equal(const Pos : TIterator) : Boolean; 
+function TScatterTableIterator.Equal(const Pos : TIterator) : Boolean;
 begin
    Assert(pos is TScatterTableIterator, msgInvalidIterator);
    Result := (TScatterTableIterator(pos).FBase = FBase) and
@@ -2318,10 +2318,10 @@ begin
    with FTable, FTable.FArray^ do
    begin
       ind := GetIndex(FBase + FOffset);
-      
+
       Assert((Items[ind] <> stFree) and (Items[ind] <> stDeleted),
              msgReadingInvalidIterator);
-      
+
       Result := Items[ind];
    end;
 end;
@@ -2336,7 +2336,7 @@ begin
                 (Items[GetIndex(FBase + FOffset)] <> stDeleted),
              msgReadingInvalidIterator);
 //      Assert(GetIndex(Hasher.Hash(aitem)) = FBase, msgWrongHash);
-      
+
       i := GetIndex(FBase + FOffset);
       if not _mcp_equal(Items[i], aitem) then
       begin
@@ -2349,7 +2349,7 @@ begin
          DisposeItem(Items[i]);
          Items[i] := aitem;
       end;
-   end;   
+   end;
 end;
 
 procedure TScatterTableIterator.ResetItem;
@@ -2370,7 +2370,7 @@ end;
 procedure TScatterTableIterator.Advance;
 begin
    Assert(FBase < FTable.FArray^.Capacity, msgAdvancingInvalidIterator);
-   
+
    with FTable do
    begin
       if FOffset = 0 then
@@ -2386,7 +2386,7 @@ end;
 
 procedure TScatterTableIterator.Retreat;
 var
-   i, maxi : IndexType; 
+   i, maxi : IndexType;
    lastoff : SizeType;
 begin
    with FTable.FArray^, FTable do
@@ -2399,7 +2399,7 @@ begin
       begin
          maxi := GetIndex(FBase + FOffset);
       end;
-      
+
       repeat
          if maxi = 0 then
          begin
@@ -2409,11 +2409,11 @@ begin
                           search stop prematurely }
             Assert(FBase >= 0, msgRetreatingStartIterator);
          end;
-         
+
          { find the first non-empty collision chain }
          while Items[FBase] = stFree do
             Dec(FBase);
-         
+
          lastoff := 0; { we have to keep lastoff, because we in fact
                          know we've reached an appropriate index only
                          just after this index itself }
@@ -2472,16 +2472,16 @@ begin
          FFirstUsedIndex := -1;
          FFirstUsedOffset := -1;
       end;
-   
+
       i := GetIndex(FBase + FOffset);
       Assert((Items[i] <> stFree) and (Items[i] <> stDeleted),
              msgDeletingInvalidIterator);
-      
+
       Result := Items[i];
       Items[i] := stDeleted;
       Inc(FDeletedFields);
       Dec(FArray^.Size);
-      
+
       if FDeletedFields + FArray^.Size = FArray^.Capacity then
       begin
          FBase := FArray^.Capacity;
@@ -2491,7 +2491,7 @@ begin
    end;
 end;
 
-function TScatterTableIterator.Owner : TContainerAdt; 
+function TScatterTableIterator.Owner : TContainerAdt;
 begin
    Result := Ftable;
 end;
@@ -2506,7 +2506,7 @@ begin
       i := GetIndex(FBase + FOffset);
       isGood := (FBase < FArray^.Capacity) and (Items[i] <> stFree) and
          (Items[i] <> stDeleted) and (GetIndex(Hasher.Hash(Items[i])) = FBase);
-      
+
       if (FBase = FARRAY^.Capacity) then
       begin
          Result := Size = 0;
@@ -2529,7 +2529,7 @@ begin
    end;
 end;
 
-function TScatterTableIterator.IsFinish : Boolean; 
+function TScatterTableIterator.IsFinish : Boolean;
 begin
    Result := FBase = Ftable.FArray^.Capacity;
 end;
