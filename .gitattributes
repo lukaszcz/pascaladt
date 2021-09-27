@@ -1,2 +1,2 @@
-*.i linguist-detectable=false language=Pascal
-*.mcp linguist-detectable=false
+*.i linguist-language=Pascal
+*.mcp linguist-language=Pascal
