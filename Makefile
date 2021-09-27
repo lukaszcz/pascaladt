@@ -72,7 +72,7 @@ override OPTS += -Ur -O3 -v0
 endif
 
 ifdef DEBUG
-override OPTS += -vewn -Sa -g -gl -dDEBUG_PASCAL_ADT
+override OPTS += -vewn -Sa -g -gl -gh -dDEBUG_PASCAL_ADT
 endif
 
 ifdef TEST
@@ -133,7 +133,7 @@ units : $(ADTUNITS)
 
 tests : units $(TESTPROGS) $(TESTUNITS)
 
-debug : units
+debug : units tests
 
 windows : units
 

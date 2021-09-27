@@ -1,19 +1,19 @@
 (* This file is a part of the PascalAdt library, which provides
    commonly used algorithms and data structures for the FPC and Delphi
    compilers.
-   
+
    Copyright (C) 2005 by Lukasz Czajka
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -30,7 +30,7 @@ uses
    adtmem, adtcontbase;
 
 &include adtdefs.inc
-   
+
 &_mcp_generic_include(adtiters.i)
 
 implementation
@@ -44,17 +44,18 @@ var
 {$endif DEBUG_PASCAL_ADT }
 
 &_mcp_generic_include(adtiters_impl.i)
-   
+
 {$ifdef DEBUG_PASCAL_ADT }
 
 initialization
-   
-   existingIters := 0;
-   
-finalization
-   
-   Assert(existingIters = 0, msgLeakedIterators + ' (' +
-                                IntToStr(existingIters) + ')');
 
-{$endif DEBUG_PASCAL_ADT }   
+   existingIters := 0;
+
+finalization
+
+if existingIters <> 0 then
+   WriteLn('PascalADT warning: ' + msgLeakedIterators + ' (' +
+                                   IntToStr(existingIters) + ')');
+
+{$endif DEBUG_PASCAL_ADT }
 end.

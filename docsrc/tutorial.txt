@@ -1,9 +1,8 @@
                          PascalAdt tutorial.
 
 This document provides an introduction to the PascalAdt library and
-briefly explains its basic functions using an example of a (very)
-hypothetical program dealing with a base of customers and their
-orders.
+briefly explains its basic functions using an example of simple
+program dealing with a database of customers and their orders.
 
 I. What is PascalAdt?
 II. How to use it?

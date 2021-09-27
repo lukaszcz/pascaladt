@@ -71,11 +71,6 @@ begin
       end;
       timeInsert := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - timeInsert;
 
-{$ifdef TEST_PASCAL_ADT }
-      if className <> 'TString23Tree' then
-         aset.LogStatus('BenchmarkSet (after inserting all items)');
-{$endif }
-
       timeSearchFound := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := 0 to maxi do
       begin
@@ -99,11 +94,6 @@ begin
          aset.Delete(words^.Items[i]);
       end;
       timeDelete := TimeStampToMSecs(DateTimeToTimeStamp(Time)) - timeDelete;
-
-{$ifdef TEST_PASCAL_ADT }
-      if className <> 'TString23Tree' then
-         aset.LogStatus('BenchmarkSet (after deleting half of the items)');
-{$endif }
 
       tm := TimeStampToMSecs(DateTimeToTimeStamp(Time));
       for i := maxi div 2 + 1 to maxi do
