@@ -12,22 +12,22 @@ var
    a : TArray;
 
 begin
-(*   StartTest('Algorithms (single list)');
+   StartTest('Algorithms (single list)');
    ls := TSingleList.Create;
    testalgs.TestAllAlgs(ls);
    StartDestruction(ls.Size, 'destructor');
    ls.Destroy;
    FinishDestruction;
    FinishTest;
-   
+
    StartTest('Algorithms (double list)');
    ls2 := TDoubleList.Create;
    testalgs.TestAllAlgs(TDoubleListAdt(ls2));
    StartDestruction(ls2.Size, 'destructor');
    ls2.Destroy;
    FinishDestruction;
-   FinishTest;*)
-   
+   FinishTest;
+
    StartTest('Algorithms (queue)');
    q := TSegDeque.Create;
    testalgs.TestAllAlgs(TRandomAccessContainerAdt(q));
@@ -35,7 +35,7 @@ begin
    q.Destroy;
    FinishDestruction;
    FinishTest;
-   
+
    StartTest('Algorithms (array)');
    a := TArray.Create;
    testalgs.TestAllAlgs(TRandomAccessContainerAdt(a));
@@ -44,4 +44,3 @@ begin
    FinishDestruction;
    FinishTest;
 end.
-   

@@ -145,7 +145,7 @@ type
 
    { the TxxxBinder functors are provided purely for efficiency
      reasons; they perfrom the same work as the functor obtained from
-     the consequent appliance of Txxx (TLess, TEqual, ...) and then
+     the consequent application of Txxx (TLess, TEqual, ...) and then
      TBind2nd; the pointer passed to the constructor is not owned by
      the object and not disposed with its destruction unless you
      provide a disposer; @until-next-comment; }
@@ -230,6 +230,11 @@ function AdaptObject(f : TBinaryObjectFunction) : IBinaryFunctor; overload;
 function AdaptObject(f : TUnaryObjectBoolFunction) : IUnaryPredicate; overload;
 function AdaptObject(f : TBinaryObjectBoolFunction) : IBinaryPredicate; overload;
 function &_mcp_special_adapt_prefix&AdaptObject(f : TBinaryObjectIntegerFunction) : IBinaryComparer; overload;
+
+{ converts IBinaryComparer to corresponding IBinaryPredicate tests }
+function LessTest(const comparer : IBinaryComparer) : IBinaryPredicate;
+function GreaterTest(const comparer : IBinaryComparer) : IBinaryPredicate;
+function EqualTest(const comparer : IBinaryComparer) : IBinaryPredicate;
 
 { returns a predicate which returns true if its argument is equal to
   aitem with respect to comparer }

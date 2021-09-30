@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -39,7 +39,7 @@ var
 
 type
    { -------------- Procedure/Function adaptors (wrappers) -------------------- }
-   
+
    TUnaryProcedureAdaptor = class (TFunctor, IUnaryFunctor)
    private
       proc : TUnaryProcedure;
@@ -50,7 +50,7 @@ type
       { performs the operation defined by its first constructor argument }
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
    TUnaryObjectProcedureAdaptor = class (TFunctor, IUnaryFunctor)
    private
       proc : TUnaryObjectProcedure;
@@ -61,7 +61,7 @@ type
       { performs the operation defined by its first constructor argument }
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
    TBinaryProcedureAdaptor = class (TFunctor, IBinaryFunctor)
    private
       proc : TBinaryProcedure;
@@ -71,7 +71,7 @@ type
         argument; always returns DefaultItem }
       function Perform(aitem1, aitem2 : ItemType) : ItemType;
    end;
-   
+
    TBinaryObjectProcedureAdaptor = class (TFunctor, IBinaryFunctor)
    private
       proc : TBinaryObjectProcedure;
@@ -81,7 +81,7 @@ type
         argument; always returns  }
       function Perform(aitem1, aitem2 : ItemType) : ItemType;
    end;
-   
+
    TUnaryFunctionAdaptor = class (TFunctor, IUnaryFunctor)
    private
       fun : TUnaryFunction;
@@ -90,7 +90,7 @@ type
       { performs the operation defined by its constructor argument }
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
    TUnaryObjectFunctionAdaptor = class (TFunctor, IUnaryFunctor)
    private
       fun : TUnaryObjectFunction;
@@ -99,7 +99,7 @@ type
       { performs the operation defined by its constructor argument }
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
    TBinaryFunctionAdaptor = class (TFunctor, IBinaryFunctor)
    private
       fun : TBinaryFunction;
@@ -108,7 +108,7 @@ type
       { performs the operation defined by its constructor argument }
       function Perform(aitem1, aitem2 : ItemType) : ItemType;
    end;
-   
+
    TBinaryObjectFunctionAdaptor = class (TFunctor, IBinaryFunctor)
    private
       fun : TBinaryObjectFunction;
@@ -117,7 +117,7 @@ type
       { performs the operation defined by its constructor argument }
       function Perform(aitem1, aitem2 : ItemType) : ItemType;
    end;
-   
+
    TUnaryBoolFunctionAdaptor = class (TFunctor, IUnaryPredicate)
    private
       fun : TUnaryBoolFunction;
@@ -126,7 +126,7 @@ type
       { performs the operation defined by its constructor argument }
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    TUnaryObjectBoolFunctionAdaptor = class (TFunctor, IUnaryPredicate)
    private
       fun : TUnaryObjectBoolFunction;
@@ -135,7 +135,7 @@ type
       { performs the operation defined by its constructor argument }
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    TBinaryBoolFunctionAdaptor = class (TFunctor, IBinaryPredicate)
    private
       fun : TBinaryBoolFunction;
@@ -144,7 +144,7 @@ type
       { performs the operation defined by its constructor argument }
       function Test(aitem1, aitem2 : ItemType) : Boolean;
    end;
-   
+
    TBinaryObjectBoolFunctionAdaptor = class (TFunctor, IBinaryPredicate)
    private
       fun : TBinaryObjectBoolFunction;
@@ -153,7 +153,7 @@ type
       { performs the operation defined by its constructor argument }
       function Test(aitem1, aitem2 : ItemType) : Boolean;
    end;
-   
+
    TBinaryIntegerFunctionAdaptor = class (TFunctor, IBinaryComparer)
    private
       fun : TBinaryIntegerFunction;
@@ -171,9 +171,9 @@ type
       { performs the operation defined by its constructor argument }
       function Compare(aitem1, aitem2 : ItemType) : Integer;
    end;
-   
+
    { ---------------------- other adaptors --------------------------- }
-   
+
    TPredicateBinder1st = class (TFunctor, IUnaryPredicate)
    private
       bpred : IBinaryPredicate;
@@ -187,7 +187,7 @@ type
       destructor Destroy; override;
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    TPredicateBinder2nd = class (TFunctor, IUnaryPredicate)
    private
       bpred : IBinaryPredicate;
@@ -201,7 +201,7 @@ type
       destructor Destroy; override;
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    TFunctorBinder1st = class (TFunctor, IUnaryFunctor)
    private
       bfun : IBinaryFunctor;
@@ -215,7 +215,7 @@ type
       destructor Destroy; override;
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
    TFunctorBinder2nd = class (TFunctor, IUnaryFunctor)
    private
       bfun : IBinaryFunctor;
@@ -229,7 +229,7 @@ type
       destructor Destroy; override;
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
    TUnaryFunctorBinder = class (TFunctor, IUnaryFunctor)
    private
       fun : IUnaryFunctor;
@@ -243,7 +243,7 @@ type
       function Perform(aitem : ItemType) : ItemType;
    end;
 
-   
+
    TBinaryPredicateNegator = class (TFunctor, IBinaryPredicate)
    private
       bpred : IBinaryPredicate;
@@ -259,9 +259,9 @@ type
       constructor Create(const p : IUnaryPredicate);
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    { ------------------------- PredXXX --------------------------- }
-   
+
    TPredAnd = class (TFunctor, IUnaryPredicate)
    private
       pred1, pred2 : IUnaryPredicate;
@@ -269,7 +269,7 @@ type
       constructor Create(const apred1, apred2 : IUnaryPredicate);
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    TPredOr = class (TFunctor, IUnaryPredicate)
    private
       pred1, pred2 : IUnaryPredicate;
@@ -277,7 +277,7 @@ type
       constructor Create(const apred1, apred2 : IUnaryPredicate);
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    TPredXor = class (TFunctor, IUnaryPredicate)
    private
       pred1, pred2 : IUnaryPredicate;
@@ -285,7 +285,7 @@ type
       constructor Create(const apred1, apred2 : IUnaryPredicate);
       function Test(aitem : ItemType) : Boolean;
    end;
-   
+
    { -------------------------- Composers --------------------------- }
 
    TFunctorComposer_F_Gx = class (TFunctor, IUnaryFunctor)
@@ -295,7 +295,7 @@ type
       constructor Create(const af, ag : IUnaryFunctor);
       function Perform(aitem : ItemType) : ItemType;
    end;
-   
+
    TFunctorComposer_F_Gxy = class (TFunctor, IBinaryFunctor)
    private
       f : IUnaryFunctor;
@@ -304,7 +304,7 @@ type
       constructor Create(const af : IUnaryFunctor; const ag : IBinaryFunctor);
       function Perform(aitem1, aitem2 : ItemType) : ItemType;
    end;
-   
+
    TFunctorComposer_F_Gx_Hy = class (TFunctor, IBinaryFunctor)
    private
       f : IBinaryFunctor;
@@ -314,7 +314,7 @@ type
                          const ag, ah : IUnaryFunctor);
       function Perform(aitem1, aitem2 : ItemType) : ItemType;
    end;
-   
+
 { ======================== Local helper routines ============================ }
 
 { ---------------------- TUnaryProcedureAdaptor --------------------------- }
@@ -554,7 +554,7 @@ begin
    disposer := aitemDisposer;
 end;
 
-function TPredicateBinder1st.Test(aitem : ItemType) : Boolean; 
+function TPredicateBinder1st.Test(aitem : ItemType) : Boolean;
 begin
    Result := bpred.Test(aitem1, aitem);
 end;
@@ -581,7 +581,7 @@ begin
    disposer := aitemDisposer;
 end;
 
-function TPredicateBinder2nd.Test(aitem : ItemType) : Boolean; 
+function TPredicateBinder2nd.Test(aitem : ItemType) : Boolean;
 begin
    Result := bpred.Test(aitem, aitem2);
 end;
@@ -608,7 +608,7 @@ begin
    disposer := aitemDisposer;
 end;
 
-function TFunctorBinder1st.Perform(aitem : ItemType) : ItemType; 
+function TFunctorBinder1st.Perform(aitem : ItemType) : ItemType;
 begin
    Result := bfun.Perform(aitem1, aitem);
 end;
@@ -635,7 +635,7 @@ begin
    disposer := aitemDisposer;
 end;
 
-function TFunctorBinder2nd.Perform(aitem : ItemType) : ItemType; 
+function TFunctorBinder2nd.Perform(aitem : ItemType) : ItemType;
 begin
    Result := bfun.Perform(aitem, aitem2);
 end;
@@ -662,7 +662,7 @@ begin
    disposer := disp;
 end;
 
-function TUnaryFunctorBinder.Perform(aitem : ItemType) : ItemType; 
+function TUnaryFunctorBinder.Perform(aitem : ItemType) : ItemType;
 begin
    Result := fun.Perform(Fptr);
 end;
@@ -686,7 +686,7 @@ begin
    bpred := p;
 end;
 
-function TBinaryPredicateNegator.Test(aitem1, aitem2 : ItemType) : Boolean; 
+function TBinaryPredicateNegator.Test(aitem1, aitem2 : ItemType) : Boolean;
 begin
    Result := not bpred.Test(aitem1, aitem2);
 end;
@@ -701,7 +701,7 @@ begin
    pred := p;
 end;
 
-function TUnaryPredicateNegator.Test(aitem : ItemType) : Boolean; 
+function TUnaryPredicateNegator.Test(aitem : ItemType) : Boolean;
 begin
    Result := not pred.Test(aitem);
 end;
@@ -818,7 +818,7 @@ begin
    cmp := c;
 end;
 
-function TLess.Test(aitem1, aitem2 : ItemType) : Boolean; 
+function TLess.Test(aitem1, aitem2 : ItemType) : Boolean;
 begin
    Result := cmp.Compare(aitem1, aitem2) < 0;
 end;
@@ -833,7 +833,7 @@ begin
    cmp := c;
 end;
 
-function TGreater.Test(aitem1, aitem2 : ItemType) : Boolean; 
+function TGreater.Test(aitem1, aitem2 : ItemType) : Boolean;
 begin
    Result := cmp.Compare(aitem1, aitem2) > 0;
 end;
@@ -848,7 +848,7 @@ begin
    cmp := c;
 end;
 
-function TEqual.Test(aitem1, aitem2 : ItemType) : Boolean; 
+function TEqual.Test(aitem1, aitem2 : ItemType) : Boolean;
 begin
    Result := cmp.Compare(aitem1, aitem2) = 0;
 end;
@@ -876,7 +876,7 @@ begin
    disposer := disp;
 end;
 
-function TLessBinder.Test(p : ItemType) : Boolean; 
+function TLessBinder.Test(p : ItemType) : Boolean;
 begin
    Result := cmp.Compare(p, aitem2) < 0;
 end;
@@ -912,7 +912,7 @@ begin
    disposer := disp;
 end;
 
-function TGreaterBinder.Test(p : ItemType) : Boolean; 
+function TGreaterBinder.Test(p : ItemType) : Boolean;
 begin
    Result := cmp.Compare(p, aitem2) > 0;
 end;
@@ -948,7 +948,7 @@ begin
    disposer := disp;
 end;
 
-function TEqualBinder.Test(p : ItemType) : Boolean; 
+function TEqualBinder.Test(p : ItemType) : Boolean;
 begin
    Result := cmp.Compare(p, aitem2) = 0;
 end;
@@ -1055,6 +1055,21 @@ begin
    Result := TBinaryObjectIntegerFunctionAdaptor.Create(f);
 end;
 
+function LessTest(const comparer : IBinaryComparer) : IBinaryPredicate;
+begin
+   Result := TLess.Create(comparer);
+end;
+
+function GreaterTest(const comparer : IBinaryComparer) : IBinaryPredicate;
+begin
+   Result := TGreater.Create(comparer);
+end;
+
+function EqualTest(const comparer : IBinaryComparer) : IBinaryPredicate;
+begin
+   Result := TEqual.Create(comparer);
+end;
+
 function EqualTo(const comparer : IBinaryComparer;
                  aitem : ItemType) : IUnaryPredicate;
 begin
@@ -1062,31 +1077,31 @@ begin
 end;
 
 function EqualTo(const comparer : IBinaryComparer; aitem : ItemType;
-                 const disposer : IUnaryFunctor) : IUnaryPredicate; 
+                 const disposer : IUnaryFunctor) : IUnaryPredicate;
 begin
    Result := TEqualBinder.Create(comparer, aitem, disposer);
 end;
 
 function LessThan(const comparer : IBinaryComparer;
-                  aitem : ItemType) : IUnaryPredicate; 
+                  aitem : ItemType) : IUnaryPredicate;
 begin
    Result := TLessBinder.Create(comparer, aitem);
 end;
 
 function LessThan(const comparer : IBinaryComparer; aitem : ItemType;
-                  const disposer : IUnaryFunctor) : IUnaryPredicate; 
+                  const disposer : IUnaryFunctor) : IUnaryPredicate;
 begin
    Result := TLessBinder.Create(comparer, aitem, disposer);
 end;
 
 function GreaterThan(const comparer : IBinaryComparer;
-                     aitem : ItemType) : IUnaryPredicate; 
+                     aitem : ItemType) : IUnaryPredicate;
 begin
    Result := TGreaterBinder.Create(comparer, aitem);
 end;
 
 function GreaterThan(const comparer : IBinaryComparer; aitem : ItemType;
-                     const disposer : IUnaryFunctor) : IUnaryPredicate; 
+                     const disposer : IUnaryFunctor) : IUnaryPredicate;
 begin
    Result := TGreaterBinder.Create(comparer, aitem, disposer);
 end;
@@ -1096,17 +1111,17 @@ begin
    Result := TPredicateBinder1st.Create(pred, aitem, nil);
 end;
 
-function Bind1st(const fun : IBinaryFunctor; aitem : ItemType) : IUnaryFunctor; 
+function Bind1st(const fun : IBinaryFunctor; aitem : ItemType) : IUnaryFunctor;
 begin
    Result := TFunctorBinder1st.Create(fun, aitem, nil);
 end;
 
-function Bind2nd(const pred : IBinaryPredicate; aitem : ItemType) : IUnaryPredicate; 
+function Bind2nd(const pred : IBinaryPredicate; aitem : ItemType) : IUnaryPredicate;
 begin
    Result := TPredicateBinder2nd.Create(pred, aitem, nil);
 end;
 
-function Bind2nd(const fun : IBinaryFunctor; aitem : ItemType) : IUnaryFunctor; 
+function Bind2nd(const fun : IBinaryFunctor; aitem : ItemType) : IUnaryFunctor;
 begin
    Result := TFunctorBinder2nd.Create(fun, aitem, nil);
 end;
@@ -1129,7 +1144,7 @@ begin
 end;
 
 function Bind2nd(const pred : IBinaryPredicate; aitem : ItemType;
-                 const disposer : IUnaryFunctor) : IUnaryPredicate; 
+                 const disposer : IUnaryFunctor) : IUnaryPredicate;
 begin
    Result := TPredicateBinder2nd.Create(pred, aitem, disposer);
 end;
@@ -1146,12 +1161,12 @@ begin
    Result := TUnaryFunctorBinder.Create(fun, aitem, disposer);
 end;
 
-function Negate(const pred : IUnaryPredicate) : IUnaryPredicate; 
+function Negate(const pred : IUnaryPredicate) : IUnaryPredicate;
 begin
    Result := TUnaryPredicateNegator.Create(pred);
 end;
 
-function Negate(const pred : IBinaryPredicate) : IBinaryPredicate; 
+function Negate(const pred : IBinaryPredicate) : IBinaryPredicate;
 begin
    Result := TBinaryPredicateNegator.Create(pred);
 end;

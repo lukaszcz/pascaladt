@@ -41,40 +41,40 @@ type
    public
       function Perform(obj : TObject) : TObject;
    end;
-   
+
    TTestSum = class (TFunctor, IBinaryFunctor)
    public
       function Perform(obj1, obj2 : TObject) : TObject;
    end;
-   
+
    TPartitionFunctor = class
    public
       function Partition(start, finish : TForwardIterator;
                          const pred : IUnaryPredicate) : TForwardIterator;
       virtual; abstract;
    end;
-   
+
    TNormalPartition = class (TPartitionFunctor)
    public
       function Partition(start, finish : TForwardIterator;
                          const pred : IUnaryPredicate) : TForwardIterator;
       override;
    end;
-   
+
    TStablePartition = class (TPartitionFunctor)
    public
       function Partition(start, finish : TForwardIterator;
                          const pred : IUnaryPredicate) : TForwardIterator;
       override;
    end;
-   
+
    TMemoryEfficientStablePartition = class (TPartitionFunctor)
    public
       function Partition(start, finish : TForwardIterator;
                          const pred : IUnaryPredicate) : TForwardIterator;
       override;
    end;
-   
+
    TFindFunctor = class
    private
       cmp : ISubtractor;
@@ -84,7 +84,7 @@ type
       procedure PushBack(obj : TObject); virtual; abstract;
       function Finish : TIterator; virtual; abstract;
    end;
-   
+
    TNormalFind = class (TFindFunctor)
    private
       list : TListAdt;
@@ -94,7 +94,7 @@ type
       procedure PushBack(obj : TObject); override;
       function Finish : TIterator; override;
    end;
-   
+
    TBinaryFind = class (TFindFunctor)
    private
       cont : TRandomAccessContainerAdt;
@@ -104,7 +104,7 @@ type
       procedure PushBack(obj : TObject); override;
       function Finish : TIterator; override;
    end;
-   
+
    TInterpolationFind = class (TFindFunctor)
    private
       cont : TRandomAccessContainerAdt;
@@ -114,8 +114,8 @@ type
       procedure PushBack(obj : TObject); override;
       function Finish : TIterator; override;
    end;
-   
-function TChanger.Perform(obj : TObject) : TObject; 
+
+function TChanger.Perform(obj : TObject) : TObject;
 begin
    // counter inited to 0 at the creation of the object
    Inc(counter);
@@ -134,11 +134,11 @@ function TNormalPartition.Partition(start, finish : TForwardIterator;
 begin
    Assert((start is TBidirectionalIterator) and
              (finish is TBidirectionalIterator), msgInvalidIterator);
-   
+
    Result := adtalgs.Partition(TBidirectionalIterator(start),
                                TBidirectionalIterator(finish), pred);
 end;
-   
+
 function TStablePartition.Partition(start, finish : TForwardIterator;
                                     const pred : IUnaryPredicate) : TForwardIterator;
 begin
@@ -163,17 +163,17 @@ begin
    list := l;
 end;
 
-function TNormalFind.Find(obj : TTestObject) : TIterator; 
+function TNormalFind.Find(obj : TTestObject) : TIterator;
 begin
    Result := adtalgs.Find(list.ForwardStart, list.ForwardFinish, obj, cmp);
 end;
 
-procedure TNormalFind.PushBack(obj : TObject); 
+procedure TNormalFind.PushBack(obj : TObject);
 begin
    list.PushBack(obj);
 end;
 
-function TNormalFind.Finish : TIterator; 
+function TNormalFind.Finish : TIterator;
 begin
    Result := list.ForwardFinish;
 end;
@@ -184,17 +184,17 @@ begin
    cont := c;
 end;
 
-function TBinaryFind.Find(obj : TTestObject) : TIterator; 
+function TBinaryFind.Find(obj : TTestObject) : TIterator;
 begin
    Result := BinaryFind(cont.RandomAccessStart, cont.RandomAccessFinish, obj, cmp);
 end;
 
-procedure TBinaryFind.PushBack(obj : TObject); 
+procedure TBinaryFind.PushBack(obj : TObject);
 begin
    cont.PushBack(obj);
 end;
 
-function TBinaryFind.Finish : TIterator; 
+function TBinaryFind.Finish : TIterator;
 begin
    Result := cont.RandomAccessFinish;
 end;
@@ -205,18 +205,18 @@ begin
    cont := c;
 end;
 
-function TInterpolationFind.Find(obj : TTestObject) : TIterator; 
+function TInterpolationFind.Find(obj : TTestObject) : TIterator;
 begin
    Result := InterpolationFind(cont.RandomAccessStart, cont.RandomAccessFinish,
                                obj, cmp);
 end;
 
-procedure TInterpolationFind.PushBack(obj : TObject); 
+procedure TInterpolationFind.PushBack(obj : TObject);
 begin
    cont.PushBack(obj);
 end;
 
-function TInterpolationFind.Finish : TIterator; 
+function TInterpolationFind.Finish : TIterator;
 begin
    Result := cont.RandomAccessFinish;
 end;
@@ -228,7 +228,7 @@ var
 begin
    for i := 1 to 1000 do
       flag[i] := false;
-   
+
    for i := 1 to 1000 do
    begin
       repeat
@@ -257,7 +257,7 @@ var
 begin
    cmp := TestObjectComparer;
    pred := TLessBinder.Create(cmp, nil);
-   
+
    try
       InsertRandomItems(list);
       WriteLn('Testing ' + nameMsg + '...');
@@ -270,11 +270,10 @@ begin
             obj := TTestObject.Create(9000)
          else
             obj := TTestObject.Create(Random(1000) + 1);
-         
+
          TLessBinder(pred.GetObject).Item := obj;
          pivot := part.Partition(list.ForwardStart, list.ForwardFinish, pred);
-//         WriteLn(TRandomAccessIterator(pivot).Index);
-         
+
          iter := list.ForwardStart;
          while not iter.Equal(pivot) do
          begin
@@ -284,7 +283,7 @@ begin
                     'pivot: ' + IntToStr(obj.Value));
             iter.Advance;
          end;
-         
+
          while not iter.IsFinish do
          begin
             Test(TTestObject(iter.Item).Value >= obj.Value, nameMsg,
@@ -293,7 +292,7 @@ begin
                     'pivot: ' + IntToStr(obj.Value));
             iter.Advance;
          end;
-         
+
          obj.Destroy;
          if i = 100 then
             StopSilentMode;
@@ -317,27 +316,27 @@ begin
    begin
       ff.PushBack(TTestObject.Create(i));
    end;
-   
+
    try
       StartSilentMode;
       for j := 1 to n do
       begin
          if j = n then
             StopSilentMode;
-         
+
          i := Random(n) + 1;
-         
+
          obj := TTestObject.Create(i);
          iter := TForwardIterator(ff.Find(obj));
          obj.Destroy;
-         
+
          Test(not iter.Equal(ff.Finish), nameMsg,
               'did not find an object ' +
                  'existing in the container; object value: ' + IntToStr(i));
          Test(TTestObject(iter.Item).Value = i, nameMsg,
               'found wrong object; searched: ' + IntToStr(i) +
                  '; found: ' + IntToStr(TTestObject(iter.Item).Value));
-//         iter.Destroy;
+         iter.Destroy;
       end;
    finally
       ff.Destroy;
@@ -359,7 +358,7 @@ begin
    WriteLn('** Finished testing algorithms');
 end;
 
-procedure TestAllAlgs(list : TDoubleListAdt); 
+procedure TestAllAlgs(list : TDoubleListAdt);
 begin
    WriteLn('** Testing algorithms...');
    InsertRandomItems(list);
@@ -371,7 +370,7 @@ begin
    WriteLn('** Finished testing algorithms');
 end;
 
-procedure TestAllAlgs(cont : TRandomAccessContainerAdt); 
+procedure TestAllAlgs(cont : TRandomAccessContainerAdt);
 begin
    WriteLn('** Testing algorithms...');
    InsertRandomItems(cont);
@@ -385,29 +384,30 @@ end;
 
 procedure TestNonModifyingAlgs(list : TListAdt);
 var
-   i : IndexType;
-   flag : Boolean;
+   i                        : IndexType;
+   flag                     : Boolean;
    iter, iter1, iter2, fin1 : TForwardIterator;
-   iterpair : TForwardIteratorPair;
-   obj : TTestObject;
+   iterpair                 : TForwardIteratorPair;
+   obj                      : TTestObject;
+   cmp                      : TEqual;
 begin
    { ---------------------- Find -------------------------- }
    { the object created here is 'sunk' by the function }
    TestFind(list, TNormalFind.Create(list), 'Find');
-   
+
    { -------------------- Count --------------------------- }
    InsertRandomItems(list);
    for i := 1 to 100 do
       list.PushBack(TTestObject.Create(-1));
    AddRandomItems(list);
    list.PushBack(TTestObject.Create(-1));
-   
+
    obj := TTestObject.Create(-1);
    i := Count(list.ForwardStart, list.ForwardFinish,
               EqualTo(TestObjectComparer, obj));
    Test(i = 101, 'Count', 'wrong result: ' + IntToStr(i) + ' instead of 101');
    obj.Destroy;
-   
+
    { ------------------ Minimal --------------------------- }
    iter := Minimal(list.ForwardStart, list.ForwardFinish,
                    TestObjectComparer);
@@ -418,12 +418,12 @@ begin
    iter := Minimal(list.ForwardStart, list.ForwardFinish,
                    TestObjectComparer);
    Test(iter.IsStart, 'Minimal', 'not the first minimal item');
-   
+
    { ------------------ Maximal ---------------------------- }
    AddRandomItems(list);
    list.PushBack(TTestObject.Create(1234567));
    AddRandomItems(list);
-   
+
    iter := Maximal(list.ForwardStart, list.ForwardFinish,
                    TestObjectComparer);
    i := TTestObject(iter.Item).Value;
@@ -433,15 +433,15 @@ begin
    iter := Maximal(list.ForwardStart, list.ForwardFinish,
                    TestObjectComparer);
    Test(iter.IsStart, 'Maximal', 'not the first maximal item');
-   
+
    { ------------------ Equal ----------------------------- }
    for i := 1 to 10000 do
       list.PushBack(TTestObject.Create(-i));
    flag := Equal(list.ForwardStart, Advance(list.ForwardStart, 10000),
                  Advance(list.ForwardStart, list.Size - 10000),
-                 TEqual.Create(TestObjectComparer));
+                 EqualTest(TestObjectComparer));
    Test(not flag, 'Equal', 'returns true for two different ranges');
-   
+
    list.Clear;
    for i := 1 to 5000 do
       list.PushBack(TTestObject.Create(i));
@@ -451,29 +451,29 @@ begin
       list.PushBack(TTestObject.Create(i));
    flag := Equal(list.ForwardStart, Advance(list.ForwardStart, 10000),
                  Advance(list.ForwardStart, 5000),
-                 TEqual.Create(TestObjectComparer));
+                 EqualTest(TestObjectComparer));
    Test(flag, 'Equal', 'returns false for two equal overlapping ranges');
-   
+
    { ---------------------- Mismatch ---------------------- }
    fin1 := Advance(list.ForwardStart, 10000);
    iterpair := Mismatch(list.ForwardStart, fin1,
                         Advance(list.ForwardStart, 5000),
-                        TEqual.Create(TestObjectComparer));
+                        EqualTest(TestObjectComparer));
    Test(iterpair.First.Equal(fin1), 'Mismatch',
         'returns a mismatch for equal ranges');
-   
+
    iter := list.ForwardStart;
    Advance(iter, 4000);
    iter.Item := TTestObject.Create(-1);
    fin1 := Advance(list.ForwardStart, 5000);
    iterpair := Mismatch(list.ForwardStart, fin1, fin1,
-                        TEqual.Create(TestObjectComparer));
+                        EqualTest(TestObjectComparer));
    Test(not iterpair.First.Equal(fin1), 'Mismatch',
         'does not find a mismatch for non-equal ranges');
    Test(TTestObject(iterpair.First.Item).Value = -1, 'Mismatch');
    Test(TTestObject(iterpair.Second.Item).Value = 4001, 'Mismatch');
    Test(Distance(list.ForwardStart, iterpair.First) = 4000, 'Mismatch');
-   
+
    { ------------------ LexicographicalCompare ------------------- }
    list.Clear;
    for i := 1 to 6000 do
@@ -493,7 +493,7 @@ begin
                                iter2, list.ForwardFinish,
                                TestObjectComparer);
    Test(i > 0, 'LexicographicalCompare', 'wrong return for r1 > r2');
-   
+
    iter := list.ForwardStart;
    iter.Advance;
    iter.Item := TTestObject.Create(0);
@@ -502,23 +502,27 @@ begin
    Test(i < 0, 'LexicographicalCompare', 'wrong return for r1 < r2');
 end;
 
-procedure TestNonModifyingAlgs(list : TDoubleListAdt); 
+procedure TestNonModifyingAlgs(list : TDoubleListAdt);
 begin
    TestNonModifyingAlgs(TListAdt(list));
 end;
 
-procedure TestNonModifyingAlgs(cont : TRandomAccessContainerAdt); 
+procedure TestNonModifyingAlgs(cont : TRandomAccessContainerAdt);
 begin
    TestNonModifyingAlgs(TDoubleListAdt(cont));
 end;
 
 procedure TestModifyingAlgs(list : TListAdt);
 var
-   i, n : Indextype;
-   funct : IUnaryFunctor;
+   i, n        : Indextype;
+   funct       : IUnaryFunctor;
    iter, iter2 : TForwardIterator;
-   list2 : TListAdt;
+   list2       : TListAdt;
+   copier      : IUnaryFunctor;
+   joiner      : IBinaryFunctor;
 begin
+   copier := TTestObjectCopier.Create;
+
    { ---------------------- ForEach --------------------------- }
    n := list.Size + 1000;
    for i := 1 to 1000 do
@@ -529,7 +533,7 @@ begin
    ForEach(list.ForwardStart, list.ForwardFinish, funct);
    CheckRange(list.ForwardStart, list.ForwardFinish,
               true, 1, list.Size, 'ForEach');
-   
+
    { ---------------------- Generate --------------------------- }
    n := list.Size + 1000;
    for i := 1 to 1000 do
@@ -538,31 +542,29 @@ begin
    end;
    funct := TChanger.Create;
    Generate(list.ForwardStart, list.ForwardFinish,
-            Compose_F_Gx(TTestObjectCopier.Create, funct));
+            Compose_F_Gx(copier, funct));
    CheckRange(list.ForwardStart, list.ForwardFinish,
               true, 1, list.Size, 'Generate');
-   
+
    { ---------------------- Copy ---------------------------- }
    list.Clear;
    list2 := TDoubleListAdt(list.CopySelf(nil));
    for i := 1 to 1000 do
       list.PushBack(TTestObject.Create(i));
-   Copy(list.ForwardStart, list.ForwardFinish, TBackInserter.Create(list2),
-        TTestObjectCopier.Create);
+   Copy(list.ForwardStart, list.ForwardFinish, TBackInserter.Create(list2), copier);
    CheckRange(list.ForwardStart, list.ForwardFinish,
               true, 1, 1000, 'Copy (source)');
    CheckRange(list2.ForwardStart, list2.ForwardFinish,
               true, 1, 1000, 'Copy (dest)');
-   
-   Copy(list2.ForwardStart, list2.ForwardFinish, TBackInserter.Create(list),
-        TTestObjectCopier.Create);
+
+   Copy(list2.ForwardStart, list2.ForwardFinish, TBackInserter.Create(list), copier);
    CheckRange(list2.ForwardStart, list2.ForwardFinish,
               true, 1, 1000, 'Copy (source)');
    iter := Advance(list.ForwardStart, 1000);
    CheckRange(list.ForwardStart, iter, true, 1, 1000, 'Copy (dest 1)');
    CheckRange(iter, list.ForwardFinish, true, 1, 1000, 'Copy (dest 2)');
-   list2.Destroy;   
-   
+   list2.Destroy;
+
    { -------------------- Move ---------------------------- }
    iter2 := list.ForwardStart;
    iter2.Advance;
@@ -573,7 +575,7 @@ begin
    iter2 := Advance(CopyOf(iter), 1000);
    CheckRange(iter, iter2, true, 1, 1000, 'Move');
    CheckRange(iter2, list.ForwardFinish, true, 2, 999, 'Move');
-   
+
    { ---------------------- Combine ---------------------- }
    list.Clear;
    for i := 1 to 1000 do
@@ -581,17 +583,18 @@ begin
    for i := 1 to 1000 do
       list.PushBack(TTestObject.Create(-i));
    iter := Advance(list.ForwardStart, 1000);
-   Combine(list.ForwardStart, iter, iter, list.ForwardStart, TTestSum.Create);
+   joiner := TTestSum.Create;
+   Combine(list.ForwardStart, iter, iter, list.ForwardStart, joiner);
    CheckRange(list.ForwardStart, iter, true, 1, 1000, 'Combine');
    CheckRange(iter, list.ForwardFinish, false, -1, 1000, 'Combine');
 end;
 
-procedure TestModifyingAlgs(list : TDoubleListAdt); 
+procedure TestModifyingAlgs(list : TDoubleListAdt);
 begin
    TestModifyingAlgs(TListAdt(list));
 end;
 
-procedure TestModifyingAlgs(cont : TRandomAccessContainerAdt); 
+procedure TestModifyingAlgs(cont : TRandomAccessContainerAdt);
 begin
    TestModifyingAlgs(TDoubleListAdt(cont));
 end;
@@ -604,28 +607,28 @@ begin
    { the object created here is 'sunk' by the function }
    InsertRandomItems(list);
    TestPartition(list, TStablePartition.Create, 'StablePartition');
-   
+
    { --------------- MemoryEfficientStablePartition ------------- }
    { the object is 'sunk' by the function (ditto) }
    InsertRandomItems(list);
    TestPartition(list, TMemoryEfficientStablePartition.Create,
                  'MemoryEfficientStablePartition');
-   
+
    { -------------------- Rotate ------------------------------- }
    StartSilentMode;
    for j := 1 to 100 do
    begin
       if j = 100 then
          StopSilentMode;
-      
+
       list.Clear;
       for i := 1 to 10000 do
          list.PushBack(TTestObject.Create(i));
       n := Random(10000);
-      
+
       Rotate(list.ForwardStart, Advance(list.ForwardStart, n),
              list.ForwardFinish);
-      
+
       CheckRange(Advance(list.ForwardStart, n), list.ForwardFinish,
                  true, 1, 10000 - n, 'Rotate (' + IntToStr(n) + ')');
       CheckRange(list.ForwardStart, Advance(list.ForwardStart, n),
@@ -639,18 +642,18 @@ var
    i : IndexType;
 begin
    TestMutatingAlgs(TListAdt(list));
-   
+
    { ------------------- InsertionSort ------------------------ }
    InsertRandomItems(list);
    cmp := TestObjectComparer;
    InsertionSort(list.BidirectionalStart, list.BidirectionalFinish, cmp);
    CheckRange(list.BidirectionalStart, list.BidirectionalFinish,
               true, 1, list.Size, 'InsertionSort');
-   
+
    { -------------------- Partition --------------------------- }
    { the object created here is 'sunk' by the function }
-   TestPartition(list, TNormalPartition.Create, 'Partition');   
-   
+   TestPartition(list, TNormalPartition.Create, 'Partition');
+
    { ------------------------ Reverse --------------------------------- }
    list.Clear;
    for i := 1 to 10000 do
@@ -660,7 +663,7 @@ begin
               false, 10000, 10000, 'Reverse');
 end;
 
-procedure TestMutatingAlgs(cont : TRandomAccessContainerAdt); 
+procedure TestMutatingAlgs(cont : TRandomAccessContainerAdt);
 var
    cmp : IBinaryComparer;
    i, j, k : Indextype;
@@ -669,7 +672,7 @@ var
    perc : Double;
 begin
    TestMutatingAlgs(TDoubleListAdt(cont));
-   
+
    { ----------------------- RandomShuffle ------------------------ }
    { note: if the distribution is random then the probability that one
      item i out of n items lands at the position i should be 1/n;
@@ -696,34 +699,34 @@ begin
    perc := count*100/m;
    WriteLn('Randomness of RandomShuffle: ', perc, '%');
    WriteLn('(100% is ideal; several percent divergence is acceptable)');
-   
+
    cmp := TestObjectComparer;
-   
+
    InsertRandomItems(cont);
    InsertionSort(cont.RandomAccessStart, cont.RandomAccessFinish, cmp);
    CheckRange(cont.RandomAccessStart, cont.RandomAccessFinish,
               true, 1, cont.Size, 'InsertionSort');
-   
+
    InsertRandomItems(cont);
    ShellSort(cont.RandomAccessStart, cont.RandomAccessFinish, cmp);
    CheckRange(cont.RandomAccessStart, cont.RandomAccessFinish,
               true, 1, cont.Size, 'ShellSort');
-   
+
    InsertRandomItems(cont);
    MergeSort(cont.RandomAccessStart, cont.RandomAccessFinish, cmp);
    CheckRange(cont.RandomAccessStart,cont.RandomAccessFinish,
               true, 1, cont.Size, 'MergeSort');
-   
+
    InsertRandomItems(cont);
    QuickSort(cont.RandomAccessStart, cont.RandomAccessFinish, cmp);
    CheckRange(cont.RandomAccessStart, cont.RandomAccessFinish,
               true, 1, cont.Size, 'QuickSort');
-   
+
    InsertRandomItems(cont);
    Sort(cont.RandomAccessStart, cont.RandomAccessFinish, cmp);
    CheckRange(cont.RandomAccessStart, cont.RandomAccessFinish,
               true, 1, cont.Size, 'Sort');
-   
+
    { ------------------------- FindKthItemHoare ----------------------- }
    InsertRandomItems(cont);
    StartSilentMode;
@@ -738,7 +741,7 @@ begin
            'returns wrong item: ' + IntToStr(TTestObject(obj).Value) +
               'instead of ' + IntToStr(k));
    end;
-   
+
    { ----------------------- FindKthItem ---------------------- }
    InsertRandomItems(cont);
    StartSilentMode;
@@ -752,7 +755,7 @@ begin
            'returns wrong item: ' + IntToStr(TTestObject(obj).Value) +
               ' instead of ' + IntToStr(k));
    end;
-   
+
 end;
 
 procedure TestDeletingAlgs(list : TListAdt);
@@ -769,7 +772,7 @@ begin
    Test(Delete(list.ForwardStart, s + 3) = s, 'Delete',
         'wrong number returned');
    FinishDestruction;
-   
+
    { ---------------------- DeleteIf -------------------------- }
    list.Clear;
    for i := 1 to 10000 do
@@ -800,19 +803,21 @@ end;
 procedure TestSortedRangeAlgs(list : TListAdt);
 var
    list2, list3 : TSingleList;
-   cmp : IBinaryComparer;
-   i, j : Indextype;
-   s : SizeType;
+   cmp          : IBinaryComparer;
+   copier       : IUnaryFunctor;
+   i, j         : Indextype;
+   s            : SizeType;
 begin
    list2 := nil;
    list3 := nil;
-   
+
    try
       cmp := TestObjectComparer;
+      copier := TTestObjectCopier.Create;
       list.Clear;
       list2 := TSingleList.Create;
       list3 := TSingleList.Create;
-      
+
       for i := 1 to 100 do
       begin
          if (i and $01) <> 0 then
@@ -821,33 +826,33 @@ begin
             list2.PushBack(TTestObject.Create(i));
       end;
       s := list.Size + list2.Size;
-      
+
       { ------------------ MergeCopy ---------------------- }
-      
+
       MergeCopy(list2.ForwardStart, list2.ForwardFinish,
                 list.ForwardStart, list.ForwardFinish,
-                list3.ForwardStart, cmp, TTestObjectCopier.Create);
-      
+                list3.ForwardStart, cmp, copier);
+
       Test(list3.Size = s, 'MergeCopy', 'wrong size');
       CheckRange(list3.ForwardStart, list3.ForwardFinish,
                  true, 1, list3.Size, 'MergeCopy');
-      
+
       StartDestruction(list3.Size, 'Clear');
       list3.Clear;
       FinishDestruction;
-      
+
       { ------------------------ Merge ---------------------- }
-      
+
       Merge(list2.ForwardStart, list2.ForwardFinish,
             list.ForwardStart, list.ForwardFinish,
             list3.ForwardStart, cmp);
-      
+
       Test(list3.Size = s, 'Merge', 'wrong size');
       CheckRange(list3.ForwardStart, list3.ForwardFinish,
                  true, 1, list3.Size, 'MergeCopy');
       Test(list.Empty, 'Merge', 'the second list not cleared');
       Test(list2.Empty, 'Merge', 'the first list not cleared');
-      
+
       { ----------------- Unique -------------------------- }
       list.Clear;
       for i := 1 to 10000 do
@@ -870,12 +875,12 @@ begin
    end;
 end;
 
-procedure TestSortedRangeAlgs(list : TDoubleListAdt); 
+procedure TestSortedRangeAlgs(list : TDoubleListAdt);
 begin
    TestSortedRangeAlgs(TListAdt(list));
 end;
 
-procedure TestSortedRangeAlgs(cont : TRandomAccessContainerAdt); 
+procedure TestSortedRangeAlgs(cont : TRandomAccessContainerAdt);
 begin
    TestSortedRangeAlgs(TDoubleListAdt(cont));
    { the object created here is 'sunk' by the function }
@@ -887,14 +892,14 @@ end;
 procedure TestSetAlgs(set1, set2 : TSetAdt);
 const
    { ITEMS_NUM must be >= 10 and be divisible by 10 }
-   ITEMS_NUM = 1000; 
+   ITEMS_NUM = 1000;
 var
    set3, set4 : TSetAdt;
    i : Indextype;
    obj : TTestObject;
 begin
    WriteLn('** Testing general set algorithms...');
-   
+
    set3 := nil;
    set4 := nil;
    set1.Clear;
@@ -922,7 +927,7 @@ begin
          obj.Destroy;
       end;
       StopSilentMode;
-      
+
       { --------------------- SetUnionCopy ------------------------ }
       set1.Clear;
       set2.Clear;
@@ -935,7 +940,7 @@ begin
       Test(set4.Size = 2*ITEMS_NUM, 'SetUnionCopy', 'wrong size of the result');
       Test(set1.Size = ITEMS_NUM, 'SetUnionCopy', 'wrong size of set1');
       Test(set2.Size = ITEMS_NUM, 'SetUnionCopy', 'wrong size of set2');
-      
+
       StartSilentMode;
       for i := 1 to 2*ITEMS_NUM do
       begin
@@ -956,7 +961,7 @@ begin
          obj.Destroy;
       end;
       StopSilentMode;
-      
+
       { ---------------------- SetIntersection ----------------------- }
       set1.Clear;
       set2.Clear;
@@ -970,19 +975,19 @@ begin
          set1.Insert(TTestObject.Create(i));
          set2.Insert(TTestObject.Create(ITEMS_NUM + i));
       end;
-      
+
       StartDestruction(set3.Size, 'destructor');
       set3.Free;
       FinishDestruction;
-      
+
       set3 := nil;
       set3 := SetIntersection(set1, set2);
       Test(set3.Size = 2*(ITEMS_NUM div 10), 'SetIntersection', 'wrong size of intersection');
-      
+
       StartDestruction(ITEMS_NUM div 10, 'Unique');
       Unique(set3.Start, set3.Size, Ttestobjectcomparer.Create);
       FinishDestruction;
-      
+
       Test(set3.Size = ITEMS_NUM div 10, 'SetIntersection', 'wrong size of intersection');
       StartSilentMode;
       WriteLn('(1)');

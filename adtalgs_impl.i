@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -40,7 +40,7 @@ var
    i, j : IndexType;
 begin
    i := si + 1;
-   
+
    while i < fi do
    begin
       j := i;
@@ -50,25 +50,25 @@ begin
          Dec(j);
       end;
       Inc(i);
-   end;   
+   end;
 end;
 
 function PartitionAux(start : TRandomAccessIterator; si, fi : IndexType;
                       pred : IUnaryPredicate) : IndexType; overload;
 begin
-   Dec(fi);   
+   Dec(fi);
    while si <> fi do
    begin
       while (si <> fi) and pred.Test(start[si]) do
          Inc(si);
-      
+
       while (si <> fi) and (not pred.Test(start[fi])) do
          Dec(fi);
-      
+
       if (si <> fi) then
          start.ExchangeItemsAt(si, fi);
    end;
-   
+
    if pred.Test(start[fi]) then
       Inc(fi);
 
@@ -80,18 +80,18 @@ end;
 
 { ----------------------- TInserterBase --------------------------- }
 
-function TInserterBase.GetItem : ItemType; 
+function TInserterBase.GetItem : ItemType;
 begin
    Result := DefaultItem; { for the compiler not to complain }
    raise EAssertionFailed.Create(msgInvalidIterator);
 end;
 
-procedure TInserterBase.SetItem(aitem : ItemType); 
+procedure TInserterBase.SetItem(aitem : ItemType);
 begin
    raise EAssertionFailed.Create(msgInvalidIterator);
 end;
 
-procedure TInserterBase.ExchangeItem(iter : TIterator); 
+procedure TInserterBase.ExchangeItem(iter : TIterator);
 begin
    raise EAssertionFailed.Create(msgInvalidIterator);
 end;
@@ -105,12 +105,12 @@ begin
    FOwner := FPos.Owner;
 end;
 
-function TInserter.CopySelf : TIterator; 
+function TInserter.CopySelf : TIterator;
 begin
    Result := TInserter.Create(FPos);
 end;
 
-function TInserter.Equal(const Pos : TIterator) : Boolean; 
+function TInserter.Equal(const Pos : TIterator) : Boolean;
 begin
    if pos is TInserter then
       Result := TInserter(pos).FPos.Equal(FPos)
@@ -118,13 +118,13 @@ begin
       Result:= FPos.Equal(pos);
 end;
 
-procedure TInserter.Write(aitem : ItemType); 
+procedure TInserter.Write(aitem : ItemType);
 begin
    FPos.Insert(aitem);
    FPos.Advance;
 end;
 
-function TInserter.GetItem : ItemType; 
+function TInserter.GetItem : ItemType;
 begin
    Result := FPos.GetItem;
 end;
@@ -134,7 +134,7 @@ begin
    FPos.SetItem(aitem);
 end;
 
-procedure TInserter.ExchangeItem(iter : TIterator); 
+procedure TInserter.ExchangeItem(iter : TIterator);
 begin
    if iter is TInserter then
       FPos.ExchangeItem(TInserter(iter).FPos)
@@ -142,7 +142,7 @@ begin
       FPos.ExchangeItem(iter);
 end;
 
-function TInserter.Owner : TContainerAdt; 
+function TInserter.Owner : TContainerAdt;
 begin
    { Note: We cannot simply return FPos.Owner because this method may
      be called from the destructor to obtain the grabage collector.
@@ -151,7 +151,7 @@ begin
      have to store the owner separately in a field.  }
    Result := FOwner;
 end;
-      
+
 { ------------------------ TBasicInserter -------------------------------- }
 
 constructor TBasicInserter.Create(cont : TContainerAdt);
@@ -160,23 +160,23 @@ begin
    FCont := cont;
 end;
 
-function TBasicInserter.CopySelf : TIterator; 
+function TBasicInserter.CopySelf : TIterator;
 begin
    Result := TBasicInserter.Create(FCont);
 end;
 
-function TBasicInserter.Equal(const Pos : TIterator) : Boolean; 
+function TBasicInserter.Equal(const Pos : TIterator) : Boolean;
 begin
    Result := (pos is TBasicInserter) and (TBasicInserter(pos).FCont = FCont);
 end;
 
-procedure TBasicInserter.Write(aitem : ItemType); 
+procedure TBasicInserter.Write(aitem : ItemType);
 begin
    if not FCont.InsertItem(aitem) then
       raise EPascalAdt.Create('TBasicInserter: Cannot insert');
 end;
 
-function TBasicInserter.Owner : TContainerAdt; 
+function TBasicInserter.Owner : TContainerAdt;
 begin
    Result := FCont;
 end;
@@ -189,22 +189,22 @@ begin
    FCont := cont;
 end;
 
-function TBackInserter.CopySelf : TIterator; 
+function TBackInserter.CopySelf : TIterator;
 begin
    Result := TBackInserter.Create(FCont);
 end;
 
-function TBackInserter.Equal(const Pos : TIterator) : Boolean; 
+function TBackInserter.Equal(const Pos : TIterator) : Boolean;
 begin
    Result := (pos is TBackInserter) and (TBackInserter(pos).FCont = FCont);
 end;
 
-procedure TBackInserter.Write(aitem : ItemType); 
+procedure TBackInserter.Write(aitem : ItemType);
 begin
    FCont.PushBack(aitem);
 end;
 
-function TBackInserter.Owner : TContainerAdt; 
+function TBackInserter.Owner : TContainerAdt;
 begin
    Result := FCont;
 end;
@@ -217,22 +217,22 @@ begin
    FCont := cont;
 end;
 
-function TFrontInserter.CopySelf : TIterator; 
+function TFrontInserter.CopySelf : TIterator;
 begin
    Result := TFrontInserter.Create(FCont);
 end;
 
-function TFrontInserter.Equal(const Pos : TIterator) : Boolean; 
+function TFrontInserter.Equal(const Pos : TIterator) : Boolean;
 begin
    Result := (pos is TFrontInserter) and (TFrontInserter(pos).FCont = FCont);
 end;
 
-procedure TFrontInserter.Write(aitem : ItemType); 
+procedure TFrontInserter.Write(aitem : ItemType);
 begin
    FCont.PushFront(aitem);
 end;
 
-function TFrontInserter.Owner : TContainerAdt; 
+function TFrontInserter.Owner : TContainerAdt;
 begin
    Result := FCont;
 end;
@@ -248,7 +248,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    Result := CopyOf(start);
    while (not Result.Equal(finish)) and
             (not _mcp_equal(Result.Item, aitem, comparer)) do
@@ -263,7 +263,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    Result := CopyOf(start);
    while not (Result.Equal(finish) or pred.Test(Result.Item)) do
    begin
@@ -308,7 +308,7 @@ begin
       Result := CopyOf(finish);
       Exit;
    end;
-   
+
    Result := CopyOf(start);
    minptr := Result.Item;
    iter := Next(start);
@@ -340,7 +340,7 @@ begin
       Result := CopyOf(finish);
       Exit;
    end;
-   
+
    Result := CopyOf(start);
    maxptr := Result.Item;
    iter := Next(start);
@@ -366,7 +366,7 @@ begin
    CheckIteratorRange(start1, finish1);
 {$endif }
 
-   REsult := false;
+   Result := false;
    iter1 := CopyOf(start1);
    iter2 := CopyOf(start2);
    while not iter1.Equal(finish1) do
@@ -457,7 +457,7 @@ begin
 {$endif }
 
    iter := CopyOf(start);
-   owner := start.Owner; 
+   owner := start.Owner;
    owns := owner.OwnsItems;
    owner.OwnsItems := false;
    try
@@ -517,7 +517,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start1, finish1);
 {$endif }
-   
+
    if start1.Owner <> start2.Owner then
    begin
       iter := CopyOf(start1);
@@ -540,14 +540,14 @@ begin
    end else { not start1.Owner <> start2.Owner }
    begin
       Assert(start2 is TForwardIterator);
-      
+
       fstart2 := TForwardIterator(start2);
       if Less(start1, fstart2) then
       begin
          if finish1.Equal(fstart2) then
             Exit;
          Assert(Less(finish1, fstart2), msgMovingBadRange);
-         
+
          if start1 is TBidirectionalIterator then
          begin
             Assert((fstart2 is TBidirectionalIterator) and
@@ -559,14 +559,14 @@ begin
             iter := CopyOf(start1);
             Advance(iter, Distance(finish1, fstart2));
          end;
-         
+
          Rotate(start1, iter, fstart2);
-         
+
       end else { not Less(start1, fstart2) }
       begin
          if start1.Equal(fstart2) then
             Exit;
-         
+
          if start1 is TBidirectionalIterator then
          begin
             Assert((fstart2 is TBidirectionalIterator) and
@@ -578,7 +578,7 @@ begin
             iter := CopyOf(fstart2);
             Advance(iter, Distance(start1, finish1));
          end;
-         
+
          Rotate(fstart2, iter, finish1);
       end;
    end; { end not start1.Owner <> start2.Owner }
@@ -646,27 +646,27 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    starti := start.Index;
    finishi := finish.Index;
    si := 0;
    fi := finishi - starti;
-   
+
    ArrayAllocate(stack, CeilLog2(fi - si), 0); { may raise }
-   
+
    try
       pred := nil;
       pred := TLessBinder.Create(comparer, DefaultItem); { may raise }
       predi := pred;
-      
+
       ArrayPushBack(stack, ItemType(si)); { may raise }
       ArrayPushBack(stack, ItemType(fi));
-      
+
       while stack^.Size <> 0 do
       begin
          fi := IndexType(ArrayPopBack(stack));
          si := IndexType(ArrayPopBack(stack));
-         
+
          while fi - si >= qsMinItems do
          begin
             pi := Random(fi - si) + si;
@@ -693,16 +693,16 @@ begin
                si := pi;
             end;
          end; { end while fi - si }
-         
+
          { insertion-sort is performed at the very end for the whole
            range }
-         
+
       end; { end while stack }
-      
+
    finally
       ArrayDeallocate(stack);
    end;
-   
+
    { now use InsertionSort to sort small groups that have remained
      unsorted; InsertionSort will work very fast because it has only
      groups with maximally qsMinItems to sort; }
@@ -721,7 +721,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    owner := start.Owner;
    owns := owner.OwnsItems;
    owner.OwnsItems := false;
@@ -752,7 +752,7 @@ begin
                end;
                Inc(m);
             end; { end while end of sequence not reached }
-            
+
             while j < i + n do
             begin
                buffer[m] := start[j];
@@ -766,7 +766,7 @@ begin
                Inc(k);
                Inc(m);
             end;
-            
+
             i := i + 2*n;
          end; { end while i + n < fi }
          { copy the tail }
@@ -776,7 +776,7 @@ begin
             Inc(i);
          end;
          n := 2*n;
-         
+
          invalidContainer := true; { exception handling }
          if n < fi then
          begin
@@ -801,7 +801,7 @@ begin
                   end;
                   Inc(m);
                end; { end while end of sequence not reached }
-               
+
                while j < i + n do
                begin
                   start[m] := buffer[j];
@@ -815,7 +815,7 @@ begin
                   Inc(k);
                   Inc(m);
                end;
-               
+
                i := i + 2*n;
             end; { end while i + n < fi }
             { copy the tail }
@@ -825,7 +825,7 @@ begin
                Inc(i);
             end;
             n := 2*n;
-            
+
          end else
          begin
             { copy items from the buffer to the container }
@@ -834,7 +834,7 @@ begin
          end; { end not if n < fi }
          invalidContainer := false;
       end; { end while n < fi }
-      
+
    finally
       if invalidContainer then
       begin
@@ -857,7 +857,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    n := finish.Index - start.Index;
    k := n div 2;
    while k <> 0 do
@@ -887,20 +887,20 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    if start is TRandomAccessIterator then
    begin
       Assert(finish is TRandomAccessIterator);
       InsertionSort(TRandomAccessIterator(start), TRandomAccessIterator(finish),
                     comparer);
    end;
-   
+
    iter := CopyOf(start);
-   
+
    iter2 := CopyOf(iter);
    iter.Advance;
    iter3 := CopyOf(iter);
-   
+
    while not iter.Equal(finish) do
    begin
       while _mcp_gt(iter2.Item, iter3.Item, comparer) do
@@ -911,10 +911,10 @@ begin
             break;
          iter2.Retreat;
       end;
-      
+
       iter2.Destroy;
       iter3.Destroy;
-      
+
       iter2 := CopyOf(iter);
       iter.Advance;
       iter3 := CopyOf(iter);
@@ -928,7 +928,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    InsertionSortAux(start, 0, finish.Index - start.Index, comparer);
 end;
 
@@ -943,18 +943,18 @@ begin
    CheckIteratorRange(start, newstart);
    CheckIteratorRange(newstart, finish);
 {$endif }
-   
+
    if start.Equal(newstart) or newstart.Equal(finish) then
       Exit;
 
    src := nil; { will be set in the loop }
-   dest := CopyOf(newstart);  
+   dest := CopyOf(newstart);
 //   newstart := CopyOf(newstart);
 //   finish := CopyOf(finish);
    findest := CopyOf(finish);
    finsrc := CopyOf(newstart);
    start := CopyOf(start); { start of source }
-   
+
    repeat
       { First, we swap the source as many times as possible with
         subsequent destination blocks. We shall call a block any
@@ -1031,7 +1031,7 @@ begin
       start := CopyOf(src);
    until src.Equal(dest);
    src.Destroy;
-   dest.Destroy;  
+   dest.Destroy;
 //   newstart.Destroy;
 //   finish.Destroy;
    findest.Destroy;
@@ -1043,7 +1043,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    while not start.Equal(finish) do
    begin
       finish.Retreat;
@@ -1063,7 +1063,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    fi := finish.Index - start.Index;
    for i := 0 to fi - 1 do
    begin
@@ -1077,7 +1077,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    if start is TRandomAccessIterator then
    begin
       Result := TBidirectionalIterator(Partition(TRandomAccessIterator(start),
@@ -1085,33 +1085,33 @@ begin
                                                  pred));
       Exit;
    end;
-   
+
    start := CopyOf(start);
    Result := CopyOf(finish);
    Result.Retreat;
-   
+
    while not start.Equal(Result) do
    begin
       while (not start.Equal(Result)) and pred.Test(start.Item) do
       begin
          start.Advance;
       end;
-      
+
       while not (start.Equal(Result) or pred.Test(Result.Item)) do
       begin
          Result.Retreat;
       end;
-      
+
       start.ExchangeItem(Result);
    end;
-   
+
    start.Destroy;
-   
+
    if pred.Test(Result.Item) then
       Result.Advance;
 end;
 
-function Partition(start, finish : TRandomAccessIterator; 
+function Partition(start, finish : TRandomAccessIterator;
                    const pred : IUnaryPredicate) : TRandomAccessIterator;
 var
    i : IndexType;
@@ -1119,9 +1119,9 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    i := PartitionAux(start, 0, finish.Index - start.Index, pred);
-   
+
    Result := CopyOf(start);
    Result.Advance(i);
 end;
@@ -1141,10 +1141,10 @@ begin
 
    a1 := nil;
    a2 := nil;
-   
+
    owns := start.Owner.OwnsItems;
    start.Owner.OwnsItems := false;
-   
+
    iter := nil; a1 := nil; a2 := nil;
    try
       ArrayAllocate(a1, 100, 0);
@@ -1163,7 +1163,7 @@ begin
       end;
       iter.Free;
       iter := CopyOf(start);
-      
+
 //      WriteLn;
       for i := 0 to a1^.Size - 1 do
       begin
@@ -1172,9 +1172,9 @@ begin
          iter.Advance;
       end;
 //      WriteLn;
-      
+
       Result := CopyOf(iter);
-      
+
       for i := 0 to a2^.Size - 1 do
       begin
 //         WriteLn(TTestObject(a2^.Items[i]).Value);
@@ -1201,7 +1201,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    if start.Equal(finish) then
    begin
       Result := CopyOf(finish);
@@ -1232,7 +1232,7 @@ begin
    end;
    iter.Destroy;
    prev.Destroy;
-   
+
    { in each pass merge two adjacent already 'sorted' sequences of
      size n into a sequence of size 2*n }
    n := 2; { the length of already 'sorted' sequences }
@@ -1273,7 +1273,7 @@ begin
            before the group of items in sequence 1 for which pred does
            not hold }
          Rotate(iter, iter4, iter3);
-         
+
          iter.Destroy;
          iter := iter3;
          while (i > 0) and (not iter.Equal(finish)) do
@@ -1281,7 +1281,7 @@ begin
             Dec(i);
             iter.Advance;
          end;
-         
+
          if 2*n >= size then
          begin
             Result := CopyOf(iter4);
@@ -1291,7 +1291,7 @@ begin
       end; { end while not iter.Equal(finish) }
       n := n*2;
    end; { end while n <> size }
-   
+
    if size <= 2 then
    begin
       Result := CopyOf(start);
@@ -1352,7 +1352,7 @@ var
             end;
             Inc(i);
          end;
-         
+
          if si + kk < pi then
             fi := pi
          else if (si + kk >= pi) and (si + kk < j) then
@@ -1365,17 +1365,17 @@ var
             si := j;
          end;
       end; { end while fi - si >= ... }
-      
+
       Result := FindKthItemHoare(Next(start, si),
                                  Next(start, fi), kk + 1, comparer)
    end; { end FindAux }
-   
+
 begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
    Assert((k <= finish.Index - start.Index) and (k > 0));
-   
+
    pred := TLessBinder.Create(comparer, DefaultItem);
    predi := pred;
    Result := FindAux(0, finish.Index - start.Index, k - 1);
@@ -1391,17 +1391,17 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    Result := DefaultItem;
-   
+
    si := 0;
    fi := finish.Index - start.Index;
-   
+
    Assert((k <= finish.Index - start.Index) and (k > 0));
-   
+
    pred := TLessBinder.Create(comparer, DefaultItem); { may raise }
    predi := pred;
-   
+
    while si < fi do
    begin
       pi := Random(fi - si);
@@ -1501,7 +1501,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    si := 0;
    fi := finish.Index - start.Index;
    while fi - si > 2 do
@@ -1512,7 +1512,7 @@ begin
       else
          si := i + 1;
    end;
-   
+
    if _mcp_equal(aitem, start[si], comparer) then
    begin
       Result := CopyOf(start);
@@ -1537,7 +1537,7 @@ begin
 {$ifdef DEBUG_PASCAL_ADT }
    CheckIteratorRange(start, finish);
 {$endif }
-   
+
    si := 0;
    fi := finish.Index - start.Index;
    while fi - si > 1 do
@@ -1569,7 +1569,7 @@ begin
       else
          si := i + 1;
    end;
-   
+
    if _mcp_equal(aitem, start[si], diff) then
    begin
       Result := CopyOf(start);
@@ -1655,12 +1655,12 @@ begin
 {$endif }
 
    { numbers of items in the first and the second range, respectively }
-   range1 := 0; 
+   range1 := 0;
    range2 := 0;
-   
+
    s1 := CopyOf(start1);
    s2 := CopyOf(start2);
-      
+
    while not (s1.Equal(finish1) or s2.Equal(finish2)) do
    begin
       aitem1 := s1.Item;
@@ -1677,14 +1677,14 @@ begin
          Inc(range2);
       end;
    end;
-   
+
    while not s1.Equal(finish1) do
    begin
       output.Write(s1.Item);
       s1.Advance;
       Inc(range1);
    end;
-   
+
    while not s2.Equal(finish2) do
    begin
       output.Write(s2.Item);
@@ -1693,16 +1693,16 @@ begin
    end;
    s1.Free;
    s2.Free;
-      
+
    owns1 := start1.Owner.OwnsItems;
    owns2 := start2.Owner.OwnsItems;
    start1.Owner.OwnsItems := false;
    start2.Owner.OwnsItems := false;
-   
+
    try
       Delete(start1, range1);
       Delete(start2, range2);
-      
+
    finally
       start1.Owner.OwnsItems := owns1;
       start2.Owner.OwnsItems := owns2;
@@ -1723,7 +1723,7 @@ begin
 
    s1 := CopyOf(start1);
    s2 := CopyOf(start2);
-   
+
    while not (s1.Equal(finish1) or s2.Equal(finish2)) do
    begin
       aitem1 := s1.Item;
@@ -1738,13 +1738,13 @@ begin
          s2.Advance;
       end;
    end;
-   
+
    while not s1.Equal(finish1) do
    begin
       output.Write(itemCopier.Perform(s1.Item));
       s1.Advance;
    end;
-   
+
    while not s2.Equal(finish2) do
    begin
       output.Write(itemCopier.Perform(s2.Item));
@@ -1768,7 +1768,7 @@ begin
       set2.OwnsItems := false;
       try
          Result.Swap(set1); { may raise }
-   
+
          iter := set2.Start; { may raise }
          while not iter.IsFinish do { may raise }
          begin
