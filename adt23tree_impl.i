@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -68,14 +68,14 @@
                          |   +----+----+
                         1|      |    |     3
                          |     2|    +------------+
-                         |      |                 | 
+                         |      |                 |
                  +----+----+   +----+----+     +----+----+
          +-------|  3 | nil| +-|  7 | nil|   +-| 13 | nil|
          |       +----+----+ | +----+----+   | +----+----+  2
         1|         |         |    |  2      1|    +--------------+
          |        2|        1|    +------+   +-------+           |
          |         |         |           |           |           |
-   +----+----+ +----+----+ +----+----+ +----+----+ +----+----+ +----+----+ 
+   +----+----+ +----+----+ +----+----+ +----+----+ +----+----+ +----+----+
    |  1 |  2 | |  4 | nil| |  6 | nil| |  8 |  9 | | 11 | 12 | | 14 | 15 |
    +----+----+ +----+----+ +----+----+ +----+----+ +----+----+ +----+----+
 }
@@ -111,11 +111,9 @@ function NodeConsistent(node : P23TreeNode) : Boolean;
 begin
    with node^ do
    begin
-{      Assert(LowItem[2] <> DefaultItem); }
-{      Assert((StoredItems = 1) or (LowItem[3] <> DefaultItem)); }
       Assert((Child[1] <> nil) or ((Child[2] = nil) and (Child[3] = nil)));
       Assert((Child[2] <> nil) or (Child[3] = nil));
-      Result := (StoredItems >= 1) and (StoredItems <= 2);
+      Result := true;
    end;
 end;
 
@@ -163,7 +161,7 @@ begin
          Inc(Result);
          if node^.StoredItems = 2 then
             Inc(Result);
-         
+
          if node^.Child[1] <> nil then
             node := node^.Child[1]
          else begin
@@ -206,7 +204,7 @@ var
    pdest : ^P23TreeNode;
    src, destparent : P23TreeNode;
    storedi : 1..2;
-   
+
 begin
    if itemCopier = nil then
       CreateCopyWithoutItems(cont)
@@ -230,20 +228,20 @@ begin
          pdest := @FRoot; { pointer to where to place the newly created node }
          destparent := nil;
          src := cont.FRoot;
-         
+
          repeat
             if src^.StoredItems >= 1 then
             begin
                item2 := itemCopier.Perform(src^.LowItem[2]); { may raise }
                storedi := 1;
             end;
-            
+
             if src^.StoredItems = 2 then
             begin
                item3 := itemCopier.Perform(src^.LowItem[3]); { may raise }
                storedi := 2;
             end;
-            
+
             NewNode(pdest^); { may raise }
             with pdest^^ do
             begin
@@ -255,7 +253,7 @@ begin
                Child[2] := nil;
                Child[3] := nil;
             end;
-            
+
             if src^.Child[1] <> nil then
             begin
                src := src^.Child[1];
@@ -284,11 +282,11 @@ begin
                      destparent := destparent^.Parent;
                   end;
                end;
-               
+
             end;
-            
+
          until src^.Parent = nil;
-         
+
       except
          if storedi >= 1 then
             DisposeItem(item2);
@@ -305,7 +303,7 @@ begin
    InitFields;
 end;
 
-destructor T23Tree.Destroy; 
+destructor T23Tree.Destroy;
 begin
    Clear;
    inherited;
@@ -339,21 +337,21 @@ begin
             child := 2
          else
             child := 3;
-         
+
          if node^.StoredItems >= 1 then
          begin
             DisposeItem(node^.LowItem[2]);
             Dec(FSize);
          end;
-         
+
          if node^.StoredItems = 2 then
          begin
             DisposeItem(node^.LowItem[3]);
             Dec(FSize);
          end;
-         
+
          DisposeNode(node);
-         
+
          if (child = 1) or ((child = 2) and (parent^.Child[3] <> nil)) then
             node := LeftMostLeafNode(parent^.Child[child + 1])
          else { all children of parent visited - go to parent }
@@ -361,19 +359,19 @@ begin
 
          parent := node^.Parent;
       end;
-      
+
       if node^.StoredItems >= 1 then
       begin
          DisposeItem(node^.LowItem[2]);
          Dec(FSize);
       end;
-      
+
       if node^.StoredItems = 2 then
       begin
          DisposeItem(node^.LowItem[3]);
          Dec(FSize);
       end;
-      
+
       DisposeNode(node);
    end;
 end;
@@ -396,7 +394,7 @@ end;
   above discussion I referred to the physical existence, not logical }
 { advances pair (node,low) to next item }
 procedure T23Tree.AdvanceNode(var node : P23TreeNode; var low : Integer);
-      
+
    procedure FinishTraversalOfSubTree;
    var
       current : P23TreeNode;
@@ -414,7 +412,7 @@ procedure T23Tree.AdvanceNode(var node : P23TreeNode; var low : Integer);
          node := current;
          current := current^.Parent;
       end;
-      
+
       if current <> nil then
       begin
          if current^.Child[1] = node then
@@ -428,7 +426,7 @@ procedure T23Tree.AdvanceNode(var node : P23TreeNode; var low : Integer);
 
 begin
    Assert((node <> nil) or (low = 1), msgAdvancingFinishIterator);
-   
+
    if (node = nil) and (low = 1) then
    begin
       node := LeftMostLeafNode(FRoot);
@@ -474,7 +472,7 @@ var
    parent : P23TreeNode;
 begin
    Assert((node <> nil) or (low = 0), msgInternalError);
-   
+
    if low = 2 then
    begin
       if node^.Child[1] <> nil then
@@ -497,7 +495,7 @@ begin
             node := parent;
             parent := parent^.Parent;
          end;
-         
+
          if parent <> nil then
          begin
             if parent^.Child[3] = node then
@@ -537,7 +535,7 @@ begin
       begin
          Assert((FSize <> 0) or not FValidSize, msgRetreatingStartIterator);
          low := 1;
-      end;   
+      end;
    end;
 end;
 
@@ -545,7 +543,7 @@ function T23Tree.FindNode(aitem : ItemType; startNode : P23TreeNode;
                           var found : P23TreeNode; var low : Integer) : Boolean;
 var
    i : Integer;
-   
+
    function FindNodeAux(node : P23TreeNode) : Boolean;
    begin
       Result := false;
@@ -611,7 +609,7 @@ var
          end;
       end; { end while node <> nil }
    end; { end FindNodeAux }
-   
+
 begin
    if (FSize <> 0) or not FValidSize then
    begin
@@ -630,7 +628,7 @@ begin
          Exit;
       end;
    end;
-   
+
    found := nil;
    low := 0;
    Result := FindNodeAux(startNode);
@@ -672,7 +670,7 @@ begin
          low := 0;
          Result := false;
       end;
-      
+
    end else { empty container }
    begin
       lb := nil;
@@ -691,13 +689,13 @@ var
                        (logically - i.e. not physically contained
                        within that sub-tree) }
    templow : ItemType;
-   
+
 begin
    Assert(parent <> nil, msgInternalError);
    Assert((cnum >= 1) and (cnum <= 3));
 //   Assert(aitem <> nil);
    itemlow := DefaultItem; { to shut the compiler up }
-   try      
+   try
       { now, insert aitem into the tree as cnum+1 child of parent; if
         parent has 4 children after insertion we have to distribute
         the excessive child among neighbour nodes or split it (the
@@ -719,28 +717,28 @@ begin
          Assert(cnum > 0);
          Assert(NodeConsistent(parent));
          Assert((node = nil) or NodeConsistent(node));
-         
+
          if (cnum < 3) and (aitem = itemlow) then
          begin
             inserted := parent;
             low := cnum + 1;
          end;
-      
+
          if cnum = 1 then
          begin
             tempnode := parent^.Child[2];
             templow := parent^.LowItem[2];
             Inc(cnum);
-               
+
             parent^.Child[2] := node;
             if node <> nil then
                node^.Parent := parent;
             parent^.LowItem[2] := itemlow;
-            
+
             node := tempnode;
             itemlow := templow;
          end;
-            
+
          if cnum = 2 then
          begin
             if parent^.StoredItems = 2 then
@@ -754,12 +752,12 @@ begin
             if node <> nil then
                node^.Parent := parent;
             parent^.LowItem[3] := itemlow;
-            
+
             node := tempnode;
             itemlow := templow;
          end;
 
-         
+
          if (cnum = 3) then
          begin
             { parent would have 4 children after insertion - we can
@@ -773,7 +771,7 @@ begin
             { - otherwise, if both neighbours of parent have 3
               children or don't exist, we have to split it into two
               nodes with two children each }
-            
+
             pparent := parent^.Parent;
             if pparent <> nil then
             begin
@@ -784,14 +782,14 @@ begin
                else { if pparent^.Child[3] = parent then }
                   pnum := 3;
             end;
-            
+
             if (pparent <> nil) and (pnum + 1 <= 3) and
                   (pparent^.Child[pnum + 1] <> nil) and
                   (pparent^.Child[pnum + 1]^.StoredItems < 2) then
             begin
                { move the 4th child of parent to the 1st child of its
                  right neighbour }
-               
+
                rn := pparent^.Child[pnum + 1];
                with rn^ do
                begin
@@ -803,18 +801,18 @@ begin
                   Child[1] := node;
                   if node <> nil then
                      node^.Parent := rn;
-                  
+
                   pparent^.LowItem[pnum + 1] := itemlow;
                end;
-               
+
                if pparent^.LowItem[pnum + 1] = aitem then
                begin
                   inserted := pparent;
                   low := pnum + 1;
                end;
-               
+
                break;
-               
+
             end else if (pparent <> nil) and (pnum - 1 >= 1) and
                            (pparent^.Child[pnum - 1] <> nil) and
                            (pparent^.Child[pnum - 1]^.StoredItems < 2) then
@@ -829,18 +827,18 @@ begin
                      ln^.Child[3]^.Parent := ln;
                   ln^.LowItem[3] := pparent^.LowItem[pnum];
                   ln^.StoredItems := 2;
-                  
+
                   pparent^.LowItem[pnum] := LowItem[2];
                   LowItem[2] := LowItem[3];
                   LowItem[3] := itemlow;
 
                   Child[1] := Child[2];
                   Child[2] := Child[3];
-                  Child[3] := node;                  
+                  Child[3] := node;
                end;
                if node <> nil then
                   node^.Parent := parent;
-               
+
                if parent^.LowItem[3] = aitem then
                begin
                   inserted := parent;
@@ -854,10 +852,10 @@ begin
                   inserted := pparent;
                   low := pnum;
                end;
-               
+
                break; { propagation finished - the tree is 'in
                         Ordnung' }
-               
+
             end else { cannot move the execessive child to neighbours }
             begin
                { because cnum is 3 the node from the previous level is
@@ -871,52 +869,52 @@ begin
                begin
                   if Child[1] <> nil then
                      Child[1]^.Parent := pnewnode;
-                  
+
                   Child[2] := node;
                   if node <> nil then
                      node^.Parent := pnewnode;
-                  
+
                   LowItem[2] := itemlow;
-                  
+
                   Child[3] := nil;
                   LowItem[3] := DefaultItem;
-                  
+
                   StoredItems := 1;
                end;
                itemlow := parent^.LowItem[3];
-               
+
                with parent^ do
                begin
                   Child[3] := nil;
                   LowItem[3] := DefaultItem;
                   StoredItems := 1;
                end;
-               
+
                if pnewnode^.LowItem[2] = aitem then
                begin
                   inserted := pnewnode;
                   low := 2;
                end;
-               
+
                { now pnewnode must be inserted at higher level }
                node := pnewnode;
-               
+
                { go one level up }
                parent := pparent;
                cnum := pnum;
-               
+
             end;
-            
+
          end else
             { not cnum = 3 => there is no excessive child - no need to
               proceed }
          begin
             break;
          end;
-           
+
       end; { end while (parent <> nil) and (there is at least one item
              to be inserted) }
-      
+
       if parent = nil then
       begin
          { the root was splitted - we have to create a new root with the
@@ -937,7 +935,7 @@ begin
          node^.Parent := FRoot;
          Inc(FHeight);
       end;
-      
+
    except
       { now, we cannot get the tree back to its previous state and we
         are left with node not connected anywhere and itemlow not
@@ -959,7 +957,7 @@ begin
                DeleteNode(inserted, low);
             end;
          end;
-         
+
          if itemlow <> aitem then
             DisposeItem(itemlow);
          DeleteSubTree(node);
@@ -983,7 +981,7 @@ begin
 {$ifdef TEST_PASCAL_ADT }
 //   LogStatus('DoInsert (aitem = ' + FormatItem(aitem)  +
 //                ', node = %' + IntToStr(PointerValueType(node)) + '%)');
-{$endif TEST_PASCAL_ADT }      
+{$endif TEST_PASCAL_ADT }
 
    if (FSize = 0) and FValidSize then
    begin
@@ -993,7 +991,7 @@ begin
       inserted := nil;
       low := 1;
       Result := true;
-      
+
    end else if FRoot = nil then
    begin
       NewNode(FRoot);
@@ -1005,7 +1003,7 @@ begin
             LowestItem := aitem;
          end else
             LowItem[2] := aitem;
-         
+
          LowItem[3] := DefaultItem;
          for cnum := 1 to 3 do
             Child[cnum] := nil;
@@ -1018,11 +1016,11 @@ begin
       inserted := FRoot;
       low := 2;
       Result := true;
-      
+
    end else if node = nil then
    begin
       Result := DoInsert(aitem, FRoot, inserted, low);
-      
+
    end else if FindNode(aitem, node, parent, cnum) then
    begin
       if RepeatedItems then
@@ -1073,14 +1071,14 @@ begin
             Inc(FSize);
             Result := true;
          end;
-         
+
       end else
       begin
          inserted := nil;
          low := 0;
          Result := false;
       end;
-      
+
    end else if (parent = nil) and (cnum = 1) then
       { aitem should be inserted just before LowestItem }
    begin
@@ -1109,17 +1107,17 @@ begin
 {$ifdef TEST_PASCAL_ADT }
 //   LogStatus('DeleteNode (node = %' + IntToStr(PointerValueType(node)) + '%, low = ' +
 //                IntToStr(low) + ')');
-{$endif TEST_PASCAL_ADT }      
-   
+{$endif TEST_PASCAL_ADT }
+
    Assert((nnode <> nil) or (low = 1), msgInvalidIterator);
    Assert((low >= 1) and (low <= 3), msgInternalError);
-   
+
    Dec(FSize);
-   
+
    if (nnode = nil) and (low = 1) then
    begin
       Result := LowestItem;
-      
+
       if FRoot <> nil then
       begin
          node := LeftMostLeafNode(FRoot);
@@ -1135,10 +1133,10 @@ begin
    end else
    begin
       Result := nnode^.LowItem[low];
-      
+
       node := nnode;
    end;
-   
+
    { now we have to place the second-lowest (logically) item from the
      sub-tree of node^.Child[low] to node^.LowItem[low] and reorganise
      the tree appropriately; the (physical) lowest item in a sub-tree
@@ -1149,7 +1147,7 @@ begin
       { the second item in the left-most leaf is the next item after
         node }
       node^.LowItem[low] := leaf^.LowItem[2];
-      
+
       with leaf^ do
       begin
          LowItem[2] := LowItem[3];
@@ -1161,17 +1159,17 @@ begin
          end else
             onlyOne := true;
       end;
-      
+
       prevnode := leaf;
       node := leaf^.Parent;
-      
+
    end else
    begin
       { node is a leaf (physically, logically it is a parent of leaves)
         - we don't have to find the new low item (as it does not
         exist) - just shift some items if necessary }
       if low = 3 then
-      begin         
+      begin
          node^.LowItem[3] := DefaultItem;
          node^.StoredItems := 1;
          onlyOne := false;
@@ -1189,11 +1187,11 @@ begin
                onlyOne := true;
          end;
       end;
-      
+
       prevnode := node;
       node := node^.Parent;
    end;
-   
+
    { onlyOne indicates whether the node altered on the previous level
      (prevnode) has only one child }
    while (node <> nil) and onlyOne do
@@ -1212,13 +1210,13 @@ begin
             child1^.Child[2] := child2^.Child[1];
             if child1^.Child[2] <> nil then
                child1^.Child[2]^.Parent := child1;
-            
+
             child1^.LowItem[2] := node^.LowItem[2];
             child1^.StoredItems := 1;
-            
+
             node^.LowItem[2] := child2^.LowItem[2];
             with child2^ do
-            begin   
+            begin
                Child[1] := Child[2];
                Child[2] := Child[3];
                LowItem[2] := LowItem[3];
@@ -1226,9 +1224,9 @@ begin
                LowItem[3] := DefaultItem;
                StoredItems := 1;
             end;
-            
+
             onlyOne := false; //
-            
+
          end else
             { child2 has 2 children -> move the two children of
               child2 to child1 }
@@ -1236,11 +1234,11 @@ begin
             child1^.Child[2] := child2^.Child[1];
             if child1^.Child[2] <> nil then
                child1^.Child[2]^.Parent := child1;
-            
+
             child1^.Child[3] := child2^.Child[2];
             if child1^.Child[3] <> nil then
                child1^.Child[3]^.Parent := child1;
-            
+
             child1^.LowItem[2] := node^.LowItem[2];
             child1^.LowItem[3] := child2^.LowItem[2];
             child1^.StoredItems := 2;
@@ -1260,14 +1258,14 @@ begin
             end;
             DisposeNode(child2);
          end;
-         
+
       end else { not node^.Child[1] = prevnode }
       begin
          if node^.Child[2] = prevnode then
             cnum := 2
          else
             cnum := 3;
-         
+
          ln := node^.Child[cnum - 1]; { left neighbour of prevnode }
          if ln^.StoredItems = 2 then
             { left neighbour of prevnode has 3 children -> move its
@@ -1277,20 +1275,20 @@ begin
             begin
                LowItem[2] := node^.LowItem[cnum];
                Child[2] := Child[1];
-               
+
                Child[1] := ln^.Child[3];
                if Child[1] <> nil then
                   Child[1]^.Parent := prevnode;
-               
+
                node^.LowItem[cnum] := ln^.LowItem[3];
                StoredItems := 1;
             end;
             ln^.LowItem[3] := DefaultItem;
             ln^.Child[3] := nil;
             ln^.StoredItems := 1;
-            
+
             onlyOne := false; //
-            
+
          end else
             { left neighbour of prevnode has two children -> move the
               only child of prevnode to it }
@@ -1300,11 +1298,11 @@ begin
             if ln^.Child[3] <> nil then
                ln^.Child[3]^.Parent := ln;
             ln^.StoredItems := 2;
-            
+
             { prevnode does not contain any items any longer and may
               be removed }
             DisposeNode(prevnode);
-            
+
             with node^ do
             begin
                if cnum = 2 then
@@ -1323,12 +1321,12 @@ begin
             end;
          end;
       end;
-      
+
       prevnode := node;
       node := node^.Parent;
-      
+
    end; { end while (node <> nil) and onlyOne }
-   
+
    if onlyOne then
       { the root remained with only one child - make this child the
         new root }
@@ -1344,7 +1342,7 @@ begin
       end;
       Dec(FHeight);
    end;
-   
+
 end;
 
 procedure T23Tree.Implant(node1, node2 : P23TreeNode;
@@ -1362,7 +1360,7 @@ begin
       ExchangeData(lowitem1, lowitem2, SizeOf(ItemType));
       ExchangeData(height1, height2, SizeOf(SizeType));
    end;
-   
+
 {$ifdef DEBUG_PASCAL_ADT }
    if node1 <> nil then
    begin
@@ -1373,7 +1371,7 @@ begin
          Assert(_mcp_lte(tmp^.LowItem[2], lowitem2), msgItemsNotSmaller);
    end;
 {$endif }
-   
+
    if height1 = height2 then
    begin
       NewNode(FRoot);
@@ -1393,7 +1391,7 @@ begin
       end;
       LowestItem := lowitem1;
       FHeight := height1 + 1;
-      
+
    end else if height1 < height2 then
    begin
       { connect node1 at the left of node2 in such a way that the
@@ -1401,28 +1399,28 @@ begin
       FRoot := node2;
       FRoot^.Parent := nil;
       FHeight := height2;
-      
+
       Dec(height2);
       while height2 <> height1 do
       begin
          Dec(height2);
          node2 := node2^.Child[1];
       end;
-      
+
       tmp := node2^.Child[1];
       node2^.Child[1] := node1;
       if node1 <> nil then
          node1^.Parent := node2;
       LowestItem := lowitem1;
       InsertNode(node2, 1, lowitem2, tmp, rubbish1, rubbish2);
-      
+
    end else { height1 > height2 }
    begin
       FRoot := node1;
       FRoot^.Parent := nil;
       FHeight := height1;
       LowestItem := lowitem1;
-      
+
       Dec(height1);
       while height1 <> height2 do
       begin
@@ -1432,12 +1430,12 @@ begin
          else
             node1 := node1^.Child[2];
       end;
-      
+
       if node1^.StoredItems = 2 then
          num := 3
       else
          num := 2;
-      
+
       InsertNode(node1, num, lowitem2, node2, rubbish1, rubbish2);
    end;
 end;
@@ -1461,7 +1459,7 @@ var
    cnode, par : P23TreeNode;
 begin
    inherited LogStatus('T23Tree.' + mName);
-   
+
    if (FSize = 0) and FValidSize then
    begin
       WriteLog('The tree is empty');
@@ -1472,15 +1470,15 @@ begin
       WriteLog('LowestItem: ' + FormatItem(LowestItem));
       Exit;
    end;
-   
+
    level := 0;
    ArrayAllocate(queuei, 100, 0);
    ArrayAllocate(queuen, 100, 0);
-   
-   try      
+
+   try
       ArrayCircularPushBack(queuei, level + 1);
       ArrayCircularPushBack(queuen, FRoot);
-      
+
       { print the content of the tree by levels }
       WriteLog;
       WriteLog('Contents of T23Tree (by reversed levels):');
@@ -1490,7 +1488,7 @@ begin
       else
          WriteLog('LowestItem: none');
       WriteLog;
-      
+
       while queuei^.Size <> 0 do
       begin
          clev := ArrayCircularPopFront(queuei);
@@ -1501,7 +1499,7 @@ begin
             WriteLog('*******************************');
             WriteLog('level *' + IntToStr(level) + '*');
          end;
-         
+
          WriteLog;
          WriteLog('node <' + IntToStr(PointerValueType(cnode)) + '>');
          par := cnode^.Parent;
@@ -1517,18 +1515,18 @@ begin
             begin
                WriteLog('!!!!! Wrong parent !!!!!');
             end;
-         end;        
-         
+         end;
+
          if cnode^.StoredItems >= 1 then { always true  }
             WriteLog('LowItem[2]: ' + FormatItem(cnode^.LowItem[2]))
          else
             WriteLog('LowItem[2]: none');
-         
+
          if cnode^.StoredItems = 2 then
             WriteLog('LowItem[3]: ' + FormatItem(cnode^.LowItem[3]))
          else
             WriteLog('LowItem[3]: none');
-         
+
          WriteLog('Child[1]: %' +
                      IntToStr(PointerValueType(cnode^.Child[1])) + '%');
          WriteLog('Child[2]: %' +
@@ -1545,18 +1543,18 @@ begin
             end;
          end;
       end;
-   
+
    finally
       ArrayDeallocate(queuei);
       ArrayDeallocate(queuen);
    end;
-   
+
 end;
 
 {$endif TEST_PASCAL_ADT }
 
 function T23Tree.CopySelf(const ItemCopier :
-                             IUnaryFunctor) : TContainerAdt; 
+                             IUnaryFunctor) : TContainerAdt;
 begin
    Result := T23Tree.CreateCopy(self, itemCopier);
 end;
@@ -1578,7 +1576,7 @@ begin
       inherited;
 end;
 
-function T23Tree.Start : TSetIterator; 
+function T23Tree.Start : TSetIterator;
 begin
    Result := T23TreeIterator.Create(nil, 1, self);
 end;
@@ -1656,16 +1654,16 @@ var
    low, i, nextlow, prevlow : Integer;
 begin
    Assert(pos is T23TreeIterator, msgInvalidIterator);
-   
+
    node := T23TreeIterator(pos).FNode;
    low := T23TreeIterator(pos).FLow;
-   
+
    if node = nil then
    begin
       Result := DoInsert(aitem, FRoot, node, low);
       Exit;
    end;
-   
+
    _mcp_compare_assign(node^.LowItem[low], aitem, i);
    if i < 0 then
    begin
@@ -1717,7 +1715,7 @@ begin
             i := 0;
       end;
    end;
-   
+
    Result := DoInsert(aitem, node, node, low);
 end;
 
@@ -1735,7 +1733,7 @@ var
 begin
    Assert(pos is T23TreeIterator, msgInvalidIterator);
    Assert(T23TreeIterator(pos).FNode <> nil, msgInvalidIterator);
-   
+
    aitem := DeleteNode(T23TreeIterator(pos).FNode,
                        T23TreeIterator(pos).FLow);
    DisposeItem(aitem);
@@ -1815,15 +1813,15 @@ var
    tree : T23Tree;
 begin
    Assert(aset is T23Tree, msgWrongContainerType);
-   
+
    tree := T23Tree(aset);
-   
+
    Implant(FRoot, tree.FRoot, LowestItem, tree.LowestItem,
            FHeight, tree.FHeight);
-   
+
    FValidSize := FValidSize and tree.FValidSize;
    FSize := FSize + tree.FSize;
-   
+
    with tree do
    begin
       LowestItem := DefaultItem;
@@ -1832,7 +1830,7 @@ begin
       FHeight := 0;
       Destroy;
    end;
-   
+
 end;
 
 function T23Tree.Split(aitem : ItemType) : TConcatenableSortedSetAdt;
@@ -1845,7 +1843,7 @@ var
    depth, height : SizeType;
    tree : T23Tree;
    i : IndexType;
-   
+
 begin
    lforest1 := nil;
    lforest2 := nil;
@@ -1860,7 +1858,7 @@ begin
       ArrayAllocate(rforest1, 90, 0);
       ArrayAllocate(rforest2, 90, 0);
       ArrayAllocate(rforest3, 90, 0);
-      
+
       tree := T23Tree.CreateCopyWithoutItems(self);
 
       if (FSize <> 0) or not FValidSize then
@@ -1901,91 +1899,70 @@ begin
                   ArrayPushBack(rforest1, node^.Child[2]);
                   ArrayPushBack(rforest2, node^.LowItem[2]);
                   ArrayPushBack(rforest3, depth);
-                  
+
                   node := node^.Child[1];
                end else { i >= 0 }
                begin
                   ArrayPushBack(lforest1, node^.Child[1]);
                   ArrayPushBack(lforest2, firstlow);
                   ArrayPushBack(lforest3, depth);
-                  if node^.StoredItems = 3 then
-                  begin
-                     _mcp_compare_assign(aitem, node^.LowItem[3], i);
-                     if i < 0 then
-                     begin
-                        ArrayPushBack(rforest1, node^.Child[3]);
-                        ArrayPushBack(rforest2, node^.LowItem[3]);
-                        ArrayPushBack(rforest3, depth);
-                        firstlow := node^.LowItem[2];
-                        node := node^.Child[2];
-                     end else { i >= 0 }
-                     begin
-                        ArrayPushBack(lforest1, node^.Child[2]);
-                        ArrayPushBack(lforest2, node^.LowItem[2]);
-                        ArrayPushBack(lforest3, depth);
-                        firstlow := node^.LowItem[3];
-                        node := node^.Child[3];
-                     end;
-                  end else
-                  begin
-                     firstlow := node^.LowItem[2];
-                     node := node^.Child[2];
-                  end;
+                  firstlow := node^.LowItem[2];
+                  node := node^.Child[2];
                end; { end if }
-               
+
                Inc(depth);
-               
+
                DisposeNode(dnode);
-               
+
             end; { end while }
-            
+
             { now firstlow <= aitem and every node with items > aitem is
               placed in the right forest (rforest) and every node with
               items <= aitem is placed in the left forest (lforest) ->
               just join the nodes in each forest into one tree }
-               
+
             height := FHeight; { the original height of the whole tree }
-            
+
             { join the nodes with items <= aitem into one tree  }
             LowestItem := firstlow;
             FRoot := nil;
             FHeight := 0;
             FValidSize := false;
-            
+
             while lforest1^.Size <> 0 do
             begin
                Assert(lforest1^.Size = lforest2^.Size);
                Assert(lforest2^.Size = lforest3^.Size);
-               
+
                node := P23TreeNode(ArrayPopBack(lforest1));
                itemlow := ArrayPopBack(lforest2);
                depth := ArrayPopBack(lforest3);
                Implant(node, FRoot, itemlow, LowestItem,
                        height - depth, FHeight);
             end;
-            
+
             { join the nodes with items > aitem into one tree }
             if rforest1^.Size <> 0 then
             begin
                Assert(rforest1^.Size = rforest2^.Size);
                Assert(rforest2^.Size = rforest3^.Size);
-               
+
                with tree do
                begin
                   FRoot := P23TreeNode(ArrayPopBack(rforest1));
                   LowestItem := ArrayPopBack(rforest2);
                   FHeight := height - ArrayPopBack(rforest3);
-                  
+
                   if FRoot <> nil then
                      FRoot^.Parent := nil;
                   FValidSize := false;
-                  
+
                   while rforest1^.Size <> 0 do
                   begin
                      node := P23TreeNode(ArrayPopBack(rforest1));
                      itemlow := ArrayPopBack(rforest2);
                      depth := ArrayPopBack(rforest3);
-                     
+
                      Implant(FRoot, node, LowestItem, itemlow,
                              FHeight, height - depth);
                   end;
@@ -2003,9 +1980,9 @@ begin
             end;
          end;
       end;
-      
+
       Result := tree;
-      
+
    finally
       ArrayDeallocate(lforest1);
       ArrayDeallocate(lforest2);
@@ -2074,7 +2051,7 @@ end;
 function T23TreeIterator.Equal(const Pos : TIterator) : Boolean;
 begin
    Assert(pos is T23TreeIterator, msgInvalidIterator);
-   
+
    Result := (FNode = T23TreeIterator(pos).FNode) and
       (FLow = T23TreeIterator(pos).FLow);
 end;
@@ -2082,7 +2059,7 @@ end;
 function T23TreeIterator.GetItem : ItemType;
 begin
    Assert((FNode <> nil) or (FLow = 1), msgInvalidIterator);
-   
+
    if FLow <> 1 then
       Result := FNode^.LowItem[FLow]
    else
@@ -2094,7 +2071,7 @@ var
    oldItem : ItemType;
 begin
    Assert((FNode <> nil) or (FLow = 1), msgInvalidIterator);
-   
+
    if FLow <> 1 then
    begin
       oldItem := FNode^.LowItem[FLow];
@@ -2104,7 +2081,7 @@ begin
       oldItem := FTree.LowestItem;
       FTree.LowestItem := aitem;
    end;
-   
+
    with FTree do
    begin
       if _mcp_equal(oldItem, aitem) then
@@ -2126,17 +2103,17 @@ begin
    FTree.DoInsert(aitem, FTree.FRoot, FNode, FLow);
 end;
 
-procedure T23TreeIterator.Advance; 
+procedure T23TreeIterator.Advance;
 begin
    FTree.AdvanceNode(FNode, FLow);
 end;
 
-procedure T23TreeIterator.Retreat; 
+procedure T23TreeIterator.Retreat;
 begin
    FTree.RetreatNode(FNode, FLow)
 end;
 
-procedure T23TreeIterator.Insert(aitem : ItemType); 
+procedure T23TreeIterator.Insert(aitem : ItemType);
 begin
    FTree.DoInsert(aitem, FTree.FRoot, FNode, FLow);
 end;
@@ -2149,7 +2126,7 @@ var
    shouldSearch : Boolean;
 begin
    Assert(not IsFinish, msgDeletingInvalidIterator);
-   
+
    nextNode := FNode;
    nextLow := FLow;
    FTree.AdvanceNode(nextNode, nextLow);
@@ -2159,11 +2136,11 @@ begin
       aitem := nextNode^.LowItem[nextLow]
    end else
       shouldSearch := false;
-   
+
    { keep in mind that the tree is reorganised in this function, so we
      have to find aitem in the the tree again }
    Result := FTree.DeleteNode(FNode, FLow);
-   
+
    if shouldSearch then
    begin
       FTree.LowerBoundNode(aitem, FTree.FRoot, FNode, FLow);
@@ -2174,17 +2151,17 @@ begin
       FNode := nil;
       FLow := 0;
    end;
-   
+
    { note: this function is not 100% correct with repeated items (some
      may be visited more than once); but how to fix it?  }
 end;
 
-function T23TreeIterator.Owner : TContainerAdt; 
+function T23TreeIterator.Owner : TContainerAdt;
 begin
    Result := FTree;
 end;
 
-function T23TreeIterator.IsStart : Boolean; 
+function T23TreeIterator.IsStart : Boolean;
 begin
    Result := (FNode = nil) and ((FLow = 1) or
                                    ((FLow = 0) and
@@ -2195,4 +2172,3 @@ function T23TreeIterator.IsFinish : Boolean;
 begin
    Result := (FNode = nil) and (FLow = 0);
 end;
-
