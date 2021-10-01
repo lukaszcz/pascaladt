@@ -1798,9 +1798,6 @@ var
    iter : TSetIterator;
    aitem : ItemType;
 begin
-// &<_mcp_set_zero> is due to a bug in fpc 2.0.1 which I am
-// unfortunately not able to reproduce in a smaller program
-   _mcp_set_zero(Result, SizeOf(Pointer));
    Result := itemCopier;
    iter := set2.Start;
    while not iter.IsFinish do

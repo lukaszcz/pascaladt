@@ -54,8 +54,7 @@ initialization
 finalization
 
 if existingIters <> 0 then
-   WriteLn('PascalADT warning: ' + msgLeakedIterators + ' (' +
-                                   IntToStr(existingIters) + ')');
+   WriteLn(msgLeakedIterators + ' (' + IntToStr(existingIters) + ' iterators leaked)');
 
 {$endif DEBUG_PASCAL_ADT }
 end.

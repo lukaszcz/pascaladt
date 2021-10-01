@@ -46,7 +46,7 @@
   nodes. FCapacity is the number of buckets allocated. FSize is the
   number of items stored in the table. FTableSize is
   log2(FCapacity). When the ratio FSize/FCapacity exceeds
-  MaxFiillRatio then the table is Rehash'ed to be two times
+  MaxFillRatio then the table is Rehash'ed to be two times
   bigger. AutoShrink can be set to true to make the table shrink
   automatically when it contains less than
   (MinFillRatio*FCapacity)/100 items. FCanShrink is used to keep track
@@ -119,9 +119,13 @@ begin
    inherited CreateCopy(ht);
 
    FSize := 0;
+   FMaxFillRatio := ht.FMaxFillRatio;
+   FMinFillRatio := ht.FMinFillRatio;
 
    if itemCopier <> nil then
    begin
+      FCanShrink := ht.FCanShrink;
+      FFirstUsedBucket := ht.FFirstUsedBucket;
       FTableSize := ht.FTableSize;
       FCapacity := ht.FCapacity;
       GetMem(Pointer(FBuckets), FCapacity * SizeOf(THashNode));
@@ -260,19 +264,30 @@ end;
 
 procedure THashTable.RetreatToNearestItem(var bucket : IndexType;
                                           var node : PHashNode);
+var
+   prev : PHashNode;
 begin
    Assert(bucket <= FCapacity, msgInvalidIterator);
 
-   if node = nil then
+   if bucket = FCapacity then
+      Dec(bucket);
+
+   Assert(bucket >= 0, msgRetreatingStartIterator);
+
+   while FBuckets^.Bucket[bucket].Next = @FBuckets^.Bucket[bucket] do
    begin
-      while (bucket >= 0) and
-               ((bucket >= FCapacity) or
-                   (FBuckets^.Bucket[bucket].Next = @FBuckets^.Bucket[bucket]))  do
-      begin
-         Dec(bucket);
-      end;
+      Dec(bucket);
       Assert(bucket >= 0, msgRetreatingStartIterator);
    end;
+
+   prev := nil;
+   node := @FBuckets^.Bucket[bucket];
+   while node^.Next <> nil do
+   begin
+      prev := node;
+      node := node^.Next;
+   end;
+   node := prev;
 end;
 
 function THashTable.EqualItemsAhead(var bucket : IndexType;
@@ -444,7 +459,6 @@ begin
    FFirstUsedBucket := -1;
 end;
 
-
 procedure THashTable.NewNode(var node : PHashNode);
 begin
    New(node);
@@ -576,8 +590,6 @@ end;
 function THashTable.Start : TSetIterator;
 begin
    Result := THashTableIterator.Create(0, nil, self);
-   AdvanceToNearestItem(THashTableIterator(Result).FBucket,
-                        THashTableIterator(Result).FNode);
 end;
 
 function THashTable.Finish : TSetIterator;
@@ -606,8 +618,8 @@ begin
       end else begin
          InsertNode(bucket, node, aitem);
          Result := nil;
+         CheckMaxFillRatio;
       end;
-      CheckMaxFillRatio;
    end;
 end;
 
@@ -1073,14 +1085,16 @@ end;
 
 procedure THashTableIterator.Advance;
 begin
-   Assert(FBucket < FTAble.FCapacity, msgAdvancingInvalidIterator);
+   Assert(FBucket < FTable.FCapacity, msgAdvancingInvalidIterator);
 
-   if (FNode <> nil) and (FNode^.Next <> nil) then
+   if (FNode <> nil) then
    begin
+      Assert (FNode^.Next <> nil, 'Invalid iterator');
       FNode := FNode^.Next;
-   end else if (FNode = nil) then
+   end else
    begin
       FNode := @FTable.FBuckets^.Bucket[FBucket];
+      Assert (FNode^.Next <> FNode, 'Invalid iterator');
    end;
 
    if (FNode^.Next = nil) then
@@ -1097,26 +1111,27 @@ begin
    begin
       if FBucket < FCapacity then
       begin
-         if Bucket[FBucket].Next <> @Bucket[FBucket] then
+         Assert (Bucket[FBucket].Next <> @Bucket[FBucket], 'Invalid iterator');
+         if FNode = nil then
          begin
-            if FNode = nil then
+            Dec(FBucket);
+            FTable.RetreatToNearestItem(FBucket, FNode);
+         end else
+         begin
+            node := @Bucket[FBucket];
+            if FNode = node then
             begin
-               Dec(FBucket);
-               FTable.RetreatToNearestItem(FBucket, FNode);
+               FNode := nil;
             end else
             begin
-               node := @Bucket[FBucket];
                while node^.Next <> FNode do
                   node := node^.Next;
                FNode := node;
             end;
-         end else
-         begin
-            FNode := nil;
-            FTable.RetreatToNearestItem(FBucket, FNode);
          end;
       end else
       begin
+         Assert (FNode = nil, 'Invalid iterator');
          FTable.RetreatToNearestItem(FBucket, FNode);
       end;
    end;
@@ -1176,13 +1191,6 @@ begin
             Result := true
          else
             Result := false;
-      end else if (FBucket > 1) and
-                     ((FBuckets^.Bucket[FBucket-1].Next <>
-                          @FBuckets^.Bucket[FBucket-1]) or
-                         (FBuckets^.Bucket[FBucket-2].Next <>
-                             @FBuckets^.Bucket[FBucket-2])) then
-      begin
-         Result := false;
       end else if FFirstUsedBucket <> -1 then
       begin
          Result := FBucket = FFirstUsedBucket;

@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -28,7 +28,7 @@
 &include adtbintree.defs
 
 type
-   
+
 { =========================== General binary tree ============================ }
 
    { a node of a binary tree @see TBinaryTree @include-declarations 2 }
@@ -40,7 +40,7 @@ type
       Item : ItemType;
       Parent, LeftChild, RightChild : PBinaryTreeNode;
    end;
-   
+
    TBinaryTreeIterator = class;
 
    { a binary tree }
@@ -49,7 +49,7 @@ type
       FRoot : PBinaryTreeNode;
       FSize : SizeType;
       FValidSize : Boolean;
-      
+
       procedure InitFields;
       procedure DisposeNodeAndItem(node : PBinaryTreeNode);
       { replaces node old with newnode; old is disconnected from the tree;
@@ -130,7 +130,7 @@ type
       function Size : SizeType; override;
       { returns false }
       function IsDefinedOrder : Boolean; override;
-      
+
       { returns a pointer to the root node (PBinaryTreeNode); this may
         be sometimes useful in performance-critical parts of
         application, but does not have the common, extensible
@@ -182,7 +182,7 @@ type
                                   fadvance : Boolean) : PBinaryTreeNode;
       { the same as @<ExtractNodeInOrder>, but has one additional
         boolean var parameter which is set to true when the node
-        actually disposed was the left child, and to false if it was a
+        actually disposed was the left child, and to false if it was the
         right child. }
       function ExtractNodeInOrderAux(var node : PBinaryTreeNode;
                                      fadvance : Boolean;
@@ -277,7 +277,7 @@ type
    private
       Node : PBinaryTreeNode;
       FTree : TBinaryTree;
-      
+
       {$warnings off }
       constructor Create(tree : TBinaryTree);
       {$warnings on }
@@ -312,7 +312,7 @@ type
    private
       Node : PBinaryTreeNode;
       FTree : TBinaryTree;
-      
+
       {$warnings off }
       constructor Create(tree : TBinaryTree);
       {$warnings on }
@@ -324,7 +324,7 @@ type
       procedure StartTraversal; override;
       { moves the iterator to the next node according to postorder
         traversal order; @complexity amortized O(1) }
-      procedure Advance; overload; override; 
+      procedure Advance; overload; override;
       { moves the iterator to the previous node; @complexity amortized O(1). }
       procedure Retreat; override;
       { Inserts at the current position, advances to next position
@@ -348,7 +348,7 @@ type
    private
       Node : PBinaryTreeNode;
       FTree : TBinaryTree;
-      
+
       {$warnings off }
       constructor Create(tree : TBinaryTree);
       {$warnings on }
@@ -360,7 +360,7 @@ type
       procedure StartTraversal; override;
       { moves the iterator to the next node according to inorder
         traversal order; @complexity amortized O(1) }
-      procedure Advance; overload; override; 
+      procedure Advance; overload; override;
       { moves the iterator to the previous node; @complexity amortized O(1). }
       procedure Retreat; override;
       { Inserts at the current position, advances to next position
@@ -390,12 +390,14 @@ type
       queue : TPointerDynamicArray; { this queue is used to store
                                       pointers to the nodes to be
                                       visited }
-      
+
       { pushes children at the queue }
       procedure PushChildren;
       { performs initialization (you still have to call StartTraversal) }
       {$warnings off }
       constructor Create(tree : TBinaryTree);
+      constructor CreateCopy(tree : TBinaryTree; anode : PBinaryTreeNode;
+                             aqueue : TPointerDynamicArray);
       {$warnings on }
    public
       destructor Destroy; override;
@@ -406,7 +408,7 @@ type
       procedure StartTraversal; override;
       { moves the iterator to the next node according to levelorder
         traversal order }
-      procedure Advance; overload; override; 
+      procedure Advance; overload; override;
       { moves the iterator to the previous node; @complexity worst case O(n). }
       procedure Retreat; override;
       { Inserts at the current position, advances to next position
@@ -425,9 +427,9 @@ type
       { returns true if self is the first iterator }
       function IsStart : Boolean; override;
    end;
-   
+
 { ---------------------- non-member routines -------------------------------- }
-   
+
 { returns the parent of iter or nil if iter does not have parent }
 function Parent(const iter : TBinaryTreeIterator) : TBinaryTreeIterator;
 { returns the right child of iter or nil if iter does not have a right child }
@@ -495,4 +497,3 @@ function NodeDepth(node : PBinaryTreeNode) : SizeType;
 { returns the height of node; @complexity O(h), where h is the height
   of the tree }
 function NodeHeight(node : PBinaryTreeNode) : SizeType;
-

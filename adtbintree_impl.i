@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -44,7 +44,7 @@ end;
 
 function RightMostLeafNode(subtree : PBinaryTreeNode) : PBinaryTreeNode;
 begin
-   Result := subtree;   
+   Result := subtree;
    while subtree <> nil do
    begin
       Result := subtree;
@@ -61,7 +61,7 @@ end;
 function FirstInOrderNode(subtree : PBinaryTreeNode) : PBinaryTreeNode;
 begin
    Result := subtree;
-   
+
    if Result <> nil then
       while Result^.LeftChild <> nil do
          Result := Result^.LeftChild;
@@ -73,7 +73,7 @@ end;
 function LastInOrderNode(subtree : PBinaryTreeNode) : PBinaryTreeNode;
 begin
    Result := subtree;
-   
+
    if Result <> nil then
       while Result^.RightChild <> nil do
          Result := Result^.RightChild;
@@ -143,7 +143,7 @@ function PrevPreOrderNode(node, root : PBinaryTreeNode) : PBinaryTreeNode;
 begin
    Assert(root <> nil, msgRetreatingStartIterator);
    Assert(node <> root, msgRetreatingStartIterator);
-   
+
    if node <> nil then
    begin
       if node^.Parent^.LeftChild <> node then
@@ -158,7 +158,7 @@ end;
 function PrevPostOrderNode(node, root : PBinaryTreeNode) : PBinaryTreeNode;
 begin
    Assert(root <> nil, msgRetreatingStartIterator);
-   
+
    if node <> nil then
    begin
       if node^.RightChild <> nil then
@@ -182,7 +182,7 @@ end;
 function PrevInOrderNode(node, root : PBinaryTreeNode) : PBinaryTreeNode;
 begin
    Assert(root <> nil, msgRetreatingStartIterator);
-   
+
    if node <> nil then
    begin
       if node^.LeftChild <> nil then
@@ -256,7 +256,7 @@ begin
             parent := parent^.LeftChild;
          parent^.LeftChild := node;
          node^.Parent := parent;
-         
+
          raise;
       end;
    finally
@@ -283,7 +283,7 @@ begin
                parent^.LeftChild := node1;
                node1 := parent^.RightChild;
                parent^.RightChild := node2;
-               
+
                ArrayCircularPushBack(queue, parent^.LeftChild);
                ArrayCircularPushBack(queue, parent^.RightChild);
 
@@ -296,10 +296,10 @@ begin
                parent^.RightChild := node2;
                node2 := parent^.RightChild;
                parent^.LeftChild := node1;
-               
+
                ArrayCircularPushBack(queue, parent^.LeftChild);
                ArrayCircularPushBack(queue, parent^.RightChild);
-               
+
                parent := ArrayCircularPopFront(queue);
                InsertLeftAndShiftBy1(parent, node2, queue);
                queue := nil;
@@ -324,7 +324,7 @@ begin
          while parent^.LeftChild <> nil do
             parent := parent^.LeftChild;
          node1^.Parent := nil;
-         
+
          raise;
       end;
    finally
@@ -361,15 +361,15 @@ var
 begin
    inherited CreateCopy(cont);
    InitFields;
-   
+
    if itemCopier <> nil then
    begin
       { copy nodes while going pre-order }
-      
+
       src := cont.FRoot;
       pdest := @FRoot;
       destparent := nil;
-      
+
       try
          repeat
             NewNode(pdest^);
@@ -381,7 +381,7 @@ begin
                RightChild := nil;
             end;
             Inc(FSize);
-            
+
             if src^.LeftChild <> nil then
             begin
                destparent := pdest^;
@@ -402,7 +402,7 @@ begin
                   pdest := @pdest^^.Parent;
                   destparent := destparent^.Parent;
                end;
-               
+
                if src^.Parent = nil then
                begin
                   break;
@@ -412,15 +412,15 @@ begin
                   pdest := @destparent^.RightChild;
                end;
             end;
-            
+
          until false;
-         
+
       except
          DisposeNode(pdest^);
          pdest^ := nil;
          raise;
       end;
-      
+
       cont.FSize := FSize;
       cont.FValidSize := true;
    end; { end itemCopier <> nil }
@@ -448,21 +448,21 @@ end;
 procedure TBinaryTree.ReplaceNode(old, pnewnode : PBinaryTreeNode);
 begin
    Assert(old <> nil, msgInternalError);
-   
+
    if old^.Parent <> nil then
    begin
       if old^.Parent^.LeftChild = old then
          old^.Parent^.LeftChild := pnewnode
       else
          old^.Parent^.RightChild := pnewnode;
-      
+
       if pnewnode <> nil then
          pnewnode^.Parent := old^.Parent;
-      
+
    end else
    begin
       FRoot := pnewnode;
-      
+
       if pnewnode <> nil then
          pnewnode^.Parent := nil;
    end;
@@ -487,7 +487,7 @@ end;
 
 function TBinaryTree.CopySelf(const ItemCopier : IUnaryFunctor) : TContainerAdt;
 begin
-   Result := TBinaryTree.CreateCopy(self, ItemCopier);   
+   Result := TBinaryTree.CreateCopy(self, ItemCopier);
 end;
 
 procedure TBinaryTree.Swap(cont : TContainerAdt);
@@ -568,7 +568,7 @@ begin
    temp^.Parent := nil;
    temp^.RightChild := nil;
    temp^.Item := aitem;
-   
+
    Inc(FSize);
 end;
 
@@ -619,11 +619,11 @@ begin
    Assert(TBinaryTreeIterator(src).Node <> nil, msgInvalidIterator);
    Assert(TBinaryTreeIterator(node).Node^.LeftChild = nil, msgHasLeftChild);
    Assert(node.Owner = self, msgWrongOwner);
-   
+
    dest := TBinaryTreeIterator(node).Node;
    source := TBinaryTreeIterator(src).Node;
    tree2 := TBinaryTreeIterator(src).FTree;
-   
+
    if (source^.RightChild = nil) and (source^.LeftChild = nil) then
    begin
       Inc(FSize);
@@ -640,9 +640,9 @@ begin
       FValidSize := false;
       tree2.FValidSize := false;
    end;
-   
+
    tree2.RemoveConnections(source);
-   
+
    dest^.LeftChild := source;
    source^.Parent := dest;
 end;
@@ -658,11 +658,11 @@ begin
    Assert(TBinaryTreeIterator(src).Node <> nil, msgInvalidIterator);
    Assert(TBinaryTreeIterator(node).Node^.RightChild = nil, msgHasRightChild);
    Assert(node.Owner = self, msgWrongOwner);
-   
+
    dest := TBinaryTreeIterator(node).Node;
    source := TBinaryTreeIterator(src).Node;
    tree2 := TBinaryTreeIterator(src).FTree;
-   
+
    if (source^.RightChild = nil) and (source^.LeftChild = nil) then
    begin
       Inc(FSize);
@@ -679,9 +679,9 @@ begin
       FValidSize := false;
       tree2.FValidSize := false;
    end;
-   
+
    tree2.RemoveConnections(source);
-   
+
    dest^.RightChild := source;
    source^.Parent := dest;
 end;
@@ -689,28 +689,28 @@ end;
 procedure TBinaryTree.RotateSingleLeft(const node : TBasicTreeIterator);
 begin
    Assert(node is TBinaryTreeIterator, msgInvalidIterator);
-   
+
    RotateNodeSingleLeft(TBinaryTreeIterator(node).Node);
 end;
 
 procedure TBinaryTree.RotateDoubleLeft(const node : TBasicTreeIterator);
 begin
    Assert(node is TBinaryTreeIterator, msgInvalidIterator);
-   
+
    RotateNodeDoubleLeft(TBinaryTreeIterator(node).Node);
 end;
 
 procedure TBinaryTree.RotateSingleRight(const node : TBasicTreeIterator);
 begin
    Assert(node is TBinaryTreeIterator, msgInvalidIterator);
-   
+
    RotateNodeSingleRight(TBinaryTreeIterator(node).Node);
 end;
 
 procedure TBinaryTree.RotateDoubleRight(const node : TBasicTreeIterator);
 begin
    Assert(node is TBinaryTreeIterator, msgInvalidIterator);
-   
+
    RotateNodeDoubleRight(TBinaryTreeIterator(node).Node);
 end;
 
@@ -723,7 +723,7 @@ begin
    end;
    FSize := 0;
    FValidSize := true;
-   
+
    GrabageCollector.FreeObjects;
 end;
 
@@ -785,7 +785,7 @@ var
    lleaf, next : PBinaryTreeNode;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    if (node^.RightChild = nil) then
    begin
       ReplaceNode(node, node^.LeftChild);
@@ -818,8 +818,8 @@ begin
          if next = nil then
             next := lleaf^.RightChild;
       end;
-      
-      Result := lleaf^.Parent;            
+
+      Result := lleaf^.Parent;
       RemoveConnections(lleaf);
       DisposeNode(lleaf);
    end;
@@ -839,7 +839,7 @@ begin
          next := NextPostOrderNode(node)
       else
          next := nil;
-      
+
       if node^.LeftChild = nil then
          ReplaceNode(node, node^.RightChild)
       else
@@ -861,7 +861,7 @@ begin
          if node = nil then
             node := rleaf^.LeftChild;
       end;
-      
+
       Result := rleaf^.Parent;
       RemoveConnections(rleaf);
       DisposeNode(rleaf);
@@ -885,7 +885,7 @@ var
    nnode : PBinaryTreeNode;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    if (node^.RightChild <> nil) and (node^.LeftChild <> nil) then
    begin
       { 'toss a coin' and either replace node with the next item after
@@ -894,9 +894,9 @@ begin
       if Random(2) = 0 then
       begin
          { replace with the next item }
-         
+
          nnode := FirstInOrderNode(node^.RightChild);
-         
+
          if nnode^.Parent^.LeftChild = nnode then
          begin
             isLeftChild := true;
@@ -906,19 +906,19 @@ begin
             isLeftChild := false;
             nnode^.Parent^.RightChild := nnode^.RightChild;
          end;
-         
+
          if nnode^.RightChild <> nil then
             nnode^.RightChild^.Parent := nnode^.Parent;
-         
+
          node^.Item := nnode^.Item;
          Result := nnode^.Parent;
          DisposeNode(nnode);
       end else
       begin
          { replace with the previous item }
-         
+
          nnode := LastInOrderNode(node^.LeftChild);
-         
+
          if nnode^.Parent^.RightChild = nnode then
          begin
             isLeftChild := false;
@@ -928,17 +928,17 @@ begin
             isLeftChild := true;
             nnode^.Parent^.LeftChild := nnode^.LeftChild;
          end;
-         
+
          if nnode^.LeftChild <> nil then
             nnode^.LeftChild^.Parent := nnode^.Parent;
-         
+
          node^.Item := nnode^.Item;
-         
+
          if fadvance then
             node := FirstInOrderNode(node^.RightChild)
          else
             node := nil;
-         
+
          Result := nnode^.Parent;
          DisposeNode(nnode);
       end;
@@ -948,15 +948,15 @@ begin
          nnode := NextInOrderNode(node)
       else
          nnode := nil;
-      
+
       Result := node^.Parent;
       isLeftChild := (node^.Parent <> nil) and (node^.Parent^.LeftChild = node);
-      
+
       if node^.RightChild <> nil then
          ReplaceNode(node, node^.RightChild)
       else
          ReplaceNode(node, node^.LeftChild);
-      
+
       DisposeNode(node);
       node := nnode;
    end;
@@ -969,17 +969,17 @@ var
 begin
    Assert((node <> nil) and (node^.RightChild <> nil),
           msgInvalidNodeForSingleLeftRotation);
-   
+
    parent := node^.Parent;
    rchild := node^.RightChild;
-   
+
    node^.RightChild := rchild^.LeftChild;
    if rchild^.LeftChild <> nil then
       rchild^.LeftChild^.Parent := node;
-   
+
    rchild^.LeftChild := node;
    node^.Parent := rchild;
-   
+
    rchild^.Parent := parent;
    if parent <> nil then
    begin
@@ -1000,24 +1000,24 @@ begin
    Assert((node <> nil) and (node^.RightChild <> nil) and
              (node^.RightChild^.LeftChild <> nil),
           msgInvalidNodeForDoubleLeftRotation);
-   
+
    parent := node^.Parent;
    rchild := node^.RightChild;
    t := rchild^.LeftChild;
-   
+
    node^.RightChild := t^.LeftChild;
    if t^.LeftChild <> nil then
       t^.LeftChild^.Parent := node;
-   
+
    rchild^.LeftChild := t^.RightChild;
    if t^.RightChild <> nil then
       t^.RightChild^.Parent := rchild;
-   
+
    t^.LeftChild := node;
    t^.RightChild := rchild;
    node^.Parent := t;
    rchild^.Parent := t;
-   
+
    t^.Parent := parent;
    if parent <> nil then
    begin
@@ -1035,17 +1035,17 @@ var
 begin
    Assert((node <> nil) and (node^.LeftChild <> nil),
           msgInvalidNodeForSingleRightRotation);
-   
+
    parent := node^.Parent;
    lchild := node^.LeftChild;
-   
+
    node^.LeftChild := lchild^.RightChild;
    if node^.LeftChild <> nil then
       node^.LeftChild^.Parent := node;
-   
+
    lchild^.RightChild := node;
    node^.Parent := lchild;
-   
+
    lchild^.Parent := parent;
    if parent <> nil then
    begin
@@ -1064,24 +1064,24 @@ begin
    Assert((node <> nil) and (node^.LeftChild <> nil) and
              (node^.LeftChild^.RightChild <> nil),
           msgInvalidNodeForDoubleRightRotation);
-   
+
    parent := node^.Parent;
    lchild := node^.LeftChild;
    t := lchild^.RightChild;
-   
+
    lchild^.RightChild := t^.LeftChild;
    if lchild^.RightChild <> nil then
       lchild^.RightChild^.Parent := lchild;
-   
+
    node^.LeftChild := t^.RightChild;
    if node^.LeftChild <> nil then
       node^.LeftChild^.Parent := node;
-   
+
    t^.LeftChild := lchild;
    t^.RightChild := node;
    lchild^.Parent := t;
    node^.Parent := t;
-   
+
    t^.Parent := parent;
    if parent <> nil then
    begin
@@ -1114,16 +1114,16 @@ begin
       begin
          nnode := LeftMostLeafNode(nnode^.Parent^.RightChild);
       end;
-      
+
       DisposeItem(node2^.Item);
       DisposeNode(node2);
       Dec(FSize);
-      
+
       node2 := nnode;
    end;
    DisposeNodeAndItem(node);
    Dec(FSize);
-   
+
    Result := Result - FSize;
 end;
 
@@ -1141,7 +1141,7 @@ begin
          node2 := node^.RightChild
       else
          node2 := node;
-      
+
       while node2 <> node do
       begin
          Inc(Result);
@@ -1238,7 +1238,7 @@ end;
 function TBinaryTreeIterator.Equal(const iter : TIterator) : Boolean;
 begin
    Assert(iter is TBinaryTreeIterator, msgInvalidIterator);
-   
+
    Result := (TBinaryTreeIterator(iter).Node = Node);
 end;
 
@@ -1348,7 +1348,7 @@ end;
 procedure TBinaryTreePreOrderIterator.Advance;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    node := NextPreOrderNode(node);
 end;
 
@@ -1368,7 +1368,7 @@ begin
       { insert as parent of Node and make Node a left child }
    begin
       FTree.ReplaceNode(Node, pnewnode);
-      
+
       with pnewnode^ do
       begin
          Node^.Parent := pnewnode;
@@ -1390,7 +1390,7 @@ begin
          pnewnode^.Parent := nil;
       end;
    end;
-   
+
    Node := pnewnode;
    Inc(FTree.FSize);
 end;
@@ -1461,7 +1461,7 @@ begin
       end;
       Node^.LeftChild := pnewnode;
       Node^.RightChild := nil;
-      
+
       Node := pnewnode;
       Inc(FTree.FSize);
    end else
@@ -1530,7 +1530,7 @@ var
 begin
    FTree.NewNode(pnewnode);
    pnewnode^.Item := aitem;
-   
+
    if Node <> nil then
       { make pnewnode the left child of Node and make Node's left child
         pnewnode's left child. }
@@ -1560,7 +1560,7 @@ begin
       pnewnode^.LeftChild := nil;
       pnewnode^.RightChild := nil;
    end;
-   
+
    Node := pnewnode;
    Inc(FTree.FSize);
 end;
@@ -1597,6 +1597,16 @@ begin
    ArrayAllocate(queue, InitialQueueSize, 0);
 end;
 
+constructor TBinaryTreeLevelOrderIterator.CreateCopy(tree : TBinaryTree;
+                                                     anode : PBinaryTreeNode;
+                                                     aqueue : TPointerDynamicArray);
+begin
+   inherited Create(tree);
+   FTree := tree;
+   node := anode;
+   queue := aqueue;
+end;
+
 destructor TBinaryTreeLevelOrderIterator.Destroy;
 begin
    ArrayDeallocate(queue);
@@ -1611,9 +1621,7 @@ begin
    Result := nil;
    try
       ArrayCopy(queue, queue2);
-      Result := TBinaryTreeLevelOrderIterator.Create(FTree);
-      TBinaryTreeLevelOrderIterator(Result).Node := Node;
-      TBinaryTreeLevelOrderIterator(Result).queue := queue2;
+      Result := TBinaryTreeLevelOrderIterator.CreateCopy(FTree, Node, queue2);
    except
       ArrayDeallocate(queue2);
       Result.Free;
@@ -1625,20 +1633,20 @@ end;
 procedure TBinaryTreeLevelOrderIterator.PushChildren;
 begin
    if Node <> nil then
-   begin      
+   begin
       try
          if Node^.LeftChild <> nil then
             ArrayCircularPushBack(queue, Node^.LeftChild);
-         
+
          if Node^.RightChild <> nil then
             ArrayCircularPushBack(queue, Node^.RightChild);
       except
          if ArrayCircularGetItem(queue, queue^.Size - 1) = Node^.RightChild then
             Dec(queue^.Size);
-         
+
          if ArrayCircularGetItem(queue, queue^.Size - 1) = Node^.LeftChild then
             Dec(queue^.Size);
-         
+
          raise;
       end;
    end;
@@ -1653,7 +1661,7 @@ end;
 procedure TBinaryTreeLevelOrderIterator.Advance;
 begin
    Assert(Node <> nil, msgAdvancingInvalidIterator);
-   
+
    PushChildren;
    if queue^.Size <> 0 then
    begin
@@ -1668,7 +1676,7 @@ var
 begin
    Assert(FTree.FRoot <> nil, msgRetreatingStartIterator);
    Assert(Node <> FTree.FRoot, msgRetreatingStartIterator);
-   
+
    if Node <> nil then
    begin
       queue^.Size := 0;
@@ -1700,7 +1708,7 @@ procedure TBinaryTreeLevelOrderIterator.Insert(aitem : ItemType);
 var
    pnewnode, xnode, parent : PBinaryTreeNode;
    queue2 : TPointerDynamicArray;
-   
+
    procedure PushChildrenLocal;
    begin
       if xnode^.LeftChild <> nil then
@@ -1717,7 +1725,7 @@ begin
       LeftChild := nil;
       RightChild := nil;
    end;
-   
+
    if Node <> nil then
    begin
       if Node^.Parent <> nil then
@@ -1746,26 +1754,26 @@ begin
                while (xnode <> parent) do
                begin
                   Assert(queue^.Size <> 0, msgInternalError);
-                  
+
                   xnode := ArrayCircularPopFront(queue);
                   PushChildrenLocal;
                end;
                Dec(queue^.Size, 2); { we know that parent has 2 children }
-               
+
                ArrayCircularPushBack(queue, pnewnode);
                ArrayCircularPushBack(queue, parent^.LeftChild);
                ArrayCopy(queue, queue2);
-                  
+
                { insert pnewnode and make Node point to the one
                  excessive child of parent }
-               
+
                if Node = parent^.LeftChild then
                   Node := parent^.RightChild;
-               
+
                parent^.RightChild := parent^.LeftChild;
                parent^.LeftChild := pnewnode;
                pnewnode^.Parent := parent;
-               
+
                try
                   { get the next node (next after parent) }
                   xnode := ArrayCircularPopFront(queue);
@@ -1774,7 +1782,7 @@ begin
                   { insert the one excessive node at the left of the
                     node after its parent and shift right }
                   InsertLeftAndShiftBy1(xnode, Node, queue2);
-                  
+
                   { now find the new node }
                   while xnode <> pnewnode do
                   begin
@@ -1831,14 +1839,14 @@ begin
          ArrayClear(queue, InitialQueueSize, 0);
          raise;
       end;
-      
+
       if Node <> nil then
          Node^.LeftChild := pnewnode
       else
          FTree.FRoot := pnewnode;
       pnewnode^.Parent := Node;
    end;
-   
+
    Node := pnewnode;
    Inc(FTree.FSize);
 end;
@@ -1849,20 +1857,20 @@ var
    queue2 : TPointerDynamicArray;
 begin
    Assert(Node <> nil, msgInvalidIterator);
-   
+
    xnode := Node;
    lchild := Node^.LeftChild;
    rchild := Node^.RightChild;
-   
+
    FTree.RemoveConnections(xnode);
-   
+
    if queue^.Size = 0 then
       PushChildren;
-   
+
    if queue^.Size <> 0 then
    begin
       Node := ArrayCircularPopFront(queue);
-      
+
       if (Node <> lchild) and (Node <> rchild) then
          { shift the next node right by 2 and make the children of the
            deleted node the children of the next node }
@@ -1870,14 +1878,14 @@ begin
          queue2 := nil;
          if (lchild <> nil) or (rchild <> nil) then
             ArrayCopy(queue, queue2);
-         
+
          if (lchild = nil) and (rchild <> nil) then
             InsertLeftAndShiftBy1(Node, rchild, queue2)
          else if (rchild = nil) and (lchild <> nil) then
             InsertLeftAndShiftBy1(Node, lchild, queue2)
          else if (lchild <> nil) and (rchild <> nil) then
             InsertLeftAndShiftBy2(Node, lchild, rchild, queue2);
-         
+
       end else
          { there are no nodes on levels larger than that of the
            deleted node's children's and there are no nodes to the
@@ -1887,7 +1895,7 @@ begin
          begin
             queue2 := nil;
             ArrayAllocate(queue2, InitialQueueSize, 0);
-            
+
             { replace the deleted node with its left child, make its
               right child left child's left child and shift left child
               right by 1 }
@@ -1895,7 +1903,7 @@ begin
                                 visiting rchild twice later on }
             FTree.ReplaceNode(lchild^.Parent, lchild);
             InsertLeftAndShiftBy1(lchild, rchild, queue2);
-            
+
          end else if (lchild <> nil) then
          begin
             FTree.ReplaceNode(lchild^.Parent, lchild);
@@ -1909,7 +1917,7 @@ begin
    begin
       Node := nil;
    end;
-   
+
    Dec(FTree.FSize);
    Result := xnode^.Item;
    FTree.DisposeNode(xnode);
@@ -1931,7 +1939,7 @@ end;
 function Parent(const iter : TBinaryTreeIterator) : TBinaryTreeIterator;
 begin
    Assert((iter <> nil) and (iter.Node <> nil), msgInvalidIterator);
-   
+
    if iter.Node^.Parent <> nil then
       Result := TBinaryTreeIterator.Create(iter.Node^.Parent, iter.FTree)
    else
@@ -1941,7 +1949,7 @@ end;
 function RightChild(const iter : TBinaryTreeIterator) : TBinaryTreeIterator;
 begin
    Assert((iter <> nil) and (iter.Node <> nil), msgInvalidIterator);
-   
+
    if iter.Node^.RightChild <> nil then
       Result := TBinaryTreeIterator.Create(iter.Node^.RightChild, iter.FTree)
    else
@@ -1951,7 +1959,7 @@ end;
 function LeftChild(const iter : TBinaryTreeIterator) : TBinaryTreeIterator;
 begin
    Assert((iter <> nil) and (iter.Node <> nil), msgInvalidIterator);
-   
+
    if iter.Node^.LeftChild <> nil then
       Result := TBinaryTreeIterator.Create(iter.Node^.LeftChild, iter.FTree)
    else
@@ -1961,28 +1969,28 @@ end;
 function RightMostLeaf(const iter : TBinaryTreeIterator) : TBinaryTreeIterator;
 begin
    Assert((iter <> nil) and (iter.Node <> nil), msgInvalidIterator);
-   
+
    Result := TBinaryTreeIterator.Create(RightMostLeafNode(iter.Node), iter.FTree);
 end;
 
 function LeftMostLeaf(const iter : TBinaryTreeIterator) : TBinaryTreeIterator;
 begin
    Assert((iter <> nil) and (iter.Node <> nil), msgInvalidIterator);
-   
+
    Result := TBinaryTreeIterator.Create(LeftMostLeafNode(iter.Node), iter.FTree);
 end;
 
 function Depth(const iter : TBinaryTreeIterator) : SizeType;
 begin
    Assert((iter <> nil) and (iter.Node <> nil), msgInvalidIterator);
-   
+
    Result := NodeDepth(iter.Node);
 end;
 
 function Height(const iter : TBinaryTreeIterator) : SizeType;
 begin
    Assert((iter <> nil) and (iter.Node <> nil), msgInvalidIterator);
-   
+
    Result := NodeHeight(iter.Node);
 end;
 
@@ -1990,4 +1998,3 @@ function CopyOf(const iter : TBinaryTreeIterator) : TBinaryTreeIterator;
 begin
    Result := TBinaryTreeIterator(iter.CopySelf);
 end;
-

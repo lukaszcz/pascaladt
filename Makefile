@@ -113,7 +113,12 @@ TESTUNITS := $(patsubst %.pas, %$(obj_suffix), $(wildcard tests/units/*.pas))
 
 TOOLSDEPS := $(wildcard tools/*.pas tools/*.c tools/*.h)
 
-.PHONY : install static dynamic smart all units tests debug windows docs clean cleandocs cleanprogs fastclean tools check
+.PHONY : test install static dynamic smart all units tests debug windows docs clean cleandocs cleanprogs fastclean tools check
+
+all : units tests
+
+test : units tests
+	cd tests && ./testall.sh
 
 install :
 	./install.sh
@@ -126,8 +131,6 @@ dynamic : units
 
 smart : units
 	ppumove -s -o pascaladt$(VER)$(static_lib_suffix) *.ppu
-
-all : units tests
 
 units : $(ADTUNITS)
 

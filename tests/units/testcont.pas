@@ -11,7 +11,7 @@ type
       function CreateContainer : TContainerAdt; override;
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    TSetTester = class (TTester)
    protected
       function CreateContainer : TContainerAdt; override;
@@ -19,34 +19,34 @@ type
    public
       procedure Test; override;
    end;
-   
+
    TSortedSetTester = class (TSetTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    TConcatenableSortedSetTester = class (TSortedSetTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    THashSetTester = class (TSetTester)
    protected
       function CreateContainer : TContainerAdt; override;
    end;
-   
+
    TMapTester = class (TTester)
    protected
       function CreateContainer : TContainerAdt; override;
       function ObjectsInOneItem : SizeType; override;
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    TBasicTreeTester = class (TTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    TQueueTester = class (TTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
@@ -56,22 +56,22 @@ type
    protected
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    TSingleListTester = class (TDequeTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    TDoubleListTester = class (TSingleListTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
    TRandomAccessContainerTester = class (TDoubleListTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
    end;
-   
+
 
 const
    testAlgorithms : Boolean = true; { set this to false to make the
@@ -94,7 +94,7 @@ end;
 procedure TPriorityQueueTester.TestContainer(cont : TContainerAdt);
 var
    pqueue : TPriorityQueueAdt;
-               
+
    procedure DeleteAll;
    var
       num, ii : IndexType;
@@ -126,7 +126,7 @@ begin
    pqueue.Clear;
    FinishDestruction;
    testutils.Test(pqueue.Empty and (pqueue.Size = 0), 'Clear', 'container not empty');
-   
+
    for i := 0 to ITEMS_TO_INSERT do
       inserted[i] := false;
    for i := 0 to ITEMS_TO_INSERT do
@@ -139,15 +139,15 @@ begin
    end;
    testutils.Test(pqueue.Size = ITEMS_TO_INSERT + 1, 'Size & Insert',
         'wrong size after insertion');
-   
+
    DeleteAll;
-   
+
    pqueue2 := TPriorityQueueAdt(pqueue.CopySelf(nil));
    testutils.Test(pqueue2.Empty, 'CopySelf (with nil)', 'the copy is not empty');
-   
+
    for i := 0 to ITEMS_TO_INSERT do
       inserted[i] := false;
-   
+
    for i := 0 to ITEMS_TO_INSERT do
    begin
       repeat
@@ -159,21 +159,21 @@ begin
          pqueue2.Insert(TTestObject.Create(j));
       inserted[j] := true;
    end;
-   
+
    pqueue.Merge(pqueue2);
    testutils.Test(pqueue.Size = ITEMS_TO_INSERT + 1, 'Merge', 'wrong size after merging');
-   
+
    pqueue2 := TPriorityQueueAdt(pqueue.CopySelf(TestObjectCopier));
    testutils.Test((pqueue2.Size = pqueue.Size) and (pqueue2.Size = ITEMS_TO_INSERT + 1),
         'CopySelf (non-nil)', 'wrong size');
-   
+
    DeleteAll;
-   
+
    StartDestruction(pqueue2.Size, 'Clear');
    pqueue2.Clear;
    FinishDestruction;
    testutils.Test(pqueue2.Empty and (pqueue2.Size = 0), 'Clear', 'container not empty');
-   
+
    pqueue2.Insert(TTestObject.Create(10));
    StartDestruction(1, 'destructor');
    pqueue2.Destroy;
@@ -196,7 +196,7 @@ var
    obj : TTestObject;
    lastSize : SizeType;
    prevRepeatedItems : Boolean;
-   
+
    procedure TestInsAux;
    begin
       obj := TTestObject.Create(rand);
@@ -233,12 +233,12 @@ var
          obj.Free;
       end;
    end;
-   
+
 begin
    Randomize;
    for i := 0 to MAX_ITEMS do
       finserted[i] := false;
-   
+
    { ------------------------- Insert --------------------------- }
    aset.RepeatedItems := false;
    StartSilentMode;
@@ -247,14 +247,14 @@ begin
       rand := Random(MAX_ITEMS) + 1;
       TestInsAux;
    end;
-   
+
    for rand := 0 to MAX_ITEMS do
    begin
       TestInsAux;
    end;
-   
+
    StopSilentMode;
-   
+
    testutils.Test(aset.Size = MAX_ITEMS + 1, 'Insert', 'wrong size');
 end;
 
@@ -277,46 +277,46 @@ var
 begin
    Assert(cont is TSetAdt);
    aset := TSetAdt(cont);
-   
+
    { ------------------------ IsDefinedOrder ---------------------------- }
    testutils.Test(aset.IsDefinedOrder, 'IsDefinedOrder');
-   
+
    { ------------------------ Clear ---------------------------- }
    StartDestruction(aset.Size, 'Clear');
    aset.Clear;
    FinishDestruction;
-   
+
    aset.RepeatedItems := true;
-   
+
    { ------------------------ Size ---------------------------- }
    testutils.Test(aset.Size = 0, 'Size', 'returns non-zero for empty set');
-   
+
    { ------------------------ Empty ---------------------------- }
    testutils.Test(aset.Empty, 'Empty', 'returns false for empty set');
-   
+
    obj := TTestObject.Create(0);
-   
+
    { ------------------------- Has ------------------------------ }
    testutils.Test(not aset.Has(obj), 'Has', 'does not work for an empty set');
-   
+
    { ------------------------- Find ----------------------------- }
    testutils.Test(aset.Find(obj) = nil, 'Find', 'does not work for empty set');
-   
+
    { ------------------------- Count ----------------------------- }
    testutils.Test(aset.Count(obj) = 0, 'Count', 'does not work for empty set');
-   
-   obj.Free;  
-   
+
+   obj.Free;
+
    { ------------------------- Insert ----------------------------- }
    TestInsertSet(aset);
-   
+
    { ----------------------- Find + Count + Has -------------------------- }
    StartSilentMode;
    for i := 0 to aset.Size - 1 do
    begin
       if i = aset.Size - 2 then
          StopSilentMode;
-      
+
       obj := TTestObject.Create(i);
       obj2 := TTestObject(aset.Find(obj));
       testutils.Test(obj2 <> nil, 'Find', 'does not return object from the set');
@@ -327,46 +327,46 @@ begin
                                             ' instead of 1');
       obj.Free;
    end;
-   
+
    { ------------------------ Set iterator ---------------------------- }
    start := aset.Start;
    finish := aset.Finish;
    TestSetIterator(start, finish);
-   
+
    { ------------------------ Clear --------------------------------- }
    StartDestruction(aset.Size, 'Clear');
    aset.Clear;
    FinishDestruction;
    testutils.Test(aset.Size = 0, 'Clear', 'size <> 0');
-   
+
    { -------------------------- Insert ----------------------------- }
-   TestInsertSet(aset); 
-   
+   TestInsertSet(aset);
+
    { ------------------------ Clear --------------------------------- }
    StartDestruction(aset.Size, 'Clear');
    aset.Clear;
    FinishDestruction;
    testutils.Test(aset.Size = 0, 'Clear', 'size <> 0');
-   
+
    aset.RepeatedItems := true;
-   
+
    // insert some items
    for i := 0 to ITEMS_TO_INSERT do
    begin
       aset.Insert(TTestObject.Create(i));
    end;
-   
+
    maxItem := aset.Size - 1;
-   
+
    { ------------------- Insert (repeated items) -------------------- }
    s := aset.Size;
-   
+
    StartSilentMode;
    for i := 0 to 10 do
    begin
       rand := Random(s);
       for j := 1 to 100 do
-      begin         
+      begin
          lastSize := aset.Size;
          obj := TTestObject.Create(rand);
          lastcount := aset.Count(obj);
@@ -388,7 +388,7 @@ begin
    obj := TTestObject.Create(rand);
    testutils.Test(aset.Count(obj) = 101, 'Insert (repeated items)',
         'did not insert all 101 equal objects');
-   
+
    { ------------------ LowerBound + UpperBound --------------------------- }
    lb := aset.LowerBound(obj);
    ub := aset.UpperBound(obj);
@@ -406,16 +406,16 @@ begin
         'item at UpperBound equal to searched object');
    testutils.Test(aset.Count(obj) = i, 'UpperBound & LowerBound',
         'not all items in range <LowerBound,UpperBound)');
-   
+
    { ---------------------- EqualRange ------------------------------- }
    range := aset.EqualRange(obj);
    testutils.Test(range.Start.Equal(aset.LowerBound(obj)), 'EqualRange',
         'the start of the range not equal to LowerBound');
    testutils.Test(range.Finish.Equal(aset.UpperBound(obj)), 'EqualRange',
         'the finish of the range not equal to UpperBound');
-     
+
    obj.Free;
-   
+
    { ----------------------- CopySelf ------------------------------- }
    asetSize := aset.Size;
    copier := TTestObjectCopier.Create;
@@ -424,7 +424,7 @@ begin
    testutils.Test(set2.RepeatedItems = aset.RepeatedItems, 'CopySelf',
         'RepeatedItems not copied');
    testutils.Test(set2.ItemDisposer = aset.ItemDisposer, 'CopySelf', 'Disposer not copied');
-   
+
    StartSilentMode;
    for i := 0 to aset.Size - 1 do
    begin
@@ -433,40 +433,40 @@ begin
       obj.Free;
    end;
    StopSilentMode;
-   
+
    { ------------------------ Delete --------------------------------- }
    obj := TTestObject.Create(set2.Size);
    testutils.Test(set2.Delete(obj) = 0, 'Delete',
         'returns non-zero for item not in the set');
    obj.Free;
-   
+
    firstS := set2.Size div 2;
    firstI := set2.Size div 10;
    i := firstI;
    s := firstS;
    StartSilentMode;
    while set2.Size > s do
-   begin      
+   begin
       obj := TTestObject.Create(i);
       count := set2.Count(obj);
       if set2.Size - count <= s then
          StopSilentMode;
       lastSize := set2.Size;
-      
+
       StartDestruction(count, 'Delete');
       testutils.Test(set2.Delete(obj) = count, 'Delete', 'does not delete all items');
       FinishDestruction;
       testutils.Test(set2.Size = lastSize - count, 'Delete', 'wrong size');
-      
+
       obj.Free;
       Inc(i);
    end;
-   
+
    { -------------------------- Destroy ------------------------------------ }
    StartDestruction(set2.Size, 'destructor');
    set2.Destroy;
    FinishDestruction;
-   
+
    { check if aset is not changed by operations on set2 }
    testutils.Test(aset.Size = asetSize, 'CopySelf',
         'Size of source set changed by operations on its copy');
@@ -485,7 +485,7 @@ begin
       obj.Free;
    end;
    WriteLn(' - passed');
-   
+
    { --------------------------- Insert ----------------------------------- }
    iter := aset.Start;
    obj := TTestObject.Create(aset.Size);
@@ -494,51 +494,51 @@ begin
         'returns false although inserting item not present in the set');
    testutils.Test(aset.Count(obj) = 1, 'Insert', 'Count(obj) does not return 1');
    testutils.Test(aset.Size = lastSize + 1, 'Insert', 'wrong size');
-   
+
    testutils.Test(aset.Insert(TTestObject.Create(obj.Value)), 'Insert',
         'returns false although RepeatedItems = true');
    testutils.Test(aset.Count(obj) = 2, 'Count', 'does not return 2');
-   
+
    { --------------------------- Delete ------------------------------------ }
    obj := TTestObject.Create(obj.Value);
    iter := aset.LowerBound(obj);
    lastSize := aset.Size;
-   
+
    StartDestruction(1, 'Delete (with given position)');
    iter.Delete;
    FinishDestruction;
-   
+
    testutils.Test(aset.Size = lastSize - 1, 'Delete (with given position)', 'wrong size');
    testutils.Test(aset.Count(obj) = 1, 'Delete (with given position)',
         'Count(obj) failed');
    TestIter(not iter.IsFinish and (TTestObject(iter.Item).Value = obj.Value),
             'Delete', 'does not advance to next item');
-   
+
    lastSize := aset.Size;
    StartDestruction(1, 'Delete (with given position)');
    iter.Delete;
    FinishDestruction;
-   
+
    testutils.Test(aset.Size = lastSize - 1, 'Delete (with given position)', 'wrong size');
    testutils.Test(aset.Find(obj) = nil, 'Delete (with given position)',
         'Find(obj) does not return nil');
    obj.Free;
-   
+
    { --------------------------- Clear -------------------------------------- }
    StartDestruction(aset.Size, 'Clear');
    aset.Clear;
    FinishDestruction;
    testutils.Test(aset.Empty, 'Clear', 'still not empty');
-   
+
    { -------------------------- Insert ---------------------------------- }
    TestInsertSet(aset);
-   
+
    { ---------------------- test algorithms ---------------------- }
    if testAlgorithms then
    begin
-      set2 := TSetAdt(aset.CopySelf(TTestObjectCopier.Create));
+      set2 := TSetAdt(aset.CopySelf(copier));
       TestSetAlgs(aset, set2);
-      
+
       StartDestruction(set2.Size, 'Destructor');
       set2.Destroy;
       FinishDestruction;
@@ -571,20 +571,20 @@ begin
    inherited;
    Assert(cont is TSortedSetAdt);
    sortedset := TSortedSetAdt(cont);
-   
+
    start := sortedset.Start;
    finish := sortedset.Finish;
    TestSortedSetIterator(start, finish);
-   
+
    { ---------------------- Clear ----------------------------- }
    StartDestruction(sortedset.Size, 'Clear');
    sortedset.Clear;
    FinishDestruction;
    testutils.Test(sortedset.Size = 0, 'Clear', 'wrong size');
-   
+
    { ---------------------- Insert ---------------------------- }
    TestInsertSet(sortedset);
-   
+
    CheckRange(sortedset.Start, sortedset.Finish, true, 0, sortedset.Size,
               'Insert');
 end;
@@ -609,37 +609,37 @@ begin
    inherited;
    Assert(cont is TConcatenableSortedSetAdt);
    aset := TConcatenableSortedSetAdt(cont);
-   
+
    StartDestruction(aset.Size, 'Clear');
    aset.Clear;
    FinishDestruction;
-   
+
    aset.RepeatedItems := true;
-   
+
    copier := TTestObjectCopier.Create;
    aset2 := TConcatenableSortedSetAdt(aset.CopySelf(copier));
-   
+
    for i := 1 to 10000 do
       aset.Insert(TTestObject.Create(i));
    aset.Insert(TTestObject.Create(10000));
-   
+
    for i := 10000 to 50000 do
       aset2.Insert(TTestObject.Create(i));
-   
+
    aset.Concatenate(aset2);
-   
+
    testutils.Test(aset.Size = 50002, 'Concatenate', 'wrong size');
-   
+
    obj := TTestObject.Create(10000);
    testutils.Test(aset.Count(obj) = 3, 'Concatenate');
-   
+
    lb := aset.LowerBound(obj);
    ub := aset.UpperBound(obj);
-   
+
    CheckRange(aset.Start, lb, true, 1, 9999, 'Concatenate (1)');
    CheckRange(ub, aset.Finish, true, 10001, 40000, 'Concatenate (2)');
    testutils.Test(Distance(lb, ub) = 3, 'Concatenate', 'distance wrong');
-   
+
    aset2 := aset.Split(obj);
    testutils.Test(aset.Size = 10002, 'Split', 'wrong size of the first container');
    testutils.Test(aset2.Size = 40000, 'Split', 'wrong size of the second container');
@@ -648,20 +648,20 @@ begin
    lb := aset.LowerBound(obj);
    CheckRange(aset.Start, lb, true, 1, 9999, 'Split (1)');
    CheckRange(aset2.Start, aset2.Finish, true, 10001, 40000, 'Split (2)');
-   
-   
+
+
    aset.Concatenate(aset2);
    testutils.Test(aset.Count(obj) = 3, 'Concatenate');
-   
+
    lb := aset.LowerBound(obj);
    ub := aset.UpperBound(obj);
-   
+
    CheckRange(aset.Start, lb, true, 1, 9999, 'Concatenate (1)');
    CheckRange(ub, aset.Finish, true, 10001, 40000, 'Concatenate (2)');
    testutils.Test(Distance(lb, ub) = 3, 'Concatenate', 'distance wrong');
-   
+
    obj.Destroy;
-   
+
    StartDestruction(aset.Size, 'Clear');
    aset.Clear;
    FinishDestruction;
@@ -696,15 +696,15 @@ var
    lastSize : SizeType;
 begin
    Randomize;
-      
+
    for i := 0 to MAX_ITEMS do
    begin
       tab[i].First := nil;
       tab[i].Second := nil;
    end;
-   
+
    map.RepeatedItems := false;
-   
+
    { ------------------ Insert ---------------------- }
    StartSilentMode;
    while map.Size < MAX_ITEMS div 2 do
@@ -714,7 +714,7 @@ begin
       key := TTestObject.Create(rand1);
       item := TTestObject.Create(rand2);
       lastSize := map.Size;
-      
+
       if map.Insert(key, item) then
       begin
          testutils.Test(map.Size = lastSize + 1, 'Insert', 'wrong size (item inserted)');
@@ -743,7 +743,7 @@ begin
    end;
    StopSilentMode;
    testutils.Test(map.Size = MAX_ITEMS div 2, 'Insert', 'wrong size');
-   
+
    StartSilentMode;
    for i := 0 to MAX_ITEMS do
    begin
@@ -771,13 +771,13 @@ begin
       end;
    end;
    StopSilentMode;
-   
+
    StartSilentMode;
    for i := 0 to MAX_ITEMS do
    begin
       if i = MAX_ITEMS then
          StopSilentMode;
-      
+
       key := tab[i].First;
       item := map[key];
       testutils.Test(item <> nil, 'Find', 'item not found although inserted');
@@ -787,7 +787,7 @@ begin
               'wrong item returned');
       end;
    end;
-   
+
 end;
 
 
@@ -816,22 +816,22 @@ var
 begin
    Assert(cont is TObjectObjectMapAdt);
    map := TObjectObjectMapAdt(cont);
-   
+
    { ------------------ Clear ---------------------- }
    StartDestruction(map.Size * 2, 'Clear');
    map.Clear;
    FinishDestruction;
    testutils.Test(map.Size = 0, 'Clear', 'wrong size');
-   
+
    { ------------------ Empty ---------------------- }
    testutils.Test(map.Empty, 'Empty', 'returns false for empty map');
-   
+
    { ------------------ Insert & Find ---------------------- }
    TestInsertFindMap(map);
-   
+
    { ------------------ Empty ---------------------- }
    testutils.Test(not map.Empty, 'Empty', 'returns true for non-empty map');
-   
+
    { ------------------- Associate ------------------------- }
    map.RepeatedItems := false;
    StartSilentMode;
@@ -847,7 +847,7 @@ begin
       testutils.Test(map.Find(item) = item, 'Associate', 'Find failed (1)');
    end;
    StopSilentMode;
-   
+
    s := map.Size + 100;
    StartSilentMode;
    for i := map.Size to s do
@@ -860,7 +860,7 @@ begin
       testutils.Test(map.Find(item) = item, 'Associate', 'Find failed (2)');
    end;
    StopSilentMode;
-   
+
    map.RepeatedItems := true;
    s := map.Size - 1;
    StartSilentMode;
@@ -868,7 +868,7 @@ begin
    begin
       if i = s then
          StopSilentMode;
-      
+
       key := TTestObject.Create(i);
       item := TTestObject.Create(i);
       lastSize := map.Size;
@@ -882,15 +882,15 @@ begin
               'Find returns wrong item (3)');
       end;
    end;
-      
+
    { ------------------ Clear ---------------------- }
    StartDestruction(map.Size * 2, 'Clear');
    map.Clear;
    FinishDestruction;
    testutils.Test(map.Size = 0, 'Clear', 'wrong size');
-   
+
    TestInsertFindMap(map);
-   
+
    { ------------------ Insert ---------------------- }
    map.RepeatedItems := true;
    s := map.Size - 1;
@@ -899,18 +899,17 @@ begin
    begin
       if i = s then
          StopSilentMode;
-      
+
       testutils.Test(map.Insert(TTestObject.Create(i), TTestObject.Create(i)),
            'Insert', 'item not inserted although RepeatedItems is true');
    end;
-   
-   
+
    { ------------------ Delete ---------------------- }
    key := TTestObject.Create(map.Size);
    testutils.Test(map.Delete(key) = 0, 'Delete',
         'returns non-zero although key not in the map');
    TTestObject(key).Free;
-   
+
    StartSilentMode;
    for i := 0 to s do
    begin
@@ -929,9 +928,9 @@ begin
    end;
    StopSilentMode;
    testutils.Test(map.Size = 0, 'Delete', 'did not delete all items');
-   
+
    TestInsertFindMap(map);
-   
+
    map.RepeatedItems := false;
    s := map.Size - 1;
    for i := 0 to s do
@@ -942,41 +941,41 @@ begin
       map[key] := item;
       FinishDestruction;
    end;
-   
+
    if map.IsSorted then
       CheckRange(map.Start, map.Finish, true, 0, map.Size, 'Insert');
-   
+
    { ------------------ LowerBound ---------------------- }
    key := TTestObject.Create(10);
    iter := map.LowerBound(key);
    testutils.Test(TTestObject(iter.Key).Value = 10, 'LowerBound', 'iter.Key failed');
-   
+
    { ------------------ UpperBound ---------------------- }
    iter2 := map.UpperBound(key);
    if not iter2.IsFinish then
-   begin 
+   begin
       testutils.Test(TTestObject(iter2.Key).Value <> 10, 'UpperBound',
            'iter.Key returns 10');
    end;
-   
+
    iter3 := CopyOf(iter);
    iter3.Advance;
    testutils.Test(iter3.Equal(iter2), 'UpperBound & LowerBound',
         'wrong number of items in the range');
-   
+
    { ------------------ EqualRange ---------------------- }
    range := map.EqualRange(key);
    TTestObject(key).Free;
    testutils.Test(iter.Equal(range.Start) and iter2.Equal(range.Finish), 'EqualRange');
-   
+
    { ------------------ CopySelf ---------------------- }
    lastSize := map.Size;
    copier := map.CreateCopier(TTestObjectCopier.Create,
                               TTestObjectCopier.Create);
    map2 := TObjectObjectMapAdt(map.CopySelf(copier));
-   
+
    testutils.Test(map2.Size = map.Size, 'CopySelf', 'size not copied');
-   
+
    StartSilentMode;
    for i := 0 to map2.Size - 1 do
    begin
@@ -986,14 +985,14 @@ begin
       TTestObject(key).Destroy;
    end;
    StopSilentMode;
-   
+
    StartDestruction(map2.Size * 2, 'destructor (map2)');
    map2.Destroy;
    FinishDestruction;
-   
+
    testutils.Test(map.Size = lastSize, 'CopySelf',
         'source container changed by operations on dest (1)');
-   
+
    StartSilentMode;
    for i := 0 to map.Size - 1 do
    begin
@@ -1003,9 +1002,9 @@ begin
       TTestObject(key).Destroy;
    end;
    StopSilentMode;
-   
+
    TestMapIterator(map.Start, map.Finish, map.IsSorted);
-   
+
 end;
 
 
@@ -1023,13 +1022,13 @@ var
    fiter, fiter2 : TForwardIterator;
    i : IndexType;
    copier : IUnaryFunctor;
-   
+
    procedure TestInsertAsRoot(first, last : IndexType);
    var
       ii, lSize : IndexType;
    begin
       StartSilentMode;
-      
+
       if first <= last then
       begin
          for ii := first to last do
@@ -1055,128 +1054,128 @@ var
                  'wrong Size; failed in ' + IntToStr(first - ii + 1) + 'th try');
          end;
       end;
-      
-      StopSilentMode;   
+
+      StopSilentMode;
    end;
-   
+
 begin
    Assert(cont is TBasicTreeAdt);
    tree := TBasicTreeAdt(cont);
-   
+
    { ------------------------------ Clear ----------------------------- }
    StartDestruction(tree.Size, 'Clear');
    tree.Clear;
    FinishDestruction;
    testutils.Test(tree.Size = 0, 'Clear', 'wrong Size');
-   
+
    { -------------------------- Empty ------------------------ }
    testutils.Test(tree.Empty, 'Empty', 'returns false on empty container');
-   
+
    { -------------------------- Size ------------------------ }
    testutils.Test(tree.Size = 0, 'Size');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    tree.InsertAsRoot(TTestObject.Create(0));
    testutils.Test(tree.Size = 1, 'InsertAsRoot', 'wrong Size');
-   
+
    { -------------------------- iterator.IsRoot ------------------------ }
    TestIter(tree.BasicRoot.IsRoot, 'IsRoot', 'returns false for the root');
-   
+
    { -------------------------- iterator.IsLeaf ------------------------ }
    TestIter(tree.BasicRoot.IsLeaf, 'IsLeaf', 'returns false for a leaf');
-   
+
    { -------------------------- iterator.Item  ------------------------ }
    iter := tree.BasicRoot;
    TestIter(TTestObject(iter.Item).Value = 0, 'Item');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    TestInsertAsRoot(1, 40000);
    testutils.Test(tree.Size = 40001, 'InsertAsRoot', 'wrong Size');
-   
+
    { -------------------------- iterator.IsLeaf ------------------------ }
    TestIter(not tree.BasicRoot.IsLeaf, 'IsLeaf', 'returns true for internal node');
-   
+
    { -------------------------- Empty ------------------------ }
    testutils.Test(not tree.Empty, 'Empty', 'returns true on non-empty container');
-   
+
    { ------------------------------ Clear ----------------------------- }
    StartDestruction(tree.Size, 'Clear');
    tree.Clear;
    FinishDestruction;
    testutils.Test(tree.Size = 0, 'Clear', 'wrong Size');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    TestInsertAsRoot(50000, 0);
    testutils.Test(tree.Size = 50001, 'InsertAsRoot', 'wrong Size');
-   
+
    { -------------------------- DeleteSubTree ------------------------ }
    StartDestruction(50001, 'DeleteSubTree');
    tree.DeleteSubTree(tree.BasicRoot);
    FinishDestruction;
    testutils.Test(tree.Empty, 'DeleteSubTree', 'not empty');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    TestInsertAsRoot(50000, 0);
    testutils.Test(tree.Size = 50001, 'InsertAsRoot', 'wrong Size');
-   
+
    { -------------------------- PreOrderIterator ------------------------ }
    TestTraversalIterator(tree.PreOrderIterator, 'TPreOrderIterator');
-   
+
    { ------------------------------ Clear ----------------------------- }
    StartDestruction(tree.Size, 'Clear');
    tree.Clear;
    FinishDestruction;
    testutils.Test(tree.Size = 0, 'Clear', 'wrong Size');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    TestInsertAsRoot(0, 50000);
    testutils.Test(tree.Size = 50001, 'InsertAsRoot', 'wrong Size');
-   
+
    { -------------------------- PostOrderIterator ------------------------ }
    TestTraversalIterator(tree.PostOrderIterator, 'TPostOrderIterator');
-   
+
    { ------------------------------ Clear ----------------------------- }
    StartDestruction(tree.Size, 'Clear');
    tree.Clear;
    FinishDestruction;
    testutils.Test(tree.Size = 0, 'Clear', 'wrong Size');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    TestInsertAsRoot(0, 50000);
    testutils.Test(tree.Size = 50001, 'InsertAsRoot', 'wrong Size');
-   
+
    { -------------------------- InOrderIterator ------------------------ }
    TestTraversalIterator(tree.InOrderIterator, 'TInOrderIterator');
-   
+
    { ------------------------------ Clear ----------------------------- }
    StartDestruction(tree.Size, 'Clear');
    tree.Clear;
    FinishDestruction;
    testutils.Test(tree.Size = 0, 'Clear', 'wrong Size');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    TestInsertAsRoot(5000, 0);
    testutils.Test(tree.Size = 5001, 'InsertAsRoot', 'wrong Size');
-   
+
    { ----------------------- LevelOrderIterator ------------------------ }
    TestTraversalIterator(tree.LevelOrderIterator, 'TLevelOrderIterator');
-   
+
    { ------------------------------ Clear ----------------------------- }
    StartDestruction(tree.Size, 'Clear');
    tree.Clear;
    FinishDestruction;
    testutils.Test(tree.Size = 0, 'Clear', 'wrong Size');
-   
+
    { -------------------------- InsertAsRoot ------------------------ }
    TestInsertAsRoot(20000, 0);
    testutils.Test(tree.Size = 20001, 'InsertAsRoot', 'wrong Size');
-   
+
    { -------------------------- CopySelf ------------------------------- }
    copier := TTestObjectCopier.Create;
    tree2 := TBasicTreeAdt(tree.CopySelf(copier));
    testutils.Test(tree2 <> nil, 'CopySelf', 'returns nil');
    testutils.Test(tree2.Size = 20001, 'CopySelf', 'wrong Size');
-   
+
    fiter := tree2.PreOrderIterator;
    fiter2 := tree.PreOrderIterator;
    i := 0;
@@ -1193,7 +1192,7 @@ begin
       Inc(i);
    end;
    StopSilentMode;
-   
+
    { -------------------------- Destroy -------------------- }
    StartDestruction(tree2.Size, 'destructor');
    tree2.Destroy;
@@ -1215,21 +1214,21 @@ var
 begin
    Assert(cont is TQueueAdt);
    queue := TQueueAdt(cont);
-   
+
    { -------------------------- Clear ----------------------- }
    StartDestruction(queue.Size, 'Clear');
    queue.Clear;
    FinishDestruction;
    testutils.Test(queue.Size = 0, 'Clear', 'does not update Size');
-   
+
    { -------------------------- Empty ----------------------- }
    testutils.Test(queue.Empty, 'Empty', 'returns false for empty container');
-   
+
    { -------------------------- Front ----------------------- }
    queue.PushBack(TTestObject.Create(0));
    testutils.Test(TTestObject(queue.Front).Value = 0, 'Front',
         'returns wrong item (or PushBack failed)');
-   
+
    { -------------------------- PushBack ----------------------- }
    StartSilentMode;
    for i := 1 to ITEMS_TO_INSERT do
@@ -1241,21 +1240,21 @@ begin
    end;
    StopSilentMode;
    testutils.Test(queue.Size = ITEMS_TO_INSERT + 1, 'PushBack', 'wrong Size');
-   
+
    { -------------------------- Empty ----------------------- }
    testutils.Test(not queue.Empty, 'Empty', 'returns true for non-empty container');
-   
+
    { -------------------------- Front + PopFront ----------------------- }
    StartSilentMode;
    for i := 0 to ITEMS_TO_INSERT do
    begin
       if i = ITEMS_TO_INSERT then
          StopSilentMode;
-      
+
       testutils.Test(TTestObject(queue.Front).Value = i, 'Front',
            'returns wrong item (or PushBack failed); failed in ' +
               IntToStr(i + 1) + 'th try');
-      
+
       lastSize := queue.Size;
       StartDestruction(1, 'PopFront');
       queue.PopFront;
@@ -1269,82 +1268,82 @@ begin
       testutils.Test(queue.Size = lastSize - 1, 'PopFront',
            'wrong Size; failed in ' + IntToStr(i + 1) + 'th try');
    end;
-   
+
    { -------------------------- PushBack ----------------------- }
    StartSilentMode;
    for i := 0 to ITEMS_TO_INSERT do
    begin
       if i = ITEMS_TO_INSERT then
          StopSilentMode;
-      
+
       lastSize := queue.Size;
       queue.PushBack(TTestObject.Create(i));
       testutils.Test(queue.Size = lastSize + 1, 'PushBack',
            'wrong Size; failed in ' + IntToStr(i + 1) + 'th try');
    end;
-   
+
    { -------------------------- Clear ----------------------- }
    StartDestruction(ITEMS_TO_INSERT + 1, 'Clear');
    queue.Clear;
    FinishDestruction;
    testutils.Test(queue.Size = 0, 'Size',
         'or maybe Clear failed to update the internal Size ?');
-   
+
    { -------------------------- PushBack ----------------------- }
    StartSilentMode;
    for i := 0 to ITEMS_TO_INSERT do
    begin
       if i = ITEMS_TO_INSERT then
          StopSilentMode;
-      
+
       lastSize := queue.Size;
       queue.PushBack(TTestObject.Create(i));
       testutils.Test(queue.Size = lastSize + 1, 'PushBack',
            'wrong Size; failed in ' + IntToStr(i + 1) + 'th try');
    end;
-   
+
    { -------------------------- CopySelf ----------------------- }
    copier := TTestObjectCopier.Create;
    queue2 := TQueueAdt(queue.CopySelf(copier));
    testutils.Test(queue2.ItemDisposer = queue.ItemDisposer, 'CopySelf',
         'disposer not copied');
    testutils.Test(queue2.Size = queue.Size, 'CopySelf', 'Size not copied');
-   
+
    StartSilentMode;
    for i := 0 to ITEMS_TO_INSERT do
    begin
       if i = ITEMS_TO_INSERT then
          StopSilentMode;
-      
+
       testutils.Test(not queue2.Empty, 'CopySelf', 'not enough items copied');
       testutils.Test(TTestObject(queue2.Front).Value = i, 'CopySelf',
            'wrong order of copied items');
-      
+
       StartDestruction(1, 'PopFront');
       queue2.PopFront;
       FinishDestruction;
    end;
    testutils.Test(queue2.Empty, 'CopySelf', 'wrong Size');
-   
+
    { --------------------------- Destroy ------------------------------- }
    for i := 0 to ITEMS_TO_INSERT do
    begin
       queue2.PushBack(TTestObject.Create(i));
    end;
-   
+
    StartDestruction(ITEMS_TO_INSERT + 1, 'destructor');
    queue2.Destroy;
    FinishDestruction;
-   
+
    { -------------------------- Clear ----------------------- }
    copier := TTestObjectCopier.Create;
    queue2 := TQueueAdt(queue.CopySelf(copier));
-   
+
    StartDestruction(ITEMS_TO_INSERT + 1, 'Clear');
    queue2.Clear;
    FinishDestruction;
    testutils.Test(queue2.Size = 0, 'Clear', 'wrong Size');
-   
+
    { ------------------ destruction of empty container --------------------- }
    Write('Destroying empty container...');
    queue2.Destroy;
@@ -1365,12 +1364,12 @@ begin
    inherited;
    Assert(cont is TDequeAdt);
    deque := TDequeAdt(cont);
-   
+
    { -------------------------- Back ----------------------- }
    testutils.Test(TTestObject(deque.Back).Value = deque.Size - 1, 'Back',
         'returns wrong item');
-   
-   
+
+
    { -------------------------- PopBack ----------------------- }
    { for singly linked list it takes O(n) time, so it may take a while }
    i := deque.Size - 2;
@@ -1380,13 +1379,13 @@ begin
    begin
       if deque.Size = 1 then
          StopSilentMode;
-      
+
       lastSize := deque.Size;
-      
+
       StartDestruction(1, 'PopBack');
       deque.PopBack;
       FinishDestruction;
-      
+
       if not deque.Empty then
       begin
          testutils.Test(TTestObject(deque.Back).Value = i, 'PopBack',
@@ -1396,17 +1395,17 @@ begin
            'wrong Size; failed in ' + IntToStr(first + 1 - i) + 'th try');
       Dec(i);
    end;
-   
+
    { -------------------------- Size ----------------------- }
    testutils.Test(deque.Size = 0, 'Size');
-   
+
    { -------------------------- PushFront ----------------------- }
    StartSilentMode;
    for i := ITEMS_TO_INSERT downto 0 do
    begin
       if i = 0 then
          StopSilentMode;
-      
+
       lastSize := deque.Size;
       deque.PushFront(TTestObject.Create(i));
       testutils.Test(TTestObject(deque.Front).Value = i, 'PushFront',
@@ -1415,14 +1414,14 @@ begin
       testutils.Test(deque.Size = lastSize + 1, 'PushFront',
            'wrong Size; failed in ' + IntToStr(ITEMS_TO_INSERT - i) + 'th try');
    end;
-   
+
    { -------------------------- Back + PushBack ----------------------- }
    StartSilentMode;
    for i := ITEMS_TO_INSERT + 1 to ITEMS_TO_INSERT*2 do
    begin
       if i = ITEMS_TO_INSERT*2 then
          StopSilentMode;
-      
+
       lastSize := deque.Size;
       deque.PushBack(TTestObject.Create(i));
       testutils.Test(deque.Size = lastSize + 1, 'PushBack',
@@ -1451,22 +1450,22 @@ begin
    inherited;
    Assert(cont is TListAdt);
    list := TListAdt(cont);
-   
+
    iter := list.ForwardStart;
    iter2 := list.ForwardFinish;
    TestForwardIterator(iter, iter2);
-   
+
    { -------------------------- Delete ----------------------- }
    i := 1;
    StartSilentMode;
    while not list.Empty do
    begin
       lastSize := list.Size;
-      
+
       StartDestruction(1, 'Delete');
       list.Delete(list.ForwardStart);
       FinishDestruction;
-      
+
       testutils.Test(list.Size = lastSize - 1, 'Delete',
            'wrong Size; failed in ' + IntToStr(i) + 'th try');
       if not list.Empty then
@@ -1478,14 +1477,14 @@ begin
    end;
    StopSilentMode;
    testutils.Test(list.Size = 0, 'Delete', 'wrong Size');
-   
+
    { -------------------------- Insert ----------------------- }
    StartSilentMode;
    for i := 0 to ITEMS_TO_INSERT do
    begin
       if i = ITEMS_TO_INSERT then
          StopSilentMode;
-      
+
       lastSize := list.Size;
       list.Insert(list.ForwardFinish, TTestObject.Create(i));
       testutils.Test(list.Size = lastSize + 1, 'Insert',
@@ -1495,7 +1494,7 @@ begin
    end;
    CheckRange(list.ForwardStart, list.ForwardFinish, true, 0,
               list.Size, 'Insert');
-   
+
    { -------------------------- Delete ----------------------- }
    iter := list.ForwardStart;
    Advance(iter, (ITEMS_TO_INSERT div 2) + 1);
@@ -1505,13 +1504,13 @@ begin
    begin
       if i = ITEMS_TO_INSERT div 4 then
          StopSilentMode;
-      
+
       lastSize := list.Size;
-      
+
       StartDestruction(1, 'Delete');
       iter.Delete;
       FinishDestruction;
-      
+
       testutils.Test(list.Size = lastSize - 1, 'Delete',
            'wrong Size; failed in ' + IntToStr(i) + 'th try');
       Inc(i);
@@ -1523,7 +1522,7 @@ begin
    CheckRange(iter, list.ForwardFinish, true, (ITEMS_TO_INSERT div 4)*3 + 1,
               ITEMS_TO_INSERT div 4, 'Delete');
    testutils.Test(list.Size = 3*(ITEMS_TO_INSERT div 4) + 1, 'Delete', 'wrong Size');
-   
+
    { ---------------------- Delete (range) ------------------------ }
    iter := list.ForwardStart;
    Advance(iter, (ITEMS_TO_INSERT div 2) + 1);
@@ -1534,7 +1533,7 @@ begin
    CheckRange(list.ForwardStart, list.ForwardFinish, true,
               (ITEMS_TO_INSERT div 4)*3 + 1, (ITEMS_TO_INSERT div 4),
               'Delete (range)');
-   
+
    { ----------------------- PushFront ----------------------- }
    StartSilentMode;
    for i := (ITEMS_TO_INSERT div 2) downto 0 do
@@ -1568,14 +1567,14 @@ begin
    testutils.Test(list.Size = ITEMS_TO_INSERT + 1, 'Insert', 'wrong Size');
    CheckRange(list.ForwardStart, list.ForwardFinish, true, 0,
               list.Size, 'Insert');
-   
+
    { ------------------------ Move (same container)  ----------------------- }
    iter := list.ForwardStart;
    Advance(iter, (ITEMS_TO_INSERT div 4));
    iter2 := CopyOf(iter);
    Advance(iter2, 10);
    iter3 := CopyOf(iter);
-   
+
    list.Move(iter, iter2);
    {$ifdef TEST_PASCAL_ADT }
    list.SizeCanRecalc := false;
@@ -1591,37 +1590,37 @@ begin
    iter.Advance;
    testutils.Test(TTestObject(iter.Item).Value = (ITEMS_TO_INSERT div 4) + 10, 'Move',
         'wrong order of items');
-   
+
    iter := list.ForwardStart;
    Advance(iter, (ITEMS_TO_INSERT div 4));
    iter2 := CopyOf(iter);
    Advance(iter2, 9);
    list.Move(iter2, iter);
-   
+
    {$ifdef TEST_PASCAL_ADT }
    list.SizeCanRecalc := false;
    {$endif }
    testutils.Test(list.Size = ITEMS_TO_INSERT + 1, 'Move', 'wrong Size');
    CheckRange(list.ForwardStart, list.ForwardFinish, true, 0,
               list.Size, 'Move');
-   
+
    { ------------------------ Move (same container, range)  -------------------- }
    iter := list.ForwardStart;
    Advance(iter, (ITEMS_TO_INSERT div 2));
    iter2 := CopyOf(iter);
    Advance(iter2, 10);
    iter3 := CopyOf(iter2);
-   Advance(iter3, (ITEMS_TO_INSERT div 4)); 
-   
+   Advance(iter3, (ITEMS_TO_INSERT div 4));
+
    { move [20000, 20010) to 30010 }
    list.Move(iter, iter2, iter3);
-   
+
    {$ifdef TEST_PASCAL_ADT }
    list.SizeCanRecalc := false;
    {$endif }
    testutils.Test(list.Size = ITEMS_TO_INSERT + 1, 'Move (same container, range)',
         'wrong Size');
-   
+
    iter := list.ForwardStart;
    Advance(iter, (ITEMS_TO_INSERT div 2));
    CheckRange(list.forwardStart, iter, true, 0, (ITEMS_TO_INSERT div 2), 'Move');
@@ -1633,7 +1632,7 @@ begin
    CheckRange(iter2, iter, true, (ITEMS_TO_INSERT div 2), 10, 'Move');
    CheckRange(iter, list.ForwardFinish, true, (ITEMS_TO_INSERT div 4)*3 + 10,
               (ITEMS_TO_INSERT div 4) - 10, 'Move');
-   
+
    iter := list.ForwardStart;
    Advance(iter, (ITEMS_TO_INSERT div 4)*3);
    iter2 := list.ForwardStart;
@@ -1647,12 +1646,12 @@ begin
    testutils.Test(list.Size = ITEMS_TO_INSERT + 1, 'Move (same container, range)',
         'wrong Size');
    CheckRange(list.ForwardStart, list.ForwardFinish, true, 0, list.Size, 'Move');
-   
-   
+
+
    { ----------------------- Move (different containers)  ----------------------- }
    copier := TTestObjectCopier.Create;
    list2 := TListAdt(list.CopySelf(copier));
-   
+
    iter := list.ForwardStart;
    Advance(iter, 10);
    list2.Move(iter, list2.ForwardStart);
@@ -1664,7 +1663,7 @@ begin
         'wrong Size in first container (source)');
    testutils.Test(list2.Size = ITEMS_TO_INSERT + 2, 'Move',
         'wrong Size in second container (destination)');
-   
+
    iter := list.ForwardStart;
    Advance(iter, 10);
    CheckRange(list.ForwardStart, iter, true, 0, 10,
@@ -1683,7 +1682,7 @@ begin
               'Move (checking destination container)');
    CheckRange(list2.ForwardStart, list2.ForwardFinish, true, 0,
               ITEMS_TO_INSERT + 1, 'Move (checking source container)');
-   
+
    { ------------------- Move (different containers, range)  -------------------- }
    list.Move(list2.ForwardStart, list2.ForwardFinish, list.ForwardFinish);
    testutils.Test(list2.Size = 0, 'Move (different containers, range)',
@@ -1696,7 +1695,7 @@ begin
               'Move (checking destination container)');
    CheckRange(iter, list.ForwardFinish, true, 0, ITEMS_TO_INSERT + 1,
               'Move (checking destination container)');
-   
+
    list2.Move(iter, list.ForwardFinish, list2.ForwardStart);
    testutils.Test(list.Size = ITEMS_TO_INSERT + 1, 'Move',
         'Size failed in source container (recalculation)');
@@ -1706,7 +1705,7 @@ begin
               'Move (checking source container)');
    CheckRange(list2.ForwardStart, list2.ForwardFinish, true, 0, list2.Size,
               'Move (checking destination container)');
-   
+
    { -------------------------- Extract --------------------------- }
    iter := list2.ForwardStart;
    Advance(iter, 100);
@@ -1714,22 +1713,22 @@ begin
    testutils.Test(obj.Value = 100, 'Extract', 'returns wrong object');
    testutils.Test(list2.Size = ITEMS_TO_INSERT, 'Extract', 'wrong Size');
    obj.Free;
-   
+
    { -------------------------- Destroy --------------------------- }
    StartDestruction(list2.Size, 'destructor');
    list2.Destroy;
    FinishDestruction;
-   
+
    { ---------------------- test algorithms ---------------------- }
    if testAlgorithms then
    begin
       TestAllAlgs(list);
    end;
-   
+
    StartDestruction(list.Size, 'Clear');
    list.Clear;
    FinishDestruction;
-   
+
    for i := 0 to ITEMS_TO_INSERT do
       list.PushBack(TTestObject.Create(i));
 end;
@@ -1747,21 +1746,21 @@ begin
    inherited;
    Assert(cont is TDoubleListAdt);
    dlist := TDoubleListAdt(cont);
-   
+
    start := dlist.BidirectionalStart;
    finish := dlist.BidirectionalFinish;
    TestBidirectionalIterator(start, finish);
-   
+
    { ---------------------- test algorithms ---------------------- }
    if testAlgorithms then
    begin
       TestAllAlgs(dlist);
    end;
-   
+
    StartDestruction(dlist.Size, 'Clear');
    dlist.Clear;
    FinishDestruction;
-   
+
    for i := 0 to ITEMS_TO_INSERT do
       dlist.PushBack(TTestObject.Create(i));
 end;
@@ -1782,17 +1781,17 @@ begin
    inherited;
    Assert(cont is TRandomAccessContainerAdt);
    ra := TRandomAccessContainerAdt(cont);
-   
+
    iter := ra.RandomAccessStart;
    iter2 := ra.RandomAccessFinish;
    TestRandomAccessIterator(iter, iter2);
-   
+
    { -------------------- HighIndex + LowIndex ------------------- }
    testutils.Test(ra.HighIndex >= ra.LowIndex, 'HighIndex & LowIndex',
         'HighIndex >= LowIndex is false');
    testutils.Test(ra.HighIndex - ra.LowIndex + 1 = ra.Size, 'HighIndex & LowIndex',
         'incorrect relationship with Size');
-   
+
    { ------------------------ Delete ----------------------------- }
    i := (ra.Size div 2) + ra.LowIndex;
    cs := i;
@@ -1814,7 +1813,7 @@ begin
    StopSilentMode;
    CheckRange(ra.RandomAccessStart, ra.RandomAccessFinish, true, 0, ra.Size,
               'Delete');
-      
+
    { ------------------------ Insert ----------------------------- }
    i := (ra.Size div 2) + ra.LowIndex;
    newSize := ra.Size * 2;
@@ -1838,7 +1837,7 @@ begin
    CheckRange(iter, iter2, false, cs - 1, cs - 1, 'Insert');
    CheckRange(iter2, ra.RandomAccessFinish, true, i - ra.LowIndex,
               ra.HighIndex - iter2.Index + 1, 'Insert');
-   
+
    { -------------------------- Items ------------------------------ }
    for i := ra.LowIndex to ra.HighIndex do
    begin
@@ -1849,19 +1848,19 @@ begin
    end;
    CheckRange(ra.RandomAccessStart, ra.RandomAccessFinish, true, 0,
               ra.Size, 'Items property - writing (SetItem)');
-   
+
    StartSilentMode;
    for i := ra.LowIndex to ra.HighIndex do
    begin
       if i = ra.HighIndex then
          StopSilentMode;
-      
+
       testutils.Test(TTestObject(ra.GetItem(i)).Value = i - ra.LowIndex,
            'Items property - reading (GetItem)',
            'returns wrong item; failed in ' +
               IntToStr(i - ra.LowIndex + 1) + 'th step');
    end;
-   
+
    { ------------------ Delete (n items) --------------------------- }
    newSize := ra.Size - (ra.Size div 2);
    StartDestruction(ra.Size div 2, 'Delete (n items)');
@@ -1872,7 +1871,7 @@ begin
    { -------------------------- Clear ------------------------------ }
    ra.Clear;
    testutils.Test(ra.Size = 0, 'Clear', 'wrong Size');
-   
+
    { -------------------------- Capacity ------------------------------ }
    ra.Capacity := 5000;
    lastCapacity := ra.Capacity;
@@ -1882,17 +1881,17 @@ begin
    end;
    testutils.Test(ra.Capacity = lastCapacity, 'Capacity property (expansion)',
         'does not preallocate enough memory');
-   
+
    { ---------------------- test algorithms ---------------------- }
    if testAlgorithms then
    begin
       TestAllAlgs(ra);
    end;
-   
+
    StartDestruction(ra.Size, 'Clear');
    ra.Clear;
    FinishDestruction;
-   
+
    for i := 0 to 1000 do
       ra.PushBack(TTestObject.Create(i));
 end;

@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -34,14 +34,48 @@ type
      field needed by the AVL-trees.  }
    TAvlBinaryTree = class (TBinaryTree)
    public
+      constructor CreateCopy(const cont : TAvlBinaryTree;
+                             const itemCopier : IUnaryFunctor); overload;
+      function CopySelf(const ItemCopier :
+                            IUnaryFunctor) : TContainerAdt; override;
       procedure NewNode(var node : PBinaryTreeNode); override;
+      procedure DisposeNode(var node : PBinaryTreeNode); override;
    end;
-   
+
 { ------------------------ TAvlBinaryTree --------------------------------- }
-   
+
+constructor TAvlBinaryTree.CreateCopy(const cont : TAvlBinaryTree;
+                                      const itemCopier : IUnaryFunctor);
+var
+   destnode, srcnode : PBinaryTreeNode;
+begin
+   inherited CreateCopy(cont, itemCopier);
+
+   { copy bf fields (TBinaryTree does not know about them) }
+   destnode := RootNode;
+   srcnode := cont.RootNode;
+   while destnode <> nil do
+   begin
+      Assert(srcnode <> nil, msgInternalError);
+      PAvlTreeNode(destnode)^.bf := PAvlTreeNode(srcnode)^.bf;
+      destnode := NextPreOrderNode(destnode);
+      srcnode := NextPreOrderNode(srcnode);
+   end;
+end;
+
+function TAvlBinaryTree.CopySelf(const itemCopier : IUnaryFunctor) : TContainerAdt;
+begin
+   Result := TAvlBinaryTree.CreateCopy(self, itemCopier);
+end;
+
 procedure TAvlBinaryTree.NewNode(var node : PBinaryTreeNode);
 begin
    New(PAvlTreeNode(node));
+end;
+
+procedure TAvlBinaryTree.DisposeNode(var node : PBinaryTreeNode);
+begin
+   Dispose(PAvlTreeNode(node));
 end;
 
 { ------------------------- TAvlTree -------------------------------------- }
@@ -53,29 +87,8 @@ end;
 
 constructor TAvlTree.CreateCopy(const cont : TAvlTree;
                                 const itemCopier : IUnaryFunctor);
-var
-   destnode, srcnode : PBinaryTreeNode;
 begin
-   if itemCopier <> nil then
-   begin
-      inherited CreateCopy(cont, itemCopier);
-
-      { copy bf fields (TBinaryTree does not know about them) }
-      destnode := BinaryTree.RootNode;
-      srcnode := cont.BinaryTree.RootNode;
-      while destnode <> nil do
-      begin
-         Assert(srcnode <> nil, msgInternalError);
-         PAvlTreeNode(destnode)^.bf := PAvlTreeNode(srcnode)^.bf;
-         destnode := NextPreOrderNode(destnode);
-         srcnode := NextPreOrderNode(srcnode);
-      end;
-   end else
-   begin
-      inherited Create(TAvlBinaryTree.Create);
-      ItemDisposer := cont.ItemDisposer;
-      ItemComparer := cont.ItemComparer;
-   end;
+   inherited CreateCopy(cont, itemCopier);
 end;
 
 procedure TAvlTree.ReorganiseAfterDeletion(parent : PAvlTreeNode;
@@ -91,14 +104,14 @@ begin
             parent := Reorganise(parent, parent^.RightChild)
          else
             parent^.bf := 0;
-         
+
       end else if parent^.bf = +1 then
       begin
          if not wasLeftChild then
             parent := Reorganise(parent, parent^.LeftChild)
          else
             parent^.bf := 0;
-      
+
       end else { parent^.bf = 0 }
       begin
          if wasLeftChild then
@@ -106,10 +119,10 @@ begin
          else { parent^.RightChild = nil }
             parent^.bf := +1;
       end;
-      
+
       node := parent;
       parent := parent^.Parent;
-      
+
       while (parent <> nil) and (node^.bf = 0) do
          { if node^.bf is 0 it means that in the previous
            reorganisation the height of the whole sub-tree of node
@@ -127,9 +140,9 @@ begin
                parent := Reorganise(parent, parent^.RightChild)
             else
                parent := Reorganise(parent, parent^.LeftChild);
-            
+
          end;
-         
+
          node := parent;
          parent := parent^.Parent;
       end;
@@ -143,7 +156,7 @@ begin
    Assert((parent <> nil), msgInternalError);
    Assert((node <> nil), msgInternalError);
    Assert(parent^.bf <> 0, msgInternalError);
-   
+
    if parent^.bf = +1 then
    begin
       if parent^.LeftChild = node then
@@ -263,18 +276,18 @@ begin
       parent := curr^.Parent;
       curr^.bf := 0; { curr was inserted as a leaf and has no
                        children, so it must have bf = 0 }
-      
+
       while (parent <> nil) and (parent^.bf = 0) do
       begin
          if parent^.LeftChild = curr then
             parent^.bf := +1
          else
             parent^.bf := -1;
-         
+
          curr := parent;
          parent := parent^.Parent;
       end;
-      
+
       if parent <> nil then
       begin
          Reorganise(parent, curr);
@@ -284,7 +297,7 @@ end;
 
 function TAvlTree.CopySelf(const ItemCopier : IUnaryFunctor) : TContainerAdt;
 begin
-   Result := TAvlTree.CreateCopy(self, itemCopier); 
+   Result := TAvlTree.CreateCopy(self, itemCopier);
 end;
 
 procedure TAvlTree.Swap(cont : TContainerAdt);
@@ -321,7 +334,7 @@ var
    wasLeftChild : Boolean;
 begin
    Assert(pos is TBinarySearchTreeBaseIterator, msgInvalidIterator);
-   
+
    node := TBinarySearchTreeBaseIterator(pos).Node;
    DisposeItem(node^.Item);
    parent := BinaryTree.ExtractNodeInOrderAux(node, true, wasLeftChild);

@@ -895,11 +895,15 @@ const
    ITEMS_NUM = 1000;
 var
    set3, set4 : TSetAdt;
-   i : Indextype;
-   obj : TTestObject;
+   i          : Indextype;
+   obj        : TTestObject;
+   copier     : IUnaryFunctor;
+   cmp        : IBinaryComparer;
 begin
    WriteLn('** Testing general set algorithms...');
 
+   copier := TTestObjectCopier.Create;
+   cmp := TTestObjectComparer.Create;
    set3 := nil;
    set4 := nil;
    set1.Clear;
@@ -936,7 +940,7 @@ begin
          set1.Insert(TTestObject.Create(i));
          set2.Insert(TTestObject.Create(ITEMS_NUM + i));
       end;
-      set4 := SetUnionCopy(set1, set2, Ttestobjectcopier.Create);
+      set4 := SetUnionCopy(set1, set2, copier);
       Test(set4.Size = 2*ITEMS_NUM, 'SetUnionCopy', 'wrong size of the result');
       Test(set1.Size = ITEMS_NUM, 'SetUnionCopy', 'wrong size of set1');
       Test(set2.Size = ITEMS_NUM, 'SetUnionCopy', 'wrong size of set2');
@@ -985,12 +989,11 @@ begin
       Test(set3.Size = 2*(ITEMS_NUM div 10), 'SetIntersection', 'wrong size of intersection');
 
       StartDestruction(ITEMS_NUM div 10, 'Unique');
-      Unique(set3.Start, set3.Size, Ttestobjectcomparer.Create);
+      Unique(set3.Start, set3.Size, cmp);
       FinishDestruction;
 
       Test(set3.Size = ITEMS_NUM div 10, 'SetIntersection', 'wrong size of intersection');
       StartSilentMode;
-      WriteLn('(1)');
       for i := 1 to ITEMS_NUM div 10 do
       begin
          obj := TTestObject.Create(-i);
@@ -1000,7 +1003,6 @@ begin
          Test(set1.Find(obj) = nil, 'SetIntersection', 'set1 present');
          obj.Destroy;
       end;
-      WriteLn('(2)');
       for i := 1 to ITEMS_NUM do
       begin
          obj := TTestObject.Create(i);
@@ -1010,7 +1012,6 @@ begin
          Test(set1.Find(obj) <> nil, 'SetIntersection', 'set1 not present');
          obj.Destroy;
       end;
-      WriteLn('(3)');
       for i := ITEMS_NUM + 1 to 2*ITEMS_NUM do
       begin
          obj := TTestObject.Create(i);

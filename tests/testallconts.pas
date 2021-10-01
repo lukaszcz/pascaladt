@@ -19,13 +19,13 @@ begin
       RandSeed := StrToInt(ParamStr(1))
    else
       Randomize;
-   
+
    WriteLn;
    WriteLn('PascalAdt test suit.');
    WriteLn;
    WriteLn('RandSeed: ', RandSeed);
    WriteLn;
-   
+
    { ----------------- queues & arrays ---------------------- }
    TestUsing(TRandomAccessContainerTester.Create('TArray', 'TArrayIterator',
                                                  TArray.Create));
@@ -35,18 +35,18 @@ begin
    TestUsing(TRandomAccessContainerTester.Create('TCircularDeque',
                                                  'TCircularDequeIterator',
                                                  TCircularDeque.Create));
-   
+
    { ------------------- basic trees ------------------------ }
    TestUsing(TTreeTester.Create('TTree', 'TTreeIterator', TTree.Create));
    TestUsing(TBinaryTreeTester.Create('TBinaryTree', 'TBinaryTreeIterator',
                                       TBinaryTree.Create));
-   
+
    { -------------------- hash sets -------------------------- }
    TestUsing(THashSetTester.Create('THashTable', 'THashTableIterator',
                                    THashTable.Create));
    TestUsing(THashSetTester.Create('TScatterTable', 'TScatterTableIterator',
                                    TScatterTable.Create));
-   
+
    { ---------------- sets based on trees --------------------- }
    TestUsing(TSortedSetTester.Create('TSplayTree', 'TBinaryTreeIterator',
                                      TSplayTree.Create));
@@ -58,13 +58,13 @@ begin
    TestUsing(TConcatenableSortedSetTester.Create('T23Tree',
                                                  'T23TreeIterator',
                                                  T23Tree.Create));
-   
-   
-   { --------------------- priority queues -------------------- }  
+
+
+   { --------------------- priority queues -------------------- }
    TestUsing(TPriorityQueueTester.Create('TBinomialQueue',
                                          'TBinomialQueueIterator',
                                          TBinomialQueue.Create));
-   
+
    { ----------------- lists --------------------- }
    TestUsing(TSingleListTester.Create('TSingleList', 'TSingleListIterator',
                                       TSingleList.Create));
@@ -72,5 +72,5 @@ begin
                                       TDoubleList.Create));
    TestUsing(TDoubleListTester.Create('TXorList', 'TXorListIterator',
                                       TXorList.Create));
-   
+
 end.

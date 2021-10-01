@@ -489,6 +489,22 @@ var
    iter : TDefinedOrderIterator;
    obj : TTestObject;
 begin
+   { ------------------ Advance & Retreat ---------------------- }
+   i := 0;
+   while not start.IsFinish do
+   begin
+      start.Advance;
+      Inc(i);
+   end;
+   TestIter(start.Owner.Size = i, 'Advance', 'skipped some items');
+
+   while not start.IsStart do
+   begin
+      start.Retreat;
+      Dec(i);
+   end;
+   TestIter(i = 0, 'Retreat', 'skipped some items');
+
    { ----------------------- Equal ------------------------------- }
    iter := CopyOf(start);
    TestIter(iter.Equal(start), 'Equal',
@@ -660,7 +676,7 @@ var
 begin
    TestDefinedOrderIterator(start, finish);
 
-   Test(start.Owner is TSetAdt, 'Owner', 'the owner is not a set (TSetAdt)');
+   TestIter(start.Owner is TSetAdt, 'Owner', 'the owner is not a set (TSetAdt)');
 
    { ------------------------ Delete ------------------------------ }
    StartSilentMode;
@@ -772,6 +788,23 @@ var
    i : IndexType;
    key, item : TTestObject;
 begin
+   { ------------------ Advance & Retreat ---------------------- }
+   i := 0;
+   while not start.IsFinish do
+   begin
+      start.Advance;
+      Inc(i);
+   end;
+   TestIter(start.Owner.Size = i, 'Advance', 'skipped some items');
+
+   while not start.IsStart do
+   begin
+      start.Retreat;
+      Dec(i);
+   end;
+   TestIter(i = 0, 'Retreat', 'skipped some items');
+
+
    { ------------------ Delete ---------------------- }
    StartSilentMode;
    while not start.IsFinish do
@@ -784,6 +817,7 @@ begin
    end;
    StopSilentMode;
    TestIter(start.Owner.Size = 0, 'Delete', 'did not delete all items');
+   TestIter(start.IsStart, 'IsStart', 'incorrect after Delete');
 
    { ------------------ Insert ---------------------- }
    i := 0;
@@ -808,7 +842,7 @@ begin
    finish := CopyOf(start);
 
    Retreat(start, start.Owner.Size);
-   Test(start.IsStart, 'Retreat', 'did not retreat to start');
+   TestIter(start.IsStart, 'Retreat', 'did not retreat to start');
 
    if isSorted then
    begin

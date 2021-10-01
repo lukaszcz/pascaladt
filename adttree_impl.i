@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -29,15 +29,15 @@
 &include adttree_impl.mcp
 
 { ---------------------- helper functions ---------------------------------- }
-   
+
 { returns the right-most child of node; takes exactly O(n) time, where
   n is the number of children of node }
 function RightMostChildNode(node : PTreeNode) : PTreeNode;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    Result := node^.LeftmostChild;
-   
+
    if Result <> nil then
       while (Result^.RightSibling <> nil) do
          Result := Result^.RightSibling;
@@ -96,7 +96,7 @@ end;
 function LastInOrderNode(node : PTreeNode) : PTreeNode;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    while (node^.LeftmostChild <> nil) and
             (node^.LeftmostChild^.RightSibling <> nil) do
    begin
@@ -108,7 +108,7 @@ end;
 function NodeDepth(node : PTreeNode) : SizeType;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    Result := 0;
    while node^.Parent <> nil do
    begin
@@ -122,7 +122,7 @@ var
    h : SizeType;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    Result := 0;
    node := node^.LeftmostChild;
    while node <> nil do
@@ -130,7 +130,7 @@ begin
       h := NodeHeight(node) + 1;
       if h > Result then
          Result := h;
-      
+
       node := node^.RightSibling;
    end;
 end;
@@ -160,7 +160,7 @@ begin
    begin
       while (node <> nil) and (node^.RightSibling = nil) do
          node := node^.Parent;
-      
+
       if node <> nil then
          node := node^.RightSibling;
    end;
@@ -170,7 +170,7 @@ end;
 function NextPostOrderNode(node : PTreeNode) : PTreeNode;
 begin
    Assert(Node <> nil, msgInvalidIterator);
-   
+
    if Node^.RightSibling <> nil then
    begin
       Node := LeftMostLeafNode(Node^.RightSibling);
@@ -184,7 +184,7 @@ end;
 function NextInOrderNode(node : PTreeNode) : PTreeNode;
 begin
    Assert(Node <> nil, msgInvalidIterator);
-   
+
    if (Node^.LeftmostChild <> nil) and
          (Node^.LeftmostChild^.RightSibling <> nil) then
       { after visiting the parent start traversing the remaining
@@ -226,7 +226,7 @@ begin
             { we have already visited parent and now traverse
               sub-trees from left to right }
             Node := LeftMostLeafNode(Node^.RightSibling);
-         end; 
+         end;
       end;
    end else
    begin
@@ -294,7 +294,7 @@ begin
             { result is the second child - go to the parent }
          begin
             Result := Result^.Parent;
-         end else 
+         end else
             Result := LastInOrderNode(LeftSiblingNode(Result));
       end;
    end else
@@ -309,7 +309,7 @@ var
    lsib, child : PTreeNode;
 begin
    Assert(node^.Parent <> nil, msgInternalError);
-   
+
    lsib := LeftSiblingNode(node);
    child := node^.LeftmostChild;
    if child <> nil then
@@ -320,7 +320,7 @@ begin
          lsib^.RightSibling := child;
       end else
          node^.Parent^.LeftmostChild := child;
-      
+
       while child^.RightSibling <> nil do
       begin
          child^.Parent := node^.Parent;
@@ -334,7 +334,7 @@ begin
          lsib^.RightSibling := node^.RightSibling
       else
          node^.Parent^.LeftmostChild := node^.RightSibling;
-      
+
       if node^.RightSibling <> nil then
       begin
          Result := node^.RightSibling;
@@ -363,17 +363,17 @@ var
    top : IndexType;
 begin
    Assert(Node <> nil, msgInvalidIterator);
-   
+
    { replace the removed node with its right-most child, then move all
      other children (from right to left) to left-most leaves of
      the right-most child }
-   
+
    if Node^.LeftmostChild <> nil then
       BufferAllocate(stack, InitialStackSize)
    else
       stack := nil;
    top := -1;
-   
+
    try
       { Find the right-most child and push the other children at the
         stack, in order to retrieve them easily from right to left,
@@ -391,23 +391,23 @@ begin
          end;
       end;
       { from now on no exceptions can be raised }
-      
+
       { disconnect Node from the tree and put its right-most child in
         its place }
       if Node^.Parent <> nil then
       begin
          temp := Node^.Parent^.LeftMostChild;
-         
+
          if temp <> Node then
          begin
             while temp^.RightSibling <> Node do
                temp := temp^.RightSibling;
-            
+
             if rchild <> nil then
                temp^.RightSibling := rchild
             else
                temp^.RightSibling := Node^.RightSibling;
-            
+
          end else
          begin
             if rchild <> nil then
@@ -419,7 +419,7 @@ begin
       begin
          FTree.FRoot := rchild;
       end;
-      
+
       { In each step make one child the only child of the left-most
         leaf. Start from the one-before right-most child and proceed
         from right to left (that's why a stack is needed). }
@@ -427,14 +427,14 @@ begin
       begin
          rchild^.Parent := Node^.Parent;
          rchild^.RightSibling := Node^.RightSibling;
-         
+
          Result := rchild;
          while top <> -1 do
          begin
             lleaf := LeftMostLeafNode(Result);
             Result := stack^.Items[top];
             Dec(top);
-            
+
             lleaf^.LeftMostChild := Result;
             Result^.Parent := lleaf;
             Result^.RightSibling := nil;
@@ -493,11 +493,11 @@ constructor TTree.CreateCopy(const cont : TTree;
 var
    src, destparent : PTreeNode;
    dest : ^PTreeNode;
-   
-begin   
+
+begin
    inherited CreateCopy(cont);
    InitFields;
-   
+
    if itemCopier <> nil then
    begin
       try
@@ -516,7 +516,7 @@ begin
                RightSibling := nil;
             end;
             Inc(FSize);
-            
+
             if src^.Leftmostchild <> nil then
             begin
                src := src^.Leftmostchild;
@@ -535,24 +535,24 @@ begin
                   src := src^.Parent;
                   dest := @dest^^.Parent;
                end;
-               
+
                if src <> nil then
                begin
                   src := src^.RightSibling;
                   { necessary since destparent is not adjusted in the
                     loop }
-                  destparent := dest^^.Parent; 
+                  destparent := dest^^.Parent;
                   dest := @dest^^.RightSibling;
                end; { else end of traversal }
             end;
          end;
-         
+
       except
          DisposeNode(dest^);
          dest^ := nil;
          raise;
       end;
-      
+
       cont.FValidSize := true;
       cont.FSize := FSize;
    end;
@@ -617,7 +617,7 @@ begin
    end else if (proot = nil) then
    begin
       Assert((node = nil) or (node^.RightSibling = nil), msgInternalError);
-      
+
       proot := node;
       if node <> nil then
          node^.Parent := nil;
@@ -707,7 +707,7 @@ begin
    temp^.Parent := nil;
    temp^.RightSibling := nil;
    temp^.Item := aitem;
-   
+
    Inc(FSize);
 end;
 
@@ -721,7 +721,7 @@ begin
    Assert(TTreeIterator(node).Node <> FRoot, msgInsertingRootSibling);
 
    xnode := TTreeIterator(node).Node;
-   
+
    NewNode(pnewnode);
    pnewnode^.Item := aitem;
    pnewnode^.LeftmostChild := nil;
@@ -760,7 +760,7 @@ begin
    Assert(TTreeIterator(sourcenode).Node <> nil, msgInvalidIterator);
    Assert(destnode.Owner = self, msgWrongOwner);
    Assert(TTreeIterator(destnode).Node <> FRoot);
-             
+
    source := TTreeIterator(sourcenode).Node;
    dest := TTreeIterator(destnode).Node;
    tree2 := TTreeIterator(sourcenode).FTree;
@@ -780,9 +780,9 @@ begin
       FValidSize := false;
       tree2.FValidSize := false;
    end;
-   
+
    tree2.RemoveConnections(source);
-   
+
    source^.RightSibling := dest^.RightSibling;
    source^.Parent := dest^.Parent;
    dest^.RightSibling := source;
@@ -819,7 +819,7 @@ begin
    end;
 
    tree2.RemoveConnections(source);
-   
+
    source^.RightSibling := dest^.LeftmostChild;
    source^.Parent := dest;
    dest^.LeftmostChild := source;
@@ -877,7 +877,7 @@ var
    node1, child, nnode : PTreeNode;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    if node^.Parent <> nil then
    begin
       { insert the children of node at the place of node }
@@ -909,7 +909,7 @@ var
    nnode : PTreeNode;
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    if node^.Parent <> nil then
    begin
       { move children of node to the place of node }
@@ -921,7 +921,7 @@ begin
             nnode := nil;
       end else
          nnode := node^.Parent;
-      
+
       ReplaceNodeWithChildren(node, false);
       Result := node^.Parent;
       DisposeNode(node);
@@ -940,7 +940,7 @@ function TTree.ExtractNodeInOrder(var node : PTreeNode;
                                   fadvance : Boolean) : PTreeNode;
 var
    child, lsib, nnode, parent : PTreeNode;
-   
+
    { returns the parent of the node actually disposed }
    function ShiftItemsUp(aparent, rsib : PTreeNode) : PTreeNode;
    begin
@@ -961,7 +961,7 @@ var
 
 begin
    Assert(node <> nil, msgInvalidIterator);
-   
+
    child := node^.LeftmostChild;
    if child <> nil then
    begin
@@ -974,7 +974,7 @@ begin
             nnode := NextInOrderNode(node)
          else
             nnode := nil;
-         
+
          { replace node with child }
          parent := node^.Parent;
          lsib := LeftSiblingNode(node);
@@ -991,7 +991,7 @@ begin
          node := nnode;
       end;
    end else
-   begin      
+   begin
       if (node^.Parent <> nil) and
             (node^.Parent^.LeftmostChild = node) and
             (node^.RightSibling <> nil) then
@@ -1066,7 +1066,7 @@ begin
                   node := node^.Parent;
                end;
                node := node^.RightSibling;
-            end; 
+            end;
          end; { end while }
       end;
    end; { end if node <> nil }
@@ -1100,7 +1100,7 @@ function TTreeIterator.Equal(const iter : TIterator) : Boolean;
 begin
    Assert(iter is TTreeIterator);
    Assert(iter.Owner = FTree);
-   
+
    Result := (TTreeIterator(iter).Node = Node);
 end;
 
@@ -1273,7 +1273,7 @@ begin
          FTree.FRoot := pnewnode;
       end;
       Node^.Parent := pnewnode;
-      
+
       Node := pnewnode;
       Inc(FTree.FSize);
    end else
@@ -1335,7 +1335,7 @@ begin
    Node := LeftMostLeafNode(FTree.FRoot);
 end;
 
-{$ifdef OVERLOAD_DIRECTIVE }      
+{$ifdef OVERLOAD_DIRECTIVE }
 procedure TTreePostOrderIterator.Advance;
 {$else }
 procedure TTreePostOrderIterator.AdvanceOnePosition;
@@ -1372,7 +1372,7 @@ begin
          child^.Parent := pnewnode;
          child := child^.RightSibling;
       end;
-      
+
       Node := pnewnode;
       Inc(FTree.FSize);
    end else
@@ -1428,7 +1428,7 @@ begin
    Node := LeftMostLeafNode(FTree.FRoot);
 end;
 
-{$ifdef OVERLOAD_DIRECTIVE }      
+{$ifdef OVERLOAD_DIRECTIVE }
 procedure TTreeInOrderIterator.Advance;
 {$else }
 procedure TTreeInOrderIterator.AdvanceOnePosition;
@@ -1456,7 +1456,7 @@ begin
       begin
          Parent := Node;
          Leftmostchild := Node^.Leftmostchild;
-         
+
          if Leftmostchild <> nil then
          begin
             RightSibling := Node^.Leftmostchild^.RightSibling;
@@ -1469,14 +1469,14 @@ begin
             RightSibling := nil;
       end;
       Node^.Leftmostchild := pnewnode;
-      
+
    end else
       { inserting before the Finish iterator -> insert after all other
         nodes }
    begin
       if FTree.Froot <> nil then
          Node := LastInOrderNode(FTree.FROOT);
-      
+
       FTree.NewNode(pnewnode);
       with pnewnode^ do
       begin
@@ -1485,7 +1485,7 @@ begin
          RightSibling := nil;
          Parent := Node;
       end;
-      
+
       if Node <> nil then
       begin
          if Node^.Leftmostchild <> nil then
@@ -1501,7 +1501,7 @@ begin
          end;
       end else
          FTree.FRoot := pnewnode;
-      
+
    end;
    Node := pnewnode;
    Inc(FTree.FSize);
@@ -1542,6 +1542,16 @@ begin
    ArrayAllocate(queue, InitialQueueCapacity, 0);
 end;
 
+constructor TTreeLevelOrderIterator.CreateCopy(tree : TTree;
+                                               anode : PTreeNode;
+                                               aqueue : TPointerDynamicArray);
+begin
+   inherited Create(tree);
+   FTree := tree;
+   node := anode;
+   queue := aqueue;
+end;
+
 destructor TTreeLevelOrderIterator.Destroy;
 begin
    ArrayDeallocate(queue);
@@ -1555,7 +1565,7 @@ var
    lastSize : SizeType;
 begin
    Assert(Node <> nil, msgInternalError);
-   
+
    lastSize := queue^.Size; { in case of an exception }
    try
       child := Node^.LeftMostChild;
@@ -1578,9 +1588,7 @@ begin
    Result := nil;
    try
       ArrayCopy(queue, queue2);
-      Result := TTreeLevelOrderIterator.Create(FTree);
-      TTreeLevelOrderIterator(Result).Node := Node;
-      TTreeLevelOrderIterator(Result).queue := queue2;
+      Result := TTreeLevelOrderIterator.CreateCopy(FTree, Node, queue2);
    except
       ArrayDeallocate(queue2);
       Result.Free;
@@ -1594,14 +1602,14 @@ begin
    ArrayClear(queue, InitialQueueCapacity, 0);
 end;
 
-{$ifdef OVERLOAD_DIRECTIVE }      
+{$ifdef OVERLOAD_DIRECTIVE }
 procedure TTreeLevelOrderIterator.Advance;
 {$else }
 procedure TTreeLevelOrderIterator.AdvanceOnePosition;
 {$endif OVERLOAD_DIRECTIVE }
 begin
    Assert(Node <> nil, msgAdvancingInvalidIterator);
-   
+
    PushChildren;
    if queue^.Size <> 0 then
       Node := ArrayCircularPopFront(queue)
@@ -1615,7 +1623,7 @@ var
    lastSize : SizeType;
 begin
    Assert(FTree.FRoot <> nil, msgRetreatingStartIterator);
-   
+
    next := Node;
    StartTraversal;
    lastSize := queue^.Size;
@@ -1636,9 +1644,9 @@ var
 begin
    FTree.NewNode(pnewnode);
    pnewnode^.Item := aitem;
-   
+
    if Node <> nil then
-   begin   
+   begin
       if Node^.Parent <> nil then
          { insert as left sibling of Node }
       begin
@@ -1647,14 +1655,14 @@ begin
          begin
             while lsibling^.RightSibling <> Node do
                lsibling := lsibling^.RightSibling;
-            
+
             lsibling^.RightSibling := pnewnode;
          end else
             { Node is the left-most child }
          begin
             Node^.Parent^.LeftMostChild := pnewnode;
          end;
-         
+
          with pnewnode^ do
          begin
             Parent := Node^.Parent;
@@ -1686,7 +1694,7 @@ begin
             Node := ArrayCircularPopFront(queue);
             PushChildren;
          end;
-         
+
          Node^.LeftMostChild := pnewnode;
          with pnewnode^ do
          begin
@@ -1708,7 +1716,7 @@ begin
          FTree.FSize := 0; { will be increased below }
       end;
    end;
-      
+
    Node := pnewnode;
    Inc(FTree.FSize);
 end;
@@ -1718,26 +1726,26 @@ var
    todispose, lchild, rchild, parent, lsibling, root : PTreeNode;
 begin
    Assert(Node <> nil, msgInvalidIterator);
-   
+
    todispose := Node;
-   
+
    lchild := Node^.LeftMostChild;
    parent := Node^.Parent;
-   
+
    { disconnect Node from the tree }
    FTree.RemoveConnections(Node);
-   
+
    { advance one position; we have to push children only when the next
      node is the left-most child of the deleted one, because in other
      cases they will be connected to the next node and they would be
      pushed twice (second time when moving away from the next node) }
    if queue^.Size = 0 then
       PushChildren;
-   
+
    if queue^.Size <> 0 then
    begin
       Node := ArrayCircularPopFront(queue);
-      
+
       if lchild <> nil then
       begin
          if Node <> lchild then
@@ -1745,17 +1753,17 @@ begin
             { Connect children of the deleted node at the left of the
               next node.  }
             lchild^.Parent := Node;
-            
+
             rchild := lchild;
             while rchild^.RightSibling <> nil do
             begin
                rchild := rchild^.RightSibling;
                rchild^.Parent := Node;
             end;
-            
+
             rchild^.RightSibling := Node^.LeftMostChild;
             Node^.LeftMostChild := lchild;
-            
+
          end else { not Node <> lchild }
             { The next node is the left-most child of the previous one ->
               there are no nodes on levels >= the levels of children of
@@ -1776,7 +1784,7 @@ begin
                   end;
                   lsibling^.RightSibling := lchild;
                end;
-               
+
                while lchild <> nil do
                begin
                   lchild^.Parent := parent;
@@ -1789,24 +1797,24 @@ begin
             begin
                { we have to clear the queue }
                queue^.Size := 0;
-               
+
                FTree.FRoot := lchild;
                root := lchild;
                root^.Parent := nil;
                rchild := root^.RightSibling;
                root^.RightSibling := nil;
-               
+
                if rchild <> nil then
                begin
                   lchild := rchild;
                   lchild^.Parent := root;
-                  
+
                   while rchild^.RightSibling <> nil do
                   begin
                      rchild := rchild^.RightSibling;
                      rchild^.Parent := root;
                   end;
-                  
+
                   rchild^.RightSibling := root^.LeftMostChild;
                   root^.LeftMostChild := lchild;
                end;
@@ -1815,7 +1823,7 @@ begin
       end; { end lchild <> nil }
    end else
       Node := nil;
-   
+
    Result := todispose^.Item;
    FTree.DisposeNode(todispose);
    Dec(FTree.FSize);
@@ -1842,7 +1850,7 @@ end;
 function Parent(const iter : TTreeIterator) : TTreeIterator;
 begin
    Assert(iter.Node <> nil, msgInvalidIterator);
-   
+
    with iter do
       if Node^.Parent <> nil then
          Result := TTreeIterator.Create(Node^.Parent, FTree)
@@ -1853,7 +1861,7 @@ end;
 function LeftMostChild(const iter : TTreeIterator) : TTreeIterator;
 begin
    Assert(iter.Node <> nil, msgInvalidIterator);
-   
+
    with iter do
       if Node^.LeftMostChild <> nil then
          Result := TTreeIterator.Create(Node^.LeftMostChild, FTree)
@@ -1864,7 +1872,7 @@ end;
 function RightSibling(const iter : TTreeIterator) : TTreeIterator;
 begin
    Assert(iter.Node <> nil, msgInvalidIterator);
-   
+
    with iter do
       if Node^.RightSibling <> nil then
          Result := TTreeIterator.Create(Node^.LeftMostChild, FTree)
@@ -1875,7 +1883,7 @@ end;
 function RightMostChild(const iter : TTreeIterator) : TTreeIterator;
 begin
    Assert(iter.Node <> nil, msgInvalidIterator);
-   
+
    with iter do
       if Node^.LeftMostChild <> nil then
          Result := TTreeIterator.Create(RightMostChildNode(Node), FTree)
@@ -1888,7 +1896,7 @@ var
    node : PTreeNode;
 begin
    Assert(iter.Node <> nil, msgInvalidIterator);
-   
+
    node := LeftSiblingNode(iter.Node);
    if node <> nil then
       Result := TTreeIterator.Create(node, iter.Ftree)
@@ -1899,14 +1907,14 @@ end;
 function LeftMostLeaf(const iter : TTreeIterator) : TTreeIterator;
 begin
    Assert(iter.Node <> nil, msgInvalidIterator);
-   
+
    Result := TTreeIterator.Create(LeftMostLeafNode(iter.Node), iter.FTree);
 end;
 
 function RightMostLeaf(const iter : TTreeIterator) : TTreeIterator;
 begin
    Assert(iter.Node <> nil, msgInvalidIterator);
-   
+
    Result := TTreeIterator.Create(RightMostLeafNode(iter.Node), iter.FTree);
 end;
 
@@ -1929,4 +1937,3 @@ function CopyOf(const iter : TTreeIterator) : TTreeIterator;
 begin
    Result := TTreeIterator(iter.CopySelf);
 end;
-

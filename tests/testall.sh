@@ -8,3 +8,4 @@
 ./teststralgs | tee teststralgs.log
 
 grep FAILED *.log
+exit 0

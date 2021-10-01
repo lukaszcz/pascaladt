@@ -1,19 +1,19 @@
 (* This file is a part of the PascalAdt library, which provides
    commonly used algorithms and data structures for the FPC and Delphi
    compilers.
-   
+
    Copyright (C) 2004, 2005, 2006 by Lukasz Czajka
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -38,20 +38,20 @@ type
       function Perform(aitem : TObject) : TObject;
       property Map : TMap read FMap;
    end;
-   
+
    TMapCopier = class (TMapAdtCopier, IUnaryFunctor)
    private
       FMap : TMap;
-      
+
    public
       constructor Create(const keycp : IKeyUnaryFunctor;
                          const itemcp : IItemUnaryFunctor);
       { disposes both the key and the item }
       function Perform(aitem : TObject) : TObject; override;
-      
+
       property Map : TMap write FMap;
    end;
-   
+
 { ------------------------- TMapAdtCopier ------------------------------ }
 
 constructor TMapAdtCopier.Create(const keycp : IKeyUnaryFunctor;
@@ -137,7 +137,7 @@ begin
       map1 := TMapAdt(cont);
       map2 := self;
    end;
-   
+
    owns1 := map1.OwnsItems;
    owns2 := map2.OwnsItems;
    ownsKeys1 := map1.OwnsKeys;
@@ -152,7 +152,7 @@ begin
          map2.OwnsItems := false;
          map1.OwnsKeys := false;
          map2.OwnsKeys := false;
-         
+
          iter := map1.Start;
          while not iter.IsFinish do
          begin
@@ -161,7 +161,7 @@ begin
             iter.Delete;
             Inc(bufSize);
          end;
-         
+
          iter.Destroy;
          iter := map2.Start;
          while not iter.IsFinish do
@@ -169,7 +169,7 @@ begin
             map1.Insert(iter.Key, iter.Item);
             iter.Delete;
          end;
-         
+
          while i <> bufSize do
          begin
             map2.Insert(buffer1[i], buffer2[i]);
@@ -189,7 +189,7 @@ begin
          end;
          raise;
       end;
-      
+
       BasicSwap(cont);
 
    finally
@@ -200,7 +200,7 @@ begin
    end;
 end;
 
-function TMapAdt.Extract(key : KeyType) : SizeType; 
+function TMapAdt.Extract(key : KeyType) : SizeType;
 var
    owns : Boolean;
 begin
@@ -283,6 +283,7 @@ begin
          DisposeKey(k);
          DisposeItem(TMapEntry(aitem).Item);
       end;
+      TMapEntry(aitem).Destroy;
    end;
 end;
 
@@ -366,7 +367,7 @@ begin
    end;
    FSet.ItemDisposer := TMapDisposer.Create(self);
    FEntry := TMapEntry.Create(DefaultKey, DefaultItem);
-   // CachedEntry := nil;
+   CachedEntry := nil;
 end;
 
 constructor TMap.Create;
@@ -383,7 +384,7 @@ begin
       TMapCopier(mapCopier.GetObject).Map := cont;
    FSet := TSetAdt(cont.FSet.CopySelf(mapCopier));
    FEntry := TMapEntry.Create(DefaultKey, DefaultItem);
-   // CachedEntry := nil
+   CachedEntry := nil
 end;
 
 destructor TMap.Destroy;
@@ -419,7 +420,7 @@ end;
 
 function TMap.GetKeyComparer : IKeyBinaryComparer;
 begin
-   Result := TMapComparer(FSet.ItemComparer.GetObject).KeyComparer;   
+   Result := TMapComparer(FSet.ItemComparer.GetObject).KeyComparer;
 end;
 
 function TMap.CopySelf(const mapCopier : IUnaryFunctor) : TItemContainerAdt;
@@ -438,7 +439,7 @@ begin
       inherited;
    end;
 end;
-      
+
 function TMap.Start : TMapIterator;
 begin
    Result := TMapAdaptorIterator.Create(FSet.Start, self);
@@ -474,7 +475,7 @@ begin
          CachedEntry := obj;
          Result := obj.Item;
       end
-&if (&_mcp_accepts_nil)         
+&if (&_mcp_accepts_nil)
       else
          Result := nil;
 &else
@@ -503,7 +504,7 @@ begin
    end else
    begin
       e1 := TMapEntry.Create(key, aitem);
-      
+
       try
          e2 := TMapEntry(FSet.FindOrInsert(e1));
       except
@@ -511,7 +512,7 @@ begin
          e1.Destroy;
          raise;
       end;
-      
+
       if e2 <> nil then
       begin
          DisposeKey(e2.Key);
@@ -529,16 +530,16 @@ var
    e : TMapEntry;
 begin
    Assert(pos is TMapAdaptorIterator, msgInvalidIterator);
-   
+
    e := TMapEntry.Create(key, aitem);
-   
+
    try
       Result := FSet.Insert(TMapAdaptorIterator(pos).FSIter, e);
    except
       e.Destroy;
       raise;
    end;
-   
+
    if not Result then
       e.Destroy;
 end;
@@ -548,14 +549,14 @@ var
    e : TMapEntry;
 begin
    e := TMapEntry.Create(key, aitem);
-   
+
    try
       Result := FSet.Insert(e);
    except
       e.Destroy;
       raise;
    end;
-   
+
    if not Result then
       e.Destroy;
 end;
@@ -563,7 +564,7 @@ end;
 procedure TMap.Delete(pos : TMapIterator);
 begin
    Assert(pos is TMapAdaptorIterator, msgInvalidIterator);
-   
+
    CachedEntry := nil;
    FSet.Delete(TMapAdaptorIterator(pos).FSIter);
 end;
@@ -649,7 +650,7 @@ end;
 function TMapAdaptorIterator.Equal(const Pos : TItemIterator) : Boolean;
 begin
    Assert(pos is TMapAdaptorIterator, msgInvalidIterator);
-   
+
    Result := FSiter.Equal(TMapAdaptorIterator(pos).FSIter);
 end;
 
@@ -658,7 +659,7 @@ begin
    Result := TMapEntry(FSIter.GetItem).Key;
 end;
 
-function TMapAdaptorIterator.GetItem : ItemType; 
+function TMapAdaptorIterator.GetItem : ItemType;
 begin
    Result := TMapEntry(FSIter.GetItem).Item;
 end;
@@ -679,7 +680,7 @@ var
    temp : ItemType;
 begin
    Assert(iter is TMapAdaptorIterator, msgInvalidIterator);
-   
+
    e1 := TMapEntry(FSIter.GetItem);
    e2 := TMapEntry(TMapAdaptorIterator(iter).FSIter.GetItem);
    temp := e1.Item;
@@ -737,12 +738,12 @@ begin
    Result := FMap;
 end;
 
-function TMapAdaptorIterator.IsStart : Boolean; 
+function TMapAdaptorIterator.IsStart : Boolean;
 begin
    Result := FSIter.IsStart;
 end;
 
-function TMapAdaptorIterator.IsFinish : Boolean; 
+function TMapAdaptorIterator.IsFinish : Boolean;
 begin
    Result := FSIter.IsFinish;
 end;
@@ -758,4 +759,3 @@ function CopyOf(const iter : TMapAdaptorIterator) : TMapAdaptorIterator;
 begin
    Result := TMapAdaptorIterator(iter.CopySelf);
 end;
-
