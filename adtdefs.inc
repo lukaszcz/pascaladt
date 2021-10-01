@@ -155,6 +155,8 @@ type
      size of PointerValueType. SizeType may be signed or unsigned, but
      must be of at least the size of IndexType. UnsignedType must be
      unsigned and of at least the size of SizeType.  }
+   { @discard-recent-comments }
+   { @ignore-declarations 14 }
    PointerValueType = PtrUInt;
    UnsignedType = PtrUInt;
    SizeType = PtrInt;
