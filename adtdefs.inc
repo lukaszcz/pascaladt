@@ -330,10 +330,18 @@ const
 &macro _mcp_generic_include
    &expand-non-prefixed-on
    &ifdef MCP_SRCDOC
-      &define _mcp_prefix __prefix__
+      &define _mcp_prefix
       &define ItemType ItemType
       &include &arg1&
-   &else
+
+      &define _mcp_prefix String
+      &define ItemType String
+      &include &arg1&
+
+      &define _mcp_prefix Integer
+      &define ItemType Integer
+      &include &arg1&
+  &else
       &define _mcp_prefix
       &define ItemType TObject
       &include &arg1&
@@ -372,11 +380,39 @@ const
 &macro _mcp_map_generic_include
    &expand-non-prefixed-on
    &ifdef MCP_SRCDOC
-      &define _mcp_map_prefix __map_prefix__
-      &define _mcp_key_prefix __key_prefix__
-      &define _mcp_item_prefix __item_prefix__
+      &define _mcp_map_prefix KeyItem
+      &define _mcp_item_prefix Item
+      &define _mcp_key_prefix Key
       &define ItemType ItemType
       &define KeyType KeyType
+      &include &arg1&
+
+      &define _mcp_map_prefix ObjectObject
+      &define _mcp_item_prefix
+      &define _mcp_key_prefix
+      &define ItemType TObject
+      &define KeyType TObject
+      &include &arg1&
+
+      &define _mcp_map_prefix
+      &define _mcp_item_prefix
+      &define _mcp_key_prefix String
+      &define ItemType TObject
+      &define KeyType String
+      &include &arg1&
+
+      &define _mcp_map_prefix StringString
+      &define _mcp_item_prefix String
+      &define _mcp_key_prefix String
+      &define ItemType String
+      &define KeyType String
+      &include &arg1&
+
+      &define _mcp_map_prefix StringInteger
+      &define _mcp_item_prefix Integer
+      &define _mcp_key_prefix String
+      &define ItemType Integer
+      &define KeyType String
       &include &arg1&
    &else
       &define _mcp_map_prefix ObjectObject

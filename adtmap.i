@@ -1,23 +1,25 @@
-(* This file is a part of the PascalAdt library, which provides
+{@discard
+
+   This file is a part of the PascalAdt library, which provides
    commonly used algorithms and data structures for the FPC and Delphi
    compilers.
-   
+
    Copyright (C) 2004, 2005, 2006 by Lukasz Czajka
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-   02110-1301 USA @discard *)
+   02110-1301 USA @discard }
 
 {@discard
  adtmap.inc::map_prefix=&_mcp_map_prefix&::item_prefix=&_mcp_item_prefix&::key_prefix=&_mcp_key_prefix&::item_type=&ItemType&::key_type=&KeyType&
@@ -37,40 +39,40 @@ type
    private
       FKeyCp : IKeyUnaryFunctor;
       FItemCp : IItemUnaryFunctor;
-      
+
    protected
       {$warnings off }
       constructor Create(const keycp : IKeyUnaryFunctor;
                          const itemcp : IItemUnaryFunctor);
       {$warnings on }
-      
+
    public
       function Perform(aitem : TObject) : TObject; virtual; abstract;
       property KeyCopier : IKeyUnaryFunctor read FKeyCp;
       property ItemCopier : IItemUnaryFunctor read FItemCp;
    end;
-   
+
    { represents a map or a multimap, also called a dictionary }
    TMapAdt = class (TItemDefinedOrderContainerAdt)
    private
       FKeyDisposer : IKeyUnaryFunctor;
       FOwnsKeys : Boolean;
-      
+
       procedure SetKeyDisposer(const akeydisp : IKeyUnaryFunctor);
       function GetKeyDisposer : IKeyUnaryFunctor;
-      
+
    protected
       {$warnings off }
       constructor Create; overload;
       constructor CreateCopy(const cont : TMapAdt); overload;
       {$warnings on }
-      
+
       procedure BasicSwap(cont : TItemContainerAdt); override;
       procedure SetRepeatedItems(b : Boolean); virtual; abstract;
       function GetRepeatedItems : Boolean; virtual; abstract;
       function GetKeyComparer : IKeyBinaryComparer; virtual; abstract;
       procedure SetKeyComparer(cmp : IKeyBinaryComparer); virtual; abstract;
-      
+
    public
       { returns a copier suitable to be used by the CopySelf method or
         the copy constructor; only the functor returned by this
@@ -80,7 +82,7 @@ type
       class function CreateCopier(const keyCopier : IKeyUnaryFunctor;
                                   const itemCopier : IItemUnaryFunctor) :
          TMapAdtCopier; virtual; abstract;
-      
+
 &if (&ItemType != TObject)
       { raises an exception; the second CopySelf should be used instead }
       function CopySelf(const itemCopier : IItemUnaryFunctor) : TItemContainerAdt; override;
@@ -89,7 +91,7 @@ type
       function CopySelf(const mapCopier : IUnaryFunctor) : TItemContainerAdt; virtual; abstract;
 &endif
       { <cont> must be of the type TMapAdt; otherwise the exception
-        ENoMapSwap is raised } 
+        ENoMapSwap is raised }
       procedure Swap(cont : TItemContainerAdt); override;
       { returns the start iterator }
       function Start : TMapIterator; virtual; abstract;
@@ -171,15 +173,15 @@ type
         map when assinging; the old key may be destroyed }
       property Items[key : KeyType] : ItemType read Find
                                          write Associate; default;
-      
+
       { always returns false }
       function InsertItem(aitem : ItemType) : Boolean; override;
       { should never be called since its precondition is always false }
       function ExtractItem : ItemType; override;
       { returns false }
       function CanExtract : Boolean; override;
-   end;   
-      
+   end;
+
    { ----------------- map iterator --------------------- }
    { an iterator into a map; the iterator into a map represents a
      position that is composed of two things: the key and the item; in
@@ -208,8 +210,8 @@ type
       procedure Insert(akey : KeyType;
                        aitem : ItemType); overload; virtual; abstract;
    end;
-   
-   
+
+
    { -------------- a map iterator pair ------------------------ }
    { a pair of two map iterators; used frequently in connection with
      maps; an object of this class is owned by the container which is
@@ -222,7 +224,7 @@ type
       FStart, FFinish : TMapIterator;
       owner : TItemContainerAdt;
       handle : TCollectorObjectHandle;
-      
+
    public
       constructor Create(starti, finishi : TMapIterator);
       { unregisters self from grabage collector; does _not_ destroy
@@ -236,11 +238,11 @@ type
       property Second : TMapIterator read FFinish;
    end;
    TMapIteratorPair = TMapIteratorRange;
-   
+
    { -------- container adaptors and their helper classes ---------- }
-   
+
    TMap = class;
-   
+
    TMapEntry = class
    private
       FKey : KeyType;
@@ -250,12 +252,12 @@ type
       property Key : KeyType read FKey write FKey;
       property Item : ItemType read FItem write FItem;
    end;
-   
+
    { the comparer that should be used with @<TMap> }
    TMapComparer = class (TFunctor, IBinaryComparer)
    private
       fkeycmp : IKeyBinaryComparer;
-      
+
    public
       { creates a map comparer. <keycmp> should compare keys; }
       constructor Create(const keycmp : IKeyBinaryComparer);
@@ -263,12 +265,12 @@ type
       function Compare(aitem1, aitem2 : TObject) : Integer;
       property KeyComparer : IKeyBinaryComparer read fkeycmp write fkeycmp;
    end;
-   
+
    { the hasher that should be used with @<TMap> }
    TMapHasher = class (TFunctor, IHasher)
    private
       fkeyhasher : IKeyHasher;
-      
+
    public
       { keyhasher is owned by the object and destroyed with its
         destruction }
@@ -276,7 +278,7 @@ type
       function Hash(aitem : TObject) : UnsignedType;
       property KeyHasher : IKeyHasher read fkeyhasher;
    end;
-   
+
    { adapts the general set interface to implement a map }
    TMap = class (TMapAdt)
    private
@@ -287,14 +289,14 @@ type
         @c if map.Has(x) then y := map.Find(x); @ec }
       CachedEntry : TMapEntry;
       FSet : TSetAdt;
-      
+
    protected
       procedure SetOwnsItems(b : Boolean); override;
       procedure SetRepeatedItems(b : Boolean); override;
       function GetRepeatedItems : Boolean; override;
       procedure SetKeyComparer(cmp : IKeyBinaryComparer); override;
       function GetKeyComparer : IKeyBinaryComparer; override;
-      
+
    public
       { returns a copier suitable for use by CopySelf method or the
         copy constructor; only the functor returned by this function
@@ -303,7 +305,7 @@ type
       class function CreateCopier(const keyCopier : IKeyUnaryFunctor;
                                   const itemCopier : IItemUnaryFunctor) :
          TMapAdtCopier; override;
-      
+
       { <aset> is a set for storing objects; appropriate disposers and
         comparers are automatically chosen in the constructor, basing
         on the type of the map; if you need to use non-standard ones
@@ -331,11 +333,11 @@ type
       procedure Associate(key : KeyType; aitem : ItemType); override;
       function Insert(pos : TMapIterator;
                       key : KeyType;
-                      aitem : ItemType) : Boolean; overload; override; 
+                      aitem : ItemType) : Boolean; overload; override;
       function Insert(key : KeyType;
-                      aitem : ItemType) : Boolean; overload; override; 
-      procedure Delete(pos : TMapIterator); overload; override; 
-      function Delete(key : KeyType) : SizeType; overload; override; 
+                      aitem : ItemType) : Boolean; overload; override;
+      procedure Delete(pos : TMapIterator); overload; override;
+      function Delete(key : KeyType) : SizeType; overload; override;
       { returns the iterator starting the range of items associated
         with <key> }
       function LowerBound(key : KeyType) : TMapIterator; override;
@@ -354,13 +356,13 @@ type
         underlying TSetAdt is a TSortedSetAdt }
       function IsSorted : Boolean; override;
    end;
-   
+
    { an iterator into @<TMap> }
    TMapAdaptorIterator = class (TMapIterator)
    private
       FSIter : TSetIterator;
       FMap : TMap;
-      
+
    public
       constructor Create(siter : TSetIterator; map : TMap);
       { returns an exact copy of self; i.e. copies all the data }
@@ -378,8 +380,8 @@ type
       { exchanges the item pointed to by self with the one pointed
         to by the argument @see TContainerAdt.IsDefinedOrder, TSetIterator }
       procedure ExchangeItem(iter : TItemIterator); override;
-      { moves self one position forward } 
-      procedure Advance; overload; override; 
+      { moves self one position forward }
+      procedure Advance; overload; override;
       { goes back one position }
       procedure Retreat; override;
       { inserts into the map (associates <aitem> with key) and moves to
@@ -398,6 +400,6 @@ type
       { returns true if self is the 'one beyond last' iterator }
       function IsFinish : Boolean; override;
    end;
-   
-function CopyOf(const iter : TMapIterator) : TMapIterator; overload;   
+
+function CopyOf(const iter : TMapIterator) : TMapIterator; overload;
 function CopyOf(const iter : TMapAdaptorIterator) : TMapAdaptorIterator; overload;

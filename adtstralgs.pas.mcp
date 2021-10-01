@@ -98,14 +98,14 @@ function BmComputeTable(const str2 : String) : TBmTable;
 function BmFindSubstr(const str1, str2 : String; startIndex : IndexType;
                       const table : TBmTable) : IndexType;
 
-{ implements the Karp-Miller-Rosenberg algorithm for finding all
-  substrings with length len in str; len is the desired length of
+{ implements the Karp-Miller-Rosenberg algorithm for computing the
+  equivalence classes of all substrings with length len in str; if the
+  table returned contains the same number at index i and j, it means
+  that the substrings of length len starting at i and at j are equal;
+  only positions from [start,finish-len) in the returned array contain
+  valid indices !! others are undefined; len is the desired length of
   substrings, should be > 1; start and finish designate the range in
-  which the search is performed; if the table returned contains the
-  same number at index i and j, it means that the substrings starting
-  at i and at j are equal; only positions from [start,finish-len) in the
-  returned array contain valid indices !! others are undefined;
-  @complexity O(n*log(n)) }
+  which the search is performed; @complexity O(n*log(n)) }
 function KmrFindSubstrings(const str : String; start, finish : IndexType;
                            len : SizeType) : TCardinalArray;
 

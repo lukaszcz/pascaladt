@@ -1,7 +1,7 @@
                          PascalAdt tutorial.
 
 This document provides an introduction to the PascalAdt library and
-briefly explains its basic functions using an example of simple
+briefly explains its basic functions using an example of a simple
 program dealing with a database of customers and their orders.
 
 I. What is PascalAdt?
@@ -10,8 +10,10 @@ II. How to use it?
         2. The basics.
            2.1 Simple type defines.
            2.2 Terminology.
-           2.3 Containers.
-           2.4 Functors.
+           2.3 Files.
+           2.4 Containers.
+           2.5 Basic methods.
+           2.6 Functors.
         3. Sets and maps.
            3.1 Basic information.
            3.2 Searching for items.
@@ -108,8 +110,6 @@ For the data type of an order we may take the following:
 A unique ID number, some product, its price and, of course, the
 customer placing the order is associated with each order.
 
-Pretty nice, but how to make it work? Read on.
-
 2. The basics.
 
 Before delving into details we shall consider some basic general
@@ -136,12 +136,24 @@ things stored in them are items. A container is said to own its items
 if it destroys them automatically when they are removed from the
 container or when the container is itself destroyed.
 
-2.3 Containers.
+2.3 Files.
+
+If you look at the PascalAdt library sources, you notice that most of
+it is not implemented in *.pas files. This is because the sources are
+preprocessed with the MCP macro processor to generate several
+instances of each container for different item types. Most units are
+broken up into three files: adtunit.i, adtunit_impl.i and
+adtunit.pas.mcp. The files contain ordinary Pascal code with some MCP
+macros. The file adtunit.i contains the interface, adtunit_impl.i the
+implementation, and adtunit.pas.mcp puts these two together with
+unit uses, initialization and finalization code.
+
+2.4 Containers.
 
 The PascalAdt library provides a variety of containers. They are all
 implemented as classes storing generic pointers. TContainerAdt is the
 ancestor of all containers, and the root of the container class
-hierarchy tree. It is defined in adtcontbase.pas. No concrete
+hierarchy tree. It is defined in adtcontbase.i. No concrete
 container class is derived directly from TContainerAdt, though, but
 instead from some abstract class providing an interface for the
 implemented functionality. There are in fact many 'chains' of
@@ -163,7 +175,7 @@ doubly-linked list - and TXorList - a memory-saving implementation of
 a doubly-linked list, but a somewhat messy one.
 
 All abstract -Adt classes, except for TContainerAdt, are defined in
-adtcont.pas. TContainerAdt is defined in adtcontbase.pas.
+adtcont.i. TContainerAdt is defined in adtcontbase.i.
 
 Going back to our TCustomer class, we see that TListAdt is just a
 general interface to a list. It is usually preferable to use abstract
@@ -171,7 +183,7 @@ general interface to a list. It is usually preferable to use abstract
 to change the implementation for some reason it will make your life
 much easier.
 
-2.4 Basic methods.
+2.5 Basic methods.
 
 All containers share several basic methods declared in
 TContainerAdt. Alone, wihtout other methods, they are rather
@@ -197,20 +209,19 @@ Indicates whether the container owns its items. In other words,
 whether the items should be disposed with the disposer when removed
 from the container. Always true after the creation.
 
-2.5 Functors.
+2.6 Functors.
 
-As was already mentioned, the containers store generic pointers. But
-wouldn't it be nice to have the items, whatever they are, being
-automatically freed upon the deletion from the container? It would
-be. It is nice. But you have to provide the information how to free
-the items by passing a functor to do the job. Functors are classes
-which act like routines. In the PascalAdt library they are implemented
-as Object Pascal interfaces.
+As was already mentioned, the containers store generic pointers. It is
+possible to have the items automatically freed upon deletion from the
+container, but you have to provide the information how to free the
+items by passing a functor to do the job. Functors are classes which
+act like routines. In the PascalAdt library they are implemented as
+Object Pascal interfaces.
 
 Functors are not only used to dispose items, but also for various
 other purposes. The most common are: comparers, hashers, predicates.
 
-All functor interfaces are defined in adtfunct.pas. The most important
+All functor interfaces are defined in adtfunct.i. The most important
 of them include:
 
    IUnaryFunctor = interface (IFunctor)
@@ -238,23 +249,22 @@ Hashes an item passed.
 
 Let's get down to earth again, and think what we need for our
 hypothetical customer.pas program. We would like to store all
-customers in a database and have a possibly fast access to any
-customer by their name. Hmm... So it seems we need a sort of map. The
-abstract map interface is TMapAdt. Take a look at its declaration in
-adtcont.pas and you will see that there is a small problem with using
-a map. Namely, it requires two kinds of objects to be stored - the
-keys and the proper items. But we need only one. To get around this
-'problem' we shall use a set - TSetAdt. Actually, most maps are
-implemented by means of a set. This is not difficult since you only
-have to store the key and the item in one object and use an
-appropriate comparer which takes only the key into account. There is
-even a wrapper class in adtcont.pas providing the TMapAdt interface
-for any TSetAdt.
+customers in a database and have possibly fast access to any customer
+by their name. We need some sort of a map. The abstract map interface
+is TMapAdt. Take a look at its declaration in adtcont.i and you will
+see that there is a small problem with using a map. Namely, it
+requires two kinds of objects to be stored - the keys and the proper
+items. But we need only one. To get around this 'problem' we shall use
+a set - TSetAdt. Actually, most maps are implemented by means of a
+set. This is not difficult since you only have to store the key and
+the item in one object and use an appropriate comparer which takes
+only the key into account. There is even a wrapper class in
+adtmap.i providing the TMapAdt interface for any TSetAdt.
 
 Let's be more specific now and choose a particular implementation for
 our set. Let it be a hash table. There are presently two
 implementations of hash tables in the PascalAdt library, both of them
-in adthash.pas. These are THashTable and TScatterTable. The former is
+in adthash.i. These are THashTable and TScatterTable. The former is
 recommended for most uses as it is slightly faster (by a constant
 factor). The latter, on the other hand, uses less memory. Notice that
 they are both derived from THashSetAdt. Yes, THashSetAdt is an
@@ -337,9 +347,9 @@ The job of comparing two TCustomer objects is done by a separate
 function as this function will be needed later in the program. The
 function simply compares first the surnames of the customers, and if
 they are the same then compares their names. The hasher uses a hashing
-function defined in adthashfunct.pas. The function implements a very
+function defined in adthashfunct.pas.mcp. The function implements a very
 simple and efficient FNV algorithm. This is the default for all
-pre-defined hashers in adthashfunct.pas, and should be used by your
+pre-defined hashers in adthashfunct.pas.mcp, and should be used by your
 own ones.
 
 Let's now choose a type for the container storing orders. To have an
@@ -576,7 +586,7 @@ It would also be nice to have an instant access to the orders made by
 a given customer. This can be accomplished by keeping a list of all
 orders of the customer with the customer data. In the PascalAdt
 library there are three implementations of lists, all of them defined
-in adtlist.pas. TSingleList is a singly-linked list, derived directly
+in adtlist.i. TSingleList is a singly-linked list, derived directly
 from TListAdt. TDoubleList and TXorList are doubly-linked lists. Both
 of them are immediate descendants of TDoubleListAdt. Of course, many
 more containers such as arrays may be used in the same fashion as
@@ -654,7 +664,7 @@ the whole container.
 5.3. Simplified class hierarchy.
 
 All abstract iterator classes serving as general interfaces are
-defined in adtiters.pas. There are numerous other concrete iterators
+defined in adtiters.i. There are numerous other concrete iterators
 implementing the methods defined in those abstract ones. They are
 scattered over various units. In this section of this peculiar mix of
 a tutorial and a quick reference we provide a simplified description
@@ -869,7 +879,7 @@ implemented to deal with ranges and not whole containers. This gives
 much greater flexibility and generality, but undoubtedly complicates
 things a bit.
 
-All algorithms are defined in adtalgs.pas.
+All algorithms are defined in adtalgs.i.
 
 To get started let's look at the PrintCustomer routine, which prints
 the data associated with a customer.
@@ -963,7 +973,7 @@ into a buffer, sort them, and then print them out. We need the buffer
 because, as you remember, items in a hash tables cannot be moved
 around, their places are fixed.
 
-PascalArrayType is defined in adtarray.pas as array of
+PascalArrayType is defined in adtarray.i as array of
 Pointer. TPascalArray is a wrapper class which adapts an object pascal
 dynamic array to the TArrayAdt interface, thus enabling it to be used
 with the PascalAdt algorithms. We could choose the items in buff to be
@@ -981,7 +991,7 @@ the customers. It uses the PrintCustomerName routine defined
 elsewhere.
 
 Brief descriptions of all algorithms can be found in comments in
-adtalgs.pas, together with the algorithms' definitions.
+adtalgs.i, together with the algorithms' definitions.
 
 7. Compositions of functors.
 
@@ -1006,7 +1016,7 @@ positions starting from the first argument up to the end of the
 container.
 
 But what is interesting here is the function EqualTo(). It is one of
-the numerous functions defined in adtfunct.pas used to modify the
+the numerous functions defined in adtfunct.i used to modify the
 behaviour of functors. EqualTo() returns an unary predicate which
 compares its argument against the second argument passed to EqualTo()
 using the comparer passed as the first one. It returns true if, and
