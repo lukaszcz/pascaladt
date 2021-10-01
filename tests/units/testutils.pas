@@ -14,17 +14,17 @@ type
       destructor Destroy; override;
       property Value : Integer read FField write FField;
    end;
-   
+
    TTestObjectCopier = class (TFunctor, IUnaryFunctor)
    public
       function Perform(aitem : TObject) : TObject;
    end;
-   
+
    TTestObjectComparer = class (TFunctor, IBinaryComparer, ISubtractor)
    public
       function Compare(aitem1, aitem2 : TObject) : Integer;
    end;
-   
+
    TTestObjectHasher = class (TFunctor, IHasher)
    public
       function Hash(aitem : TObject) : UnsignedType;
@@ -33,15 +33,15 @@ type
 var
    { name of iterators for currently tested container }
    IterName : String;
-   
+
 { Checks the parameters passed on command line and sets various
   variables appropriately. This should be called once at the beginning
   of the main test program. Valid options are: }
    { --silent or -s => be silent - show messages only for failed tests }
-procedure CheckTestParams;   
+procedure CheckTestParams;
 { Starts a test - title = name of tested thing  }
 procedure StartTest(title : string);
-{ Ends a test }   
+{ Ends a test }
 procedure FinishTest;
 { Tests condition, if it's false it means that thing 'title' failed,
   otherwise passed. Prints appropriate message. }
@@ -88,18 +88,16 @@ var
    destrname, testtitle : string;
    silent : Boolean;
    GlobalSilent : Boolean;
-   
+
 constructor TTestObject.Create(int : Integer);
 begin
    FField := int;
    Inc(objectCount);
-//   WriteLn(IntToStr(objectCount));
 end;
 
 destructor TTestObject.Destroy;
 begin
    Dec(objectCount);
-//   WriteLn(IntToStr(objectCount));
 end;
 
 function TTestObjectCopier.Perform(aitem : TObject) : TObject;
@@ -121,7 +119,7 @@ end;
 procedure CheckTestParams;
 begin
    GlobalSilent := false;
-   
+
    if (ParamCount = 1) and
          ((ParamStr(1) = '--silent') or (ParamStr(1) = '-s')) then
    begin
@@ -218,31 +216,31 @@ begin
    wasInSilent := silent;
    if not wasInSilent then
       StartSilentMode;
-   
+
    while (not iter.Equal(finish)) and (count <> 0) do
    begin
       if TTestObject(iter.Item).Value <> fnum then
       begin
-	 if ascend then
-	    num := fnum - num
-	 else
-	    num := num - fnum;
+         if ascend then
+            num := fnum - num
+         else
+            num := num - fnum;
          Test(false, testname,
-	      'Wrong order of items starting from the ' + IntToStr(num) + 'th');
-	 WriteLn('   Remaining items are: ');
+              'Wrong order of items starting from the ' + IntToStr(num) + 'th');
+         WriteLn('   Remaining items are: ');
          if count > 30 then
          begin
             WriteLn('      (too many items, only first 30 written)');
             count := 30;
          end;
-               
-	 while (not Start.Equal(finish)) and (count <> 0) do
-	 begin
-	    Write(TTestObject(iter.Item).Value, ' ');
-	    iter.Advance;
-	    dec(count);
-	 end;
-	 WriteLn;
+
+         while (not Start.Equal(finish)) and (count <> 0) do
+         begin
+            Write(TTestObject(iter.Item).Value, ' ');
+            iter.Advance;
+            dec(count);
+         end;
+         WriteLn;
          Exit;
       end;
       iter.Advance;
@@ -255,7 +253,7 @@ begin
    if not wasInSilent then
       StopSilentMode;
    Test(count = 0, testname, 'Wrong number of items');
-   
+
    if not (silent or globalSilent) then
       Write('Destroying iterator...');
    iter.Destroy;
@@ -296,7 +294,7 @@ begin
       Inc(leakmsg);
    end;
    objectsToDestroy := 0;
-   
+
    if leakmsg > 30 then
    begin
       WriteLn('FATAL - too many objects leaked - halting...');
@@ -335,4 +333,3 @@ begin
 end;
 
 end.
-

@@ -176,7 +176,6 @@ type
 
 { @header Constants. }
 const
-   adtUnlimitedArrayIndex = 1;
    adtBitsInByte = 8;
 
 &# macro definitions

@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -28,8 +28,10 @@
 &include adtcontbase.defs
 &include adtcontbase_impl.mcp
 
+&define Identity &_mcp_prefix&Identity
+
 { TContainerAdt members }
-   
+
 constructor TContainerAdt.Create;
 begin
    FDisposer := &_mcp_default_disposer(&ItemType);
@@ -139,7 +141,7 @@ begin
       cont1 := cont;
       cont2 := self;
    end;
-   
+
    BufferAllocate(temp, cont1.Size);
    { this try..finally produces a linking error with FPC 2.0 for some
      strange reason }
@@ -153,19 +155,19 @@ begin
             temp^.Items[i] := aitem;
             Inc(tempSize);
          end;
-         
+
          while cont2.CanExtract do
          begin
             aitem := cont2.ExtractItem; { may raise }
             cont1.InsertItem(aitem); { may raise }
          end;
-         
+
          for i := 0 to tempSize - 1 do
          begin
             cont2.InsertItem(temp^.Items[i]); { may raise }
          end;
          i := tempSize;
-         
+
       except
          { since the exception was probably raised by the InsertItem
            routine there is no point in trying to re-insert the items
@@ -191,4 +193,9 @@ end;
 procedure TContainerAdt.&<DisposeItem>(aitem : ItemType);
 begin
    &_mcp_dispose_item(aitem, FDisposer.Perform, OwnsItems, FDisposer);
+end;
+
+function TContainerAdt.CopySelf : TContainerAdt;
+begin
+   Result := CopySelf(Identity);
 end;

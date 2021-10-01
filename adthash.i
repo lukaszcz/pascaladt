@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -29,16 +29,11 @@
 
 type
    { ========================== THashTable =============================== }
-   
+
    PHashNode = ^THashNode;
    THashNode = record
       Item : ItemType;
       Next : PHashNode;
-   end;
-   
-   PHashBuckets = ^THashBuckets;
-   THashBuckets = record
-      Bucket : array[0..adtUnlimitedArrayIndex] of THashNode;
    end;
 
    { THashTable is an open hash table. All set operations are average
@@ -48,7 +43,7 @@ type
      function must not raise exceptions. }
    THashTable = class (THashSetAdt)
    private
-      FBuckets : PHashBuckets;
+      FBuckets : array of THashNode;
       FCapacity : SizeType; { size of FBuckets array }
       FSize : SizeType; { number of items stored in hash table }
       FTableSize : SizeType; { log2(FCapacity) }
@@ -64,7 +59,7 @@ type
         been modified since it was last set; used only to efficiently
         implement THashTableIterator.IsStart method }
       FFirstUsedBucket : IndexType;
-      
+
       { returns an index into an appropriate bucket within the hash
         table obtained from the value passed; the value should be the
         result of the hashing function }
@@ -77,10 +72,10 @@ type
       inline;
 {$endif INLINE_DIRECTIVE }
       procedure CheckMaxFillRatio;
-{$ifdef INLINE_DIRECTIVE }      
+{$ifdef INLINE_DIRECTIVE }
       inline;
 {$endif }
-      
+
       { initializes all fields to their default values }
       procedure InitFields;
       { initializes FBuckets, FCapacity, FSize, FTableSize,
@@ -131,7 +126,7 @@ type
       procedure NewNode(var node : PHashNode);
       { deallocates the node (does not touch the item) }
       procedure DisposeNode(node : PHashNode);
-      
+
    protected
       function GetCapacity : SizeType; override;
       { returns the capacity that should be used for table with
@@ -141,8 +136,8 @@ type
       function GetMaxFillRatio : SizeType; override;
       procedure SetMaxFillRatio(fr : SizeType); override;
       function GetMinFillRatio : SizeType; override;
-      procedure SetMinFillRatio(fr : SizeType); override;      
-      
+      procedure SetMinFillRatio(fr : SizeType); override;
+
    public
       { creates a new THashTable.   }
       constructor Create;
@@ -152,14 +147,14 @@ type
                              const itemCopier : IUnaryFunctor); overload;
       { frees all items and releases any allocated memory }
       destructor Destroy; override;
-      
+
 {$ifdef TEST_PASCAL_ADT }
       { writes some information about the hash table to the log file
         including the average number of items in a bucket, number of
         buckets empty, filled, etc. }
       procedure LogStatus(mname : String); override;
 {$endif TEST_PASCAL_ADT }
-      
+
       { returns an exact copy of self; @complexity O(n) }
       function CopySelf(const ItemCopier : IUnaryFunctor) :
          TContainerAdt; override;
@@ -178,7 +173,7 @@ type
         you need an iterator to that item use LowerBound or EqualRange
         instead; @complexity average O(1), worst-case O(n) }
       function Find(aitem : ItemType) : ItemType; override;
-&endif &# end &_mcp_accepts_nil      
+&endif &# end &_mcp_accepts_nil
       { returns true if the given item is present in the set; }
       { @complexity average O(1), worst-case O(n) }
       function Has(aitem : ItemType) : Boolean; override;
@@ -188,20 +183,20 @@ type
       { exactly the same as below; pos is discarded; @complexity
         average O(1), worst-case O(n) }
       function Insert(pos : TSetIterator;
-                      aitem : ItemType) : Boolean; overload; override; 
+                      aitem : ItemType) : Boolean; overload; override;
       { inserts aitem into the set; returns true if self was inserted,
         or false if it cannot be inserted (this happens for non-multi
         (without repeated items) set when item equal to aitem is already
         in the set); if the item is not inserted it is not owned by
         the container and not disposed !  @complexity average O(1),
         worst-case O(n) }
-      function Insert(aitem : ItemType) : Boolean; overload; override; 
+      function Insert(aitem : ItemType) : Boolean; overload; override;
       { removes the item at pos from the set; }
-      procedure Delete(pos : TSetIterator); overload; override; 
+      procedure Delete(pos : TSetIterator); overload; override;
       { removes all items equal to aitem from the set; returns the
         number of deleted items; @complexity average O(1), worst-case
         O(n) }
-      function Delete(aitem : ItemType) : SizeType; overload; override; 
+      function Delete(aitem : ItemType) : SizeType; overload; override;
       { returns the iterator starting the range of items equal to aitem;
         @complexity average O(1), worst-case O(n) }
       function LowerBound(aitem : ItemType) : TSetIterator; override;
@@ -226,13 +221,13 @@ type
       { returns the minimal allowed capacity for the set }
       function MinCapacity : SizeType; override;
    end;
-   
+
    THashTableIterator = class (TSetIterator)
    private
       FBucket : IndexType;
       FNode : PHashNode;
       FTable : THashTable;
-      
+
       {$warnings off }
       constructor Create(abucket : IndexType; anode : PHashNode;
                          tab : THashTable);
@@ -249,7 +244,7 @@ type
       { @fetch-related }
       { @complexity average O(1), worst-case O(n) }
       procedure ResetItem; override;
-      procedure Advance; overload; override; 
+      procedure Advance; overload; override;
       procedure Retreat; override;
       procedure Insert(aitem : ItemType); override;
       function Extract : ItemType; override;
@@ -258,15 +253,15 @@ type
         amortized O(1), worst-case O(m) }
       function IsStart : Boolean; override;
       function IsFinish : Boolean; override;
-   end;    
-   
-   
-&# TScatterTable only for objects, pointers or strings (there must be two 
+   end;
+
+
+&# TScatterTable only for objects, pointers or strings (there must be two
 &# special values not taken by any valid representation of the type)
 &if (&_mcp_are_two_special_values)
    { ========================== TScatterTable =============================== }
-   
-   
+
+
    { TScatterTable is a closed hash table. All set operations are average
      O(1), provided that a decent hash function is used. Default hash
      function uses the FNV algorithm, which in most cases is sufficiently
@@ -298,28 +293,28 @@ type
       { returns the first offset from the original position that
         should be probed when collision occurs; }
       function FirstProbe : SizeType;
-{$ifdef INLINE_DIRECTIVE }      
+{$ifdef INLINE_DIRECTIVE }
       inline;
 {$endif }
       { returns the next offset that should be probed after off }
       function NextProbe(off : UnsignedType) : SizeType;
-{$ifdef INLINE_DIRECTIVE }      
+{$ifdef INLINE_DIRECTIVE }
       inline;
 {$endif }
       function GetIndex(val : UnsignedType) : IndexType;
-{$ifdef INLINE_DIRECTIVE }      
+{$ifdef INLINE_DIRECTIVE }
       inline;
 {$endif }
       procedure CheckDeletedFields;
-{$ifdef INLINE_DIRECTIVE }      
+{$ifdef INLINE_DIRECTIVE }
       inline;
 {$endif }
       procedure CheckMaxFillRatio;
-{$ifdef INLINE_DIRECTIVE }      
+{$ifdef INLINE_DIRECTIVE }
       inline;
 {$endif }
       procedure CheckMinFillRatio;
-{$ifdef INLINE_DIRECTIVE }      
+{$ifdef INLINE_DIRECTIVE }
       inline;
 {$endif }
 
@@ -337,7 +332,7 @@ type
       { the same as above but returns true if aitem was inserted, false
         if not; }
       function DoInsert(aitem : ItemType) : Boolean; overload;
-            
+
    protected
       function GetCapacity : SizeType; override;
       { returns the capacity that should be used for table with
@@ -348,7 +343,7 @@ type
       procedure SetMaxFillRatio(fr : SizeType); override;
       function GetMinFillRatio : SizeType; override;
       procedure SetMinFillRatio(fr : SizeType); override;
-      
+
    public
       { creates a new TScatterTable.   }
       constructor Create;
@@ -358,12 +353,12 @@ type
                              const itemCopier : IUnaryFunctor); overload;
       { frees all items and releases any allocated memory }
       destructor Destroy; override;
-      
+
 {$ifdef TEST_PASCAL_ADT }
       { writes some information about the hash table to the log file }
       procedure LogStatus(mname : String); override;
 {$endif TEST_PASCAL_ADT }
-      
+
       { returns an exact copy of self; @complexity O(n) }
       function CopySelf(const ItemCopier : IUnaryFunctor) :
          TContainerAdt; override;
@@ -373,11 +368,11 @@ type
       function Start : TSetIterator; override;
       { returns the finish iterator }
       function Finish : TSetIterator; override;
-&if (&_mcp_accepts_nil)      
+&if (&_mcp_accepts_nil)
       { if RepeatedItems is false and there is an item equal to aitem in
         the set, then returns this item; in all other cases inserts
         aitem into the set and returns nil }
-      function FindOrInsert(aitem : ItemType) : ItemType; override;      
+      function FindOrInsert(aitem : ItemType) : ItemType; override;
       { returns the first item equal to aitem, or nil if not found; if
         you need an iterator to that item use LowerBound or EqualRange
         instead; @complexity average O(1), worst-case O(m) }
@@ -392,20 +387,20 @@ type
       { exactly the same as below; pos is discarded; @complexity
         average O(1), worst-case O(n) }
       function Insert(pos : TSetIterator;
-                      aitem : ItemType) : Boolean; overload; override; 
+                      aitem : ItemType) : Boolean; overload; override;
       { inserts aitem into the set; returns true if self was inserted,
         or false if it cannot be inserted (this happens for non-multi
         (without repeated items) set when item equal to aitem is already
         in the set); if the item is not inserted it is not owned by
         the container and not disposed !  @complexity average O(1),
         worst-case O(n) }
-      function Insert(aitem : ItemType) : Boolean; overload; override; 
+      function Insert(aitem : ItemType) : Boolean; overload; override;
       { removes the item at pos from the set; }
-      procedure Delete(pos : TSetIterator); overload; override; 
+      procedure Delete(pos : TSetIterator); overload; override;
       { removes all items equal to aitem from the set; returns the
         number of deleted items; @complexity average O(1), worst-case
         O(n) }
-      function Delete(aitem : ItemType) : SizeType; overload; override; 
+      function Delete(aitem : ItemType) : SizeType; overload; override;
       { returns the iterator starting the range of items equal to aitem;
         @complexity average O(1), worst-case O(m), where m is the
         capacity }
@@ -432,13 +427,13 @@ type
       { returns the minimal allowed capacity for the set }
       function MinCapacity : SizeType; override;
    end;
-   
+
    TScatterTableIterator = class (TSetIterator)
    private
       FBase : IndexType;
       FOffset : SizeType;
       FTable : TScatterTable;
-      
+
       {$warnings off }
       constructor Create(abase : IndexType; aoff : SizeType;
                          tab : TScatterTable);
@@ -456,7 +451,7 @@ type
       { @fetch-related }
       { @complexity average O(1), worst-case O(n) }
       procedure ResetItem; override;
-      procedure Advance; overload; override; 
+      procedure Advance; overload; override;
       procedure Retreat; override;
       procedure Insert(aitem : ItemType); override;
       function Extract : ItemType; override;

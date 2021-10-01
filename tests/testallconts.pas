@@ -7,7 +7,14 @@ uses
    adt23tree, adtavltree, adtbinomqueue, adtbintree, adttree, adtbstree, adthash,
    adtlist, adtarray, adtqueue, adtsplaytree;
 
-procedure TestUsing(t : TTester);
+procedure TestUsing(t : TTester); overload;
+begin
+   Assert(t <> nil);
+   t.Test;
+   t.Destroy;
+end;
+
+procedure TestUsing(t : TStringTester); overload;
 begin
    Assert(t <> nil);
    t.Test;
@@ -47,6 +54,12 @@ begin
    TestUsing(THashSetTester.Create('TScatterTable', 'TScatterTableIterator',
                                    TScatterTable.Create));
 
+   { -------------------- string hash sets -------------------------- }
+   TestUsing(TStringHashSetTester.Create('TStringHashTable', 'TStringHashTableIterator',
+                                   TStringHashTable.Create));
+   TestUsing(TStringHashSetTester.Create('TStringScatterTable', 'TStringScatterTableIterator',
+                                   TStringScatterTable.Create));
+
    { ---------------- sets based on trees --------------------- }
    TestUsing(TSortedSetTester.Create('TSplayTree', 'TBinaryTreeIterator',
                                      TSplayTree.Create));
@@ -59,6 +72,16 @@ begin
                                                  'T23TreeIterator',
                                                  T23Tree.Create));
 
+   { ---------------- string sets based on trees --------------------- }
+   TestUsing(TStringSetTester.Create('TStringSplayTree', 'TStringBinaryTreeIterator',
+                                     TStringSplayTree.Create));
+   TestUsing(TStringSetTester.Create('TStringAvlTree', 'TStringBinaryTreeIterator',
+                                     TStringAvlTree.Create));
+   TestUsing(TStringSetTester.Create('TStringBinarySearchTree',
+                                     'TStringBinarySearchTreeIterator',
+                                     TStringBinarySearchTree.Create));
+   TestUsing(TStringSetTester.Create('TString23Tree', 'TString23TreeIterator',
+                                                 TString23Tree.Create));
 
    { --------------------- priority queues -------------------- }
    TestUsing(TPriorityQueueTester.Create('TBinomialQueue',

@@ -35,7 +35,7 @@
 &endif
 
 var
-   var&_mcp_prefix&Projection : IUnaryFunctor;
+   var&_mcp_prefix&Identity : IUnaryFunctor;
 
 type
    { -------------- Procedure/Function adaptors (wrappers) -------------------- }
@@ -962,9 +962,9 @@ begin
 {$endif }
 end;
 
-{ ---------------------------- TProjection ------------------------------------ }
+{ ---------------------------- TIdentity ------------------------------------ }
 
-function TProjection.Perform(aitem : ItemType) : ItemType;
+function TIdentity.Perform(aitem : ItemType) : ItemType;
 begin
    Result := aitem;
 end;
@@ -1203,9 +1203,9 @@ begin
    Result := TFunctorComposer_F_Gx_Hy.Create(f, g, h);
 end;
 
-function &_mcp_prefix&Projection : IUnaryFunctor;
+function &_mcp_prefix&Identity : IUnaryFunctor;
 begin
-   Result := var&_mcp_prefix&Projection;
+   Result := var&_mcp_prefix&Identity;
 end;
 
 {$endif OVERLOAD_DIRECTIVE }

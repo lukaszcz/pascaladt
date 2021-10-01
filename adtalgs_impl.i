@@ -29,7 +29,7 @@
 &include adtalgs_impl.mcp
 
 &define TForwardIteratorPair T&_mcp_prefix&ForwardIteratorPair
-&define Projection &_mcp_prefix&Projection
+&define Identity &_mcp_prefix&Identity
 
 
 { ---------------------- helper functions --------------------------- }
@@ -1406,7 +1406,7 @@ begin
    begin
       pi := Random(fi - si);
       pred.Item := start[si + pi];
-      pi := PartitionAux(start, si, fi, pred); { may raise }
+      pi := PartitionAux(start, si, fi, predi); { may raise }
       { now pi is the index of the first item equal to
         pred.Item; bear in mind that k is index + 1 }
       if k < pi + 1 then
@@ -1846,7 +1846,7 @@ begin
             begin
                { insert the items without removing them from the range }
                Copy(range2.Start, range2.Finish, TBasicInserter.Create(Result),
-                    Projection);
+                    Identity);
                range2.Start.Delete(range2.Finish);
                Assert(not set2.Has(iter1.Item));
                aitem := iter1.Item;

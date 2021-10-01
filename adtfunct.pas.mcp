@@ -242,14 +242,24 @@ begin
 end;
 
 initialization
-   varProjection := TProjection.Create;
-   varStringProjection := TStringProjection.Create;
+   varIdentity := TIdentity.Create;
+   varStringIdentity := TStringIdentity.Create;
 &ifdef MCP_POINTER
-   varPointerProjection := TPointerProjection.Create;
+   varPointerIdentity := TPointerIdentity.Create;
+&endif
+&ifdef MCP_INTEGER
+   varIntegerIdentity := TIntegerIdentity.Create;
+&endif
+&ifdef MCP_CARDINAL
+   varCardinalIdentity := TCardinalIdentity.Create;
+&endif
+&ifdef MCP_REAL
+   varRealIdentity := TRealIdentity.Create;
 &endif
    varObjectDisposer := TObjectDisposer.Create;
    varPointerValueComparer := TPointerValueComparer.Create;
    varNoCaseStringComparer := TNoCaseStringComparer.Create;
+
 
 finalization
 

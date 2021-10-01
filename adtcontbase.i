@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -46,32 +46,32 @@ type
       {$warnings off }
       constructor Create; overload;
       { creates self as a copy of cont; this should be called by every
-        'copy-constructor' of a descendant container } 
+        'copy-constructor' of a descendant container }
       constructor CreateCopy(const cont : TContainerAdt); overload;
       {$warnings on }
-      
+
       procedure SetOwnsItems(b : Boolean); virtual;
       procedure SetDisposer(const proc : IUnaryFunctor); virtual;
       function GetDisposer : IUnaryFunctor; virtual;
-      { swaps basic functors, everything except for the items }      
+      { swaps basic functors, everything except for the items }
       procedure BasicSwap(cont : TContainerAdt); virtual;
 {$ifdef TEST_PASCAL_ADT }
       { Writes some information about the container to the log  }
       procedure WriteLog(msg : String); overload;
       procedure WriteLog; overload;
 {$endif TEST_PASCAL_ADT }
-      
+
    public
       { deletes all items; @complexity O(n). }
       destructor Destroy; override;
-      
+
 {$ifdef TEST_PASCAL_ADT }
       { writes out some information about the container to the log file }
       procedure LogStatus(mname : String); virtual;
       { formats aitem for displaying it }
       function FormatItem(aitem : ItemType) : String;
 {$endif TEST_PASCAL_ADT }
-      
+
       { returns a copy of self. copies all the data into the new
         object of then same type. Uses ItemCopier to copy items. This
         functor should return exact copy of item, i.e. the new object
@@ -81,7 +81,9 @@ type
         type as self and using the same disposer, comparer, hasher,
         etc. @complexity O(n). }
       function CopySelf(const ItemCopier :
-                           IUnaryFunctor) : TContainerAdt; virtual; abstract;
+                        IUnaryFunctor) : TContainerAdt; virtual; abstract; overload;
+      { calls CopySelf with the identity functor }
+      function CopySelf : TContainerAdt; overload;
       { swaps the content with <cont>; the types of items used by both
         containers should be the same if the containers are not of the
         same type; if they are the types of items may be different; if
@@ -152,6 +154,6 @@ type
         remember that this functor is still owned by the container and
         will be destroyed automatically with it }
       property ItemDisposer : IUnaryFunctor read GetDisposer write SetDisposer;
-      
+
       { @inv Empty <=> Size = 0 }
    end;

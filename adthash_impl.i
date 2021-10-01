@@ -35,9 +35,9 @@
 {   Notes on the implementation of THashTable: }
 { THashTable is implemented as a closed hash table. FBuckets is an
   array of buckets, containing elements of type THashNode. If
-  FBuckets^.Bucket[i].Next = @FBuckets.Bucket[i] then it means that
+  FBuckets[i].Next = @FBuckets[i] then it means that
   bucket number i is empty. Items that hash to the same bucket number
-  are placed in a singly linked list; FBuckets^.Bucket[i] is the head
+  are placed in a singly linked list; FBuckets[i] is the head
   of the list, next node can be reached through Next field of
   THashNode, the last node in the list has Next field set to nil. All
   nodes except for the first one are dynamically allocated. Items that
@@ -128,14 +128,14 @@ begin
       FFirstUsedBucket := ht.FFirstUsedBucket;
       FTableSize := ht.FTableSize;
       FCapacity := ht.FCapacity;
-      GetMem(Pointer(FBuckets), FCapacity * SizeOf(THashNode));
+      SetLength(FBuckets, FCapacity);
       i := 0;
       try
          for i := 0 to FCapacity - 1 do
          begin
-            dest := @FBuckets^.Bucket[i];
+            dest := @FBuckets[i];
             _mcp_set_zero(dest^.Item);
-            src := @ht.FBuckets^.Bucket[i];
+            src := @ht.FBuckets[i];
             if src^.Next <> src then
             begin
                dest^.Next := nil;
@@ -162,10 +162,10 @@ begin
          Inc(i);
          while i < FCapacity do
          begin
-            with FBuckets^.Bucket[i] do
+            with FBuckets[i] do
             begin
                _mcp_set_zero(Item);
-               Next := @FBuckets^.Bucket[i];
+               Next := @FBuckets[i];
             end;
             Inc(i);
          end;
@@ -182,7 +182,7 @@ begin
    if FBuckets <> nil then
    begin
       ClearBuckets;
-      FreeMem(FBuckets);
+      SetLength(FBuckets, 0);
    end;
    inherited;
 end;
@@ -234,12 +234,12 @@ begin
    FSize := 0;
    FTableSize := htInitialTableSize;
    FCapacity := CalculateCapacity(FTableSize);
-   GetMem(Pointer(FBuckets), FCapacity * SizeOf(THashNode));
+   SetLength(FBuckets, FCapacity);
 
    for i := 0 to FCapacity - 1 do
    begin
-      _mcp_set_zero(FBuckets^.Bucket[i].Item);
-      FBuckets^.Bucket[i].Next := @FBuckets^.Bucket[i];
+      _mcp_set_zero(FBuckets[i].Item);
+      FBuckets[i].Next := @FBuckets[i];
    end;
 end;
 
@@ -255,7 +255,7 @@ begin
    if node = nil then
    begin
       while (bucket < FCapacity) and
-               (FBuckets^.Bucket[bucket].Next = @FBuckets^.Bucket[bucket]) do
+               (FBuckets[bucket].Next = @FBuckets[bucket]) do
       begin
          Inc(bucket);
       end;
@@ -274,14 +274,14 @@ begin
 
    Assert(bucket >= 0, msgRetreatingStartIterator);
 
-   while FBuckets^.Bucket[bucket].Next = @FBuckets^.Bucket[bucket] do
+   while FBuckets[bucket].Next = @FBuckets[bucket] do
    begin
       Dec(bucket);
       Assert(bucket >= 0, msgRetreatingStartIterator);
    end;
 
    prev := nil;
-   node := @FBuckets^.Bucket[bucket];
+   node := @FBuckets[bucket];
    while node^.Next <> nil do
    begin
       prev := node;
@@ -295,12 +295,12 @@ function THashTable.EqualItemsAhead(var bucket : IndexType;
                                     aitem : ItemType) : SizeType;
 begin
    { assert that the chain is not empty }
-   Assert(FBuckets^.Bucket[bucket].Next <> @FBuckets^.Bucket[bucket]);
+   Assert(FBuckets[bucket].Next <> @FBuckets[bucket]);
 
    Result := 1;
    if node = nil then
    begin
-      node := @FBuckets^.Bucket[bucket];
+      node := @FBuckets[bucket];
    end else
    begin
       Assert(node^.Next <> nil, msgInternalError);
@@ -328,15 +328,15 @@ function THashTable.FindNode(aitem : ItemType; var bucket : IndexType;
                              var node : PHashNode) : Boolean;
 begin
    bucket := GetBucketIndex(Hasher.Hash(aitem));
-   if FBuckets^.Bucket[bucket].Next <> @FBuckets^.Bucket[bucket] then
+   if FBuckets[bucket].Next <> @FBuckets[bucket] then
    begin
-      if _mcp_equal(FBuckets^.Bucket[bucket].Item, aitem) then
+      if _mcp_equal(FBuckets[bucket].Item, aitem) then
       begin
          node := nil;
          Result := true;
       end else
       begin
-         node := @FBuckets^.Bucket[bucket];
+         node := @FBuckets[bucket];
          while (node^.Next <> nil) and
                   (not _mcp_equal(node^.Next^.Item, aitem)) do
          begin
@@ -372,20 +372,20 @@ begin
       end;
    end else
    begin
-      if FBuckets^.Bucket[bucket].Next = @FBuckets^.Bucket[bucket] then
+      if FBuckets[bucket].Next = @FBuckets[bucket] then
       begin
-         FBuckets^.Bucket[bucket].Next := nil;
-         FBuckets^.Bucket[bucket].Item := aitem
+         FBuckets[bucket].Next := nil;
+         FBuckets[bucket].Item := aitem
       end else
       begin
-         with FBuckets^.Bucket[bucket] do
+         with FBuckets[bucket] do
          begin
             temp := Next;
             NewNode(Next);
             Next^.Next := temp;
             Next^.Item := aitem;
          end;
-         node := @FBuckets^.Bucket[bucket];
+         node := @FBuckets[bucket];
       end;
    end;
 
@@ -397,10 +397,10 @@ function THashTable.ExtractNode(bucket : IndexType; node : PHashNode) : ItemType
 var
    nnode : PHashNode;
 begin
-   Assert(FBuckets^.Bucket[bucket].Next <> @FBuckets^.Bucket[bucket]);
+   Assert(FBuckets[bucket].Next <> @FBuckets[bucket]);
    if (node = nil) then
    begin
-      node := @FBuckets^.Bucket[bucket];
+      node := @FBuckets[bucket];
       Result := node^.Item;
 
       nnode := node^.Next;
@@ -435,9 +435,9 @@ var
 begin
    for i := 0 to FCapacity - 1 do
    begin
-      if FBuckets^.Bucket[i].Next <> @FBuckets^.Bucket[i] then
+      if FBuckets[i].Next <> @FBuckets[i] then
       begin
-         node := @FBuckets^.Bucket[i];
+         node := @FBuckets[i];
          DisposeItem(node^.Item);
 
          node := node^.Next;
@@ -516,7 +516,7 @@ begin
 
    for i := 0 to FCapacity - 1 do
    begin
-      node := @FBuckets^.Bucket[i];
+      node := @FBuckets[i];
       if node^.Next = node then
       begin
          Inc(BucketsEmpty);
@@ -575,7 +575,7 @@ begin
    begin
       BasicSwap(cont);
       table := THashTable(cont);
-      ExchangePtr(FBuckets, table.FBuckets);
+      ExchangePtr(FBuckets, table.FBuckets); // CHECK
       ExchangeData(FCapacity, table.FCapacity, SizeOf(SizeType));
       ExchangeData(FSize, table.FSize, SizeOf(SizeType));
       ExchangeData(FTableSize, table.FTableSize, SizeOf(SizeType));
@@ -614,7 +614,7 @@ begin
          if node <> nil then
             Result := node^.Next^.Item
          else
-            Result := FBuckets^.Bucket[bucket].Item;
+            Result := FBuckets[bucket].Item;
       end else begin
          InsertNode(bucket, node, aitem);
          Result := nil;
@@ -631,7 +631,7 @@ begin
    if FindNode(aitem, bucket, node) then
    begin
       if node = nil then
-         Result := FBuckets^.Bucket[bucket].Item
+         Result := FBuckets[bucket].Item
       else
          Result := node^.Next^.Item
    end else
@@ -708,10 +708,10 @@ begin
    begin
       if node = nil then
       begin
-         DisposeItem(FBuckets^.Bucket[bucket].Item);
+         DisposeItem(FBuckets[bucket].Item);
          Inc(Result);
 
-         node := FBuckets^.Bucket[bucket].Next;
+         node := FBuckets[bucket].Next;
          while (node <> nil) and
                   (_mcp_equal(node^.Item, aitem)) do
          begin
@@ -724,14 +724,14 @@ begin
 
          if node = nil then
          begin
-            with FBuckets^.Bucket[bucket] do
+            with FBuckets[bucket] do
             begin
                Item := DefaultItem;
-               Next := @FBuckets^.Bucket[bucket];
+               Next := @FBuckets[bucket];
             end;
          end else
          begin
-            with FBuckets^.Bucket[bucket] do
+            with FBuckets[bucket] do
             begin
                Item := node^.Item;
                Next := node^.Next;
@@ -804,13 +804,13 @@ end;
 
 procedure THashTable.Rehash(ex : SizeType);
 var
-   buckets : PHashBuckets;
+   buckets                           : array of THashNode;
    oldCap, NewCapacity, NewTableSize : SizeType;
-   nnode, node, lnode, temp : PHashNode;
-   i, lbucket : IndexType;
-   lastItem : ItemType;
-   lastItemValid : Boolean;
-   blist : PHashNode; { list of buckets that can be reused }
+   nnode, node, lnode, temp          : PHashNode;
+   i, lbucket                        : IndexType;
+   lastItem                          : ItemType;
+   lastItemValid                     : Boolean;
+   blist                             : PHashNode; { list of buckets that can be reused }
 
    procedure GetNewNode(var node : PHashNode);
    begin
@@ -837,7 +837,7 @@ var
       end else
       begin
          lbucket := GetBucketIndex(Hasher.Hash(aitem));
-         lnode := @FBuckets^.Bucket[lbucket];
+         lnode := @FBuckets[lbucket];
          if lnode^.Next = lnode then
          begin
             lnode^.Item := aitem;
@@ -866,9 +866,9 @@ var
 
       for i := 0 to oldCap - 1 do
       begin
-         if buckets^.Bucket[i].Next <> @buckets^.Bucket[i] then
+         if buckets[i].Next <> @buckets[i] then
          begin
-            node := @buckets^.Bucket[i];
+            node := @buckets[i];
             { may raise here (and only here) if there are no more
               nodes left in blist and there is not enough memory to
               allocate a new node; this is possible only if ex < 0 }
@@ -890,13 +890,13 @@ var
             { in case of an exception the fields at the current
               position to defaults (to avoid doing it when an
               exception occurs) }
-            with buckets^.Bucket[i] do
+            with buckets[i] do
             begin
                { this should not be &<_mcp_set_zero>'ed; &<_mcp_set_zero>
                  should (and must!) be used only for newly allocated
                  items }
                Item := DefaultItem;
-               Next := @buckets^.Bucket[i];
+               Next := @buckets[i];
             end;
          end;
       end; { end for }
@@ -910,7 +910,7 @@ var
          DisposeNode(blist);
          blist := nnode;
       end;
-      FreeMem(buckets);
+      SetLength(buckets, 0);
    end;
 
 begin
@@ -924,7 +924,7 @@ begin
    NewTableSize := FTableSize + ex;
    NewCapacity := CalculateCapacity(NewTableSize);
 
-   GetMem(Pointer(buckets), NewCapacity * SizeOf(THashNode)); { may raise }
+   SetLength(buckets, NewCapacity); { may raise }
 
    ExchangePtr(buckets, FBuckets);
    FCapacity := NewCapacity;
@@ -933,10 +933,10 @@ begin
 
    for i := 0 to FCapacity - 1 do
    begin
-      with FBuckets^.Bucket[i] do
+      with FBuckets[i] do
       begin
          _mcp_set_zero(Item);
-         Next := @FBuckets^.Bucket[i];
+         Next := @FBuckets[i];
       end;
    end;
 
@@ -973,7 +973,7 @@ end; { end Rehash }
 procedure THashTable.Clear;
 begin
    ClearBuckets;
-   FreeMem(FBuckets);
+   SetLength(FBuckets, 0);
    InitBuckets;
    GrabageCollector.FreeObjects;
 end;
@@ -1026,7 +1026,7 @@ begin
    if FNode <> nil then
       Result := FNode^.Next^.Item
    else
-      Result := FTable.FBuckets^.Bucket[FBucket].Item;
+      Result := FTable.FBuckets[FBucket].Item;
 end;
 
 procedure THashTableIterator.SetItem(aitem : ItemType);
@@ -1039,7 +1039,7 @@ begin
    if FNode <> nil then
       pi := @FNode^.Next^.Item
    else
-      pi := @FTable.FBuckets^.Bucket[FBucket].Item;
+      pi := @FTable.FBuckets[FBucket].Item;
 
    oldItem := pi^;
    pi^ := aitem;
@@ -1075,7 +1075,7 @@ begin
    end else
    begin
       if FTable.GetBucketIndex(
-         FTable.Hasher.Hash(FTable.FBuckets^.Bucket[FBucket].Item)
+         FTable.Hasher.Hash(FTable.FBuckets[FBucket].Item)
                               ) <> FBucket then
       begin
          DoResetItem;
@@ -1093,7 +1093,7 @@ begin
       FNode := FNode^.Next;
    end else
    begin
-      FNode := @FTable.FBuckets^.Bucket[FBucket];
+      FNode := @FTable.FBuckets[FBucket];
       Assert (FNode^.Next <> FNode, 'Invalid iterator');
    end;
 
@@ -1107,18 +1107,18 @@ procedure THashTableIterator.Retreat;
 var
    node : PHashNode;
 begin
-   with FTable.FBuckets^, FTable do
+   with FTable do
    begin
       if FBucket < FCapacity then
       begin
-         Assert (Bucket[FBucket].Next <> @Bucket[FBucket], 'Invalid iterator');
+         Assert (FBuckets[FBucket].Next <> @FBuckets[FBucket], 'Invalid iterator');
          if FNode = nil then
          begin
             Dec(FBucket);
             FTable.RetreatToNearestItem(FBucket, FNode);
          end else
          begin
-            node := @Bucket[FBucket];
+            node := @FBuckets[FBucket];
             if FNode = node then
             begin
                FNode := nil;

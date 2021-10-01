@@ -193,9 +193,9 @@ type
 
    { ---------------------- Specific functors --------------------------- }
 
-   { a projection functor; useful in connection with functions
+   { an identity functor; useful in connection with functions
      manipulating functors }
-   TProjection = class (TFunctor, IUnaryFunctor)
+   TIdentity = class (TFunctor, IUnaryFunctor)
    public
       { does nothing; returns its argument; useful when copying
         containers but not items themselves }
@@ -324,7 +324,7 @@ function Compose_F_Gxy(const f : IUnaryFunctor;
 function Compose_F_Gx_Hy(const f : IBinaryFunctor;
                          const g, h : IUnaryFunctor) : IBinaryFunctor; overload;
 
-{ returns a TProjection; it is more efficient to call this function
-  instead of creating TProjection directly, because here an existing
+{ returns a TIdentity; it is more efficient to call this function
+  instead of creating TIdentity directly, because here an existing
   object is reused intead of creating a new one }
-function &_mcp_prefix&Projection : IUnaryFunctor;
+function &_mcp_prefix&Identity : IUnaryFunctor;

@@ -20,6 +20,14 @@ type
       procedure Test; override;
    end;
 
+   TStringSetTester = class (TStringTester)
+   protected
+      function CreateContainer : TStringContainerAdt; override;
+      procedure TestContainer(cont : TStringContainerAdt); override;
+   public
+      procedure Test; override;
+   end;
+
    TSortedSetTester = class (TSetTester)
    protected
       procedure TestContainer(cont : TContainerAdt); override;
@@ -33,6 +41,11 @@ type
    THashSetTester = class (TSetTester)
    protected
       function CreateContainer : TContainerAdt; override;
+   end;
+
+   TStringHashSetTester = class (TStringSetTester)
+   protected
+      function CreateContainer : TStringContainerAdt; override;
    end;
 
    TMapTester = class (TTester)
@@ -195,7 +208,6 @@ var
    i, rand : IndexType;
    obj : TTestObject;
    lastSize : SizeType;
-   prevRepeatedItems : Boolean;
 
    procedure TestInsAux;
    begin
@@ -558,6 +570,309 @@ begin
 end;
 
 
+{ =========================== TestStringSet ================================ }
+
+
+{ pre-condition: aset must be empty; post-condition: aset is filled
+  with some items from the range <0,aset.Size) }
+procedure TestInsertStringSet(aset : TStringSetAdt);
+const
+   MAX_ITEMS = ITEMS_TO_INSERT;
+var
+   finserted         : array[0..MAX_ITEMS] of Boolean;
+   i, rand           : IndexType;
+   str               : String;
+   lastSize          : SizeType;
+
+   procedure TestInsAux;
+   begin
+      str := IntToStr(rand);
+      lastSize := aset.Size;
+      if aset.Insert(str) then
+      begin
+         testutils.Test(aset.Size = lastSize + 1, 'Insert',
+              'wrong size (item really inserted)');
+         testutils.Test(not aset.Empty, 'Empty',
+              'returns true for non-empty set (item inserted)');
+         testutils.Test(aset.Has(str), 'Insert',
+              'item not in the set (item inserted), size: ' +
+                 IntToStr(aset.Size));
+         testutils.Test(aset.Count(str) = 1, 'Insert',
+              'Count returns ' + IntToStr(aset.Count(str)) +
+                 ' (item inserted), Size is ' + IntToStr(aset.Size));
+         testutils.Test(finserted[rand] = false, 'Insert',
+              'item inserted despite the fact that it had already' +
+                 ' been in the set and RepeatedItems = false');
+         finserted[rand] := true;
+      end else
+      begin
+         testutils.Test(finserted[rand] = true, 'Insert',
+              'item not inserted although not already in the set');
+         testutils.Test(aset.Size = lastSize, 'Insert', 'wrong size (item not inserted)');
+         testutils.Test(aset.Count(str) = 1, 'Insert', 'Count returns ' +
+                                                IntToStr(aset.Count(str)) +
+                                                ' (item not inserted)');
+      end;
+   end;
+
+begin
+   Randomize;
+   for i := 0 to MAX_ITEMS do
+      finserted[i] := false;
+
+   { ------------------------- Insert --------------------------- }
+   aset.RepeatedItems := false;
+   StartSilentMode;
+   while aset.Size < (MAX_ITEMS div 2) do
+   begin
+      rand := Random(MAX_ITEMS) + 1;
+      TestInsAux;
+   end;
+
+   for rand := 0 to MAX_ITEMS do
+   begin
+      TestInsAux;
+   end;
+
+   StopSilentMode;
+
+   testutils.Test(aset.Size = MAX_ITEMS + 1, 'Insert', 'wrong size');
+end;
+
+function TStringSetTester.CreateContainer : TStringContainerAdt;
+begin
+   Result := inherited;
+end;
+
+procedure TStringSetTester.TestContainer(cont : TStringContainerAdt);
+var
+   aset : TStringSetAdt;
+   i, j, firstI : IndexType;
+   str, str2 : string;
+   lastSize, rand, lastCount, count, s, asetsize, maxItem, firstS : SizeType;
+   lb, ub, iter : TStringSetIterator;
+   range : TStringSetIteratorRange;
+   set2 : TStringSetAdt;
+begin
+   Assert(cont is TStringSetAdt);
+   aset := TStringSetAdt(cont);
+
+   { ------------------------ IsDefinedOrder ---------------------------- }
+   testutils.Test(aset.IsDefinedOrder, 'IsDefinedOrder');
+
+   { ------------------------ Clear ---------------------------- }
+   aset.Clear;
+
+   aset.RepeatedItems := true;
+
+   { ------------------------ Size ---------------------------- }
+   testutils.Test(aset.Size = 0, 'Size', 'returns non-zero for empty set');
+
+   { ------------------------ Empty ---------------------------- }
+   testutils.Test(aset.Empty, 'Empty', 'returns false for empty set');
+
+   str := IntToStr(0);
+
+   { ------------------------- Has ------------------------------ }
+   testutils.Test(not aset.Has(str), 'Has', 'does not work for an empty set');
+
+   { ------------------------- Count ----------------------------- }
+   testutils.Test(aset.Count(str) = 0, 'Count', 'does not work for empty set');
+
+   { ------------------------- Insert ----------------------------- }
+   TestInsertStringSet(aset);
+
+   { ----------------------- Count + Has -------------------------- }
+   StartSilentMode;
+   for i := 0 to aset.Size - 1 do
+   begin
+      if i = aset.Size - 2 then
+         StopSilentMode;
+
+      str := IntToStr(i);
+      testutils.Test(aset.Has(str), 'Has', 'returns false for an object present');
+      testutils.Test(aset.Count(str) = 1, 'Count', 'returns ' + InttoStr(aset.Count(str)) +
+                                            ' instead of 1');
+   end;
+
+   { ------------------------ Clear --------------------------------- }
+   aset.Clear;
+   testutils.Test(aset.Size = 0, 'Clear', 'size <> 0');
+
+   { -------------------------- Insert ----------------------------- }
+   TestInsertStringSet(aset);
+
+   { ------------------------ Clear --------------------------------- }
+   aset.Clear;
+   testutils.Test(aset.Size = 0, 'Clear', 'size <> 0');
+
+   aset.RepeatedItems := true;
+
+   // insert some items
+   for i := 0 to ITEMS_TO_INSERT do
+   begin
+      aset.Insert(IntToStr(i));
+   end;
+
+   maxItem := aset.Size - 1;
+
+   { ------------------- Insert (repeated items) -------------------- }
+   s := aset.Size;
+
+   StartSilentMode;
+   for i := 0 to 10 do
+   begin
+      rand := Random(s);
+      for j := 1 to 100 do
+      begin
+         lastSize := aset.Size;
+         str := IntToStr(rand);
+         lastcount := aset.Count(str);
+         testutils.Test(aset.Insert(str), 'Insert (repeated)',
+              'returns false although RepeatedItems = true');
+         testutils.Test(aset.Size = lastsize + 1, 'Insert (repeated)', 'wrong size');
+         testutils.Test(aset.Has(str), 'Insert (repeated)',
+              'inserted item not present');
+         testutils.Test(aset.Count(str) = lastcount + 1, 'Insert (repeated)',
+              'Count(str) returns wrong amount');
+      end;
+   end;
+   StopSilentMode;
+   str := IntToStr(rand);
+   testutils.Test(aset.Count(str) = 101, 'Insert (repeated items)',
+        'did not insert all 101 equal objects');
+
+   { ------------------ LowerBound + UpperBound --------------------------- }
+   lb := aset.LowerBound(str);
+   ub := aset.UpperBound(str);
+   i := 0;
+   StartSilentMode;
+   while not lb.Equal(ub) do
+   begin
+      Inc(i);
+      testutils.Test(lb.Item = str, 'LowerBound & UpperBound',
+           'item not equal to searched object at LowerBound + ' + IntToStr(i));
+      lb.Advance;
+   end;
+   StopSilentMode;
+   testutils.Test(ub.Item <> str, 'UpperBound',
+        'item at UpperBound equal to searched object');
+   testutils.Test(aset.Count(str) = i, 'UpperBound & LowerBound',
+        'not all items in range <LowerBound,UpperBound)');
+
+   { ---------------------- EqualRange ------------------------------- }
+   range := aset.EqualRange(str);
+   testutils.Test(range.Start.Equal(aset.LowerBound(str)), 'EqualRange',
+        'the start of the range not equal to LowerBound');
+   testutils.Test(range.Finish.Equal(aset.UpperBound(str)), 'EqualRange',
+        'the finish of the range not equal to UpperBound');
+
+   { ----------------------- CopySelf ------------------------------- }
+   asetSize := aset.Size;
+   set2 := TStringSetAdt(aset.CopySelf);
+   testutils.Test(set2.Size = aset.Size, 'CopySelf', 'wrong size');
+   testutils.Test(set2.RepeatedItems = aset.RepeatedItems, 'CopySelf',
+        'RepeatedItems not copied');
+
+   StartSilentMode;
+   for i := 0 to aset.Size - 1 do
+   begin
+      str := IntToStr(i);
+      testutils.Test(set2.Count(str) = aset.Count(str), 'CopySelf', 'not all items copied');
+   end;
+   StopSilentMode;
+
+   { ------------------------ Delete --------------------------------- }
+   str := IntToStr(set2.Size);
+   testutils.Test(set2.Delete(str) = 0, 'Delete',
+        'returns non-zero for item not in the set');
+
+   firstS := set2.Size div 2;
+   firstI := set2.Size div 10;
+   i := firstI;
+   s := firstS;
+   StartSilentMode;
+   while set2.Size > s do
+   begin
+      str := IntToStr(i);
+      count := set2.Count(str);
+      if set2.Size - count <= s then
+         StopSilentMode;
+      lastSize := set2.Size;
+
+      testutils.Test(set2.Delete(str) = count, 'Delete', 'does not delete all items');
+      testutils.Test(set2.Size = lastSize - count, 'Delete', 'wrong size');
+
+      Inc(i);
+   end;
+
+   { -------------------------- Destroy ------------------------------------ }
+   set2.Destroy;
+
+   { check if aset is not changed by operations on set2 }
+   testutils.Test(aset.Size = asetSize, 'CopySelf',
+        'Size of source set changed by operations on its copy');
+   Write('CopySelf: testing if items in source set were not changed ' +
+            'by operations on its copy...');
+   for i := 0 to maxItem do
+   begin
+      str := IntToStr(i);
+      if not aset.Has(str) then
+      begin
+         { we'll probably never get here as there will be protection
+           fault earlier }
+         WriteLn(' - FAILED !!!');
+         break;
+      end;
+   end;
+   WriteLn(' - passed');
+
+   { --------------------------- Insert ----------------------------------- }
+   iter := aset.Start;
+   str := IntToStr(aset.Size);
+   lastSize := aset.Size;
+   testutils.Test(aset.Insert(iter, str), 'Insert (with hint)',
+        'returns false although inserting item not present in the set');
+   testutils.Test(aset.Count(str) = 1, 'Insert', 'Count(obj) does not return 1');
+   testutils.Test(aset.Size = lastSize + 1, 'Insert', 'wrong size');
+
+   testutils.Test(aset.Insert(str), 'Insert',
+        'returns false although RepeatedItems = true');
+   testutils.Test(aset.Count(str) = 2, 'Count', 'does not return 2');
+
+   { --------------------------- Delete ------------------------------------ }
+   iter := aset.LowerBound(str);
+   lastSize := aset.Size;
+
+   iter.Delete;
+
+   testutils.Test(aset.Size = lastSize - 1, 'Delete (with given position)', 'wrong size');
+   testutils.Test(aset.Count(str) = 1, 'Delete (with given position)',
+        'Count(obj) failed');
+   TestIter(not iter.IsFinish and (iter.Item = str),
+            'Delete', 'does not advance to next item');
+
+   lastSize := aset.Size;
+   iter.Delete;
+
+   testutils.Test(aset.Size = lastSize - 1, 'Delete (with given position)', 'wrong size');
+   testutils.Test(not aset.Has(str), 'Delete (with given position)',
+        'Has(str) does not return false');
+
+   { --------------------------- Clear -------------------------------------- }
+   aset.Clear;
+   testutils.Test(aset.Empty, 'Clear', 'still not empty');
+
+   { -------------------------- Insert ---------------------------------- }
+   TestInsertStringSet(aset);
+end;
+
+procedure TStringSetTester.Test;
+begin
+   Assert(TestedCont is TStringSetAdt);
+   inherited;
+end;
+
 
 { =========================== TestSortedSet ================================ }
 
@@ -677,6 +992,12 @@ begin
    (Result as THashSetAdt).Hasher := TTestObjectHasher.Create;
 end;
 
+{ ========================== THashSetTester ========================= }
+
+function TStringHashSetTester.CreateContainer : TStringContainerAdt;
+begin
+   result := inherited;
+end;
 
 
 { =========================== TestMap ================================ }
