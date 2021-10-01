@@ -1,8 +1,5 @@
 PascalAdt is a library of data structures and algorithms for Free
-Pascal and Delphi, inspired by the C++ STL library. It offers a wide
-variety of data structures including lists, queues, double-ended
-queues, binary trees, binary search trees, AVL trees, 2-3-trees, splay
-trees and hash tables.
+Pascal and Delphi, inspired by the C++ STL library.
 
 Features
 --------
@@ -42,4 +39,4 @@ Copyright and license
 
 Copyright (C) 2004-2021 Lukasz Czajka
 
-Distributed under LGPL 2.1, see [LICENSE](LICENSE).
+Distributed under LGPL 2.1. See [LICENSE](LICENSE).

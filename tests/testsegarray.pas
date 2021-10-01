@@ -202,6 +202,191 @@ begin
    FinishTest;
 end;
 
+procedure TestTStringSegArray;
+var
+   sa                     : TStringSegArray;
+   i                      : IndexType;
+   lastSize, lastSegsSize : SizeType;
+   str                    : String;
+
+   procedure TestGetSetItem(low, high, start : IndexType);
+   var
+      ii : IndexType;
+   begin
+      StartSilentMode;
+      for ii := low to high do
+      begin
+         if ii = high then
+            StopSilentMode;
+
+         str := SegArrayGetItem(sa, ii);
+         Test(str = IntToStr(ii + start), 'SegArrayGetItem',
+              'returns wrong item; failed in ' + IntToStr(ii - low+1) + 'th try');
+         str := SegArraySetItem(sa, ii, IntToStr(777));
+         Test(str = IntToStr(ii + start), 'SegArraySetItem',
+              'returns wrong item; failed in ' + IntToStr(ii - low+1) + 'th try');
+         Test(SegArrayGetItem(sa, ii) = '777', 'SegArrayGetItem',
+              'sets wrong item; failed in ' + IntToStr(ii - low + 1) + 'th try');
+         SegArraySetItem(sa, ii, str);
+         Inc(i);
+      end;
+   end;
+
+begin
+   StartTest('TStringSegArray');
+
+   { ------------------- SegArrayAllocate ---------------------- }
+   SegArrayAllocate(sa, 128, 64, saSegmentCapacity div 2);
+   Test((sa^.Size = 0) and (sa^.Segments^.Capacity = 128) and
+           (sa^.Segments^.Size = 1) and (sa^.FirstSegIndex = 64) and
+           (sa^.InnerStartIndex = saSegmentCapacity div 2), 'SegArrayAllocate');
+
+   { ------------------- SegArrayPushFront --------------------- }
+   StartSilentMode;
+   for i := 500 downto 0 do
+   begin
+      lastSize := sa^.Size;
+      SegArrayPushFront(sa, IntToStr(i));
+      Test(sa^.Size = lastSize + 1, 'SegArrayPushFront',
+           'wrong Size; failed in ' + IntToStr(501 - i) + 'th try');
+      Test(String(TDynamicBuffer(
+                          sa^.Segments^.Items[sa^.FirstSegIndex]
+                                     )^.Items[sa^.InnerStartIndex]) = IntToStr(i),
+           'SegArrayPushFront',
+           'sets wrong item; failed in ' + IntToStr(501 - i) + 'th try');
+   end;
+   StopSilentMode;
+   Test(sa^.Size = 501, 'SegArrayPushFront', 'wrong Size');
+
+   { ------------- SegArrayGetItem + SegArraySetItem --------------------- }
+   TestGetSetItem(0, 500, 0);
+
+   { ------------------- SegArrayPopFront --------------------- }
+   StartSilentMode;
+   i := 0;
+   while sa^.Size <> 0 do
+   begin
+      if sa^.Size = 1 then
+         StopSilentMode;
+
+      lastSize := sa^.Size;
+      str := SegArrayPopFront(sa);
+      Test(str = IntToStr(i), 'SegArrayPopFront',
+           'returns wrong item; failed in ' + IntToStr(i + 1) + 'th try');
+      Test(sa^.Size = lastSize - 1, 'SegArrayPopFront',
+           'wrong Size in ' + IntToStr(i + 1) + 'th try');
+      Inc(i);
+   end;
+
+   { ------------------- SegArrayPushBack --------------------- }
+   StartSilentMode;
+   for i := 0 to 400 do
+   begin
+      lastSize := sa^.Size;
+      SegArrayPushBack(sa, IntToStr(i));
+      Test(sa^.Size = lastSize + 1, 'SegArrayPushBack',
+           'wrong Size; failed in ' + IntToStr(i + 1) + 'th try');
+      Test(SegArrayGetItem(sa, i) = IntToStr(i), 'SegArrayPushBack',
+           'sets wrong item; failed in ' + IntToStr(i + 1) + 'th try');
+   end;
+   StopSilentMode;
+   Test(sa^.Size = 401, 'SegArrayPushBack', 'wrong Size');
+
+   { ------------- SegArrayGetItem + SegArraySetItem --------------------- }
+   TestGetSetItem(0, 400, 0);
+
+   { ------------------- SegArrayPopBack --------------------- }
+   StartSilentMode;
+   i := 400;
+   while sa^.Size <> 200 do
+   begin
+      if sa^.Size = 201 then
+         StopSilentMode;
+
+      lastSize := sa^.Size;
+      str := SegArrayPopBack(sa);
+      Test(str = IntToStr(i), 'SegArrayPopBack',
+           'returns wrong item; failed in ' + IntToStr(401 - i) + 'th try');
+      Test(sa^.Size = lastSize - 1, 'SegArrayPopBack',
+           'wrong Size; failed in ' + IntToStr(401 - i) + 'th try');
+      Dec(i);
+   end;
+
+   { ------------------- SegArrayReserveItems --------------------- }
+   SegArrayReserveItems(sa, 100, 500);
+   Test(sa^.Size = 700, 'SegArrayReserveItems', 'wrong Size');
+
+   for i := 100 to 599 do
+   begin
+      SegArraySetItem(sa, i, IntToStr(i));
+   end;
+
+   { ------------- SegArrayGetItem + SegArraySetItem --------------------- }
+   TestGetSetItem(0, 599, 0);
+   TestGetSetItem(600, 699, -500);
+
+   for i := 100 to 599 do
+   begin
+      SegArraySetItem(sa, i, '');
+   end;
+
+   { ------------------- SegArrayRemoveItems --------------------- }
+   SegArrayRemoveItems(sa, 100, 500);
+   Test(sa^.Size = 200, 'SegArrayRemoveItems', 'wrong Size');
+
+   { ------------- SegArrayGetItem + SegArraySetItem --------------------- }
+   TestGetSetItem(0, 199, 0);
+
+   { ---------------------- SegArrayExpandRight -------------------------- }
+   SegArrayExpandRight(sa, 1000);
+   Test(sa^.Size = 200, 'SegArrayExpandRight', 'wrong Size');
+   lastSegsSize := sa^.Segments^.Size;
+
+   TestGetSetItem(0, 199, 0);
+
+   for i := 1 to 1000 do
+   begin
+      SegArrayPushBack(sa, IntToStr(i));
+   end;
+
+   Test(sa^.Segments^.Size = lastSegsSize, 'SegArrayExpandRight',
+        'not enough space preallocated');
+
+   { ---------------------- SegArrayExpandLeft -------------------------- }
+   SegArrayExpandLeft(sa, 1000);
+   Test(sa^.Size = 1200, 'SegArrayExpandLeft', 'wrong Size');
+   lastSegsSize := sa^.Segments^.Size;
+
+   TestGetSetItem(0, 199, 0);
+
+   for i := 1 to 1000 do
+   begin
+      SegArrayPushFront(sa, IntToStr(i));
+   end;
+
+   Test(sa^.Segments^.Size = lastSegsSize, 'SegArrayExpandLeft',
+        'not enough space preallocated');
+
+   StartSilentMode;
+   Test(sa^.Size = 2200, 'Sth''s wrong with SegArrayPushFront !');
+   StopSilentMode;
+
+   { ---------------------- SegArrayClear ---------------------- }
+   SegArrayClear(sa, 10);
+   Test((sa^.Segments^.Capacity = 10) and (sa^.Size = 0), 'SegArrayClear');
+
+   { ---------------------- SegArrayDeallocate ---------------------- }
+   SegArrayDeallocate(sa);
+   Test(sa = nil, 'SegArrayDeallocate', 'nil not assigned to argument');
+   sa := nil;
+   SegArrayDeallocate(sa);
+   Test(true, 'SegArrayDeallocate - correct handling of nil arguments',
+        'this message is never displayed, as we get access violation earlier');
+
+   FinishTest;
+end;
+
 begin
    TestTSegArray;
+   TestTStringSegArray;
 end.
