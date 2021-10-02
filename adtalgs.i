@@ -162,7 +162,8 @@ function LexicographicalCompare(const start1, finish1,
 
 
 { ======================= modifying algorithms ============================ }
-{ modifying algorithms may modify items of a given range but not their
+{@discard
+  modifying algorithms may modify items of a given range but not their
   order within the range, i.e. they do not remove any items; they may
   either assign the items in the range or copy the changed items to
   some other range; the iterators designating the source range are
@@ -213,8 +214,7 @@ procedure Combine(const start1, finish1, start2 : TForwardIterator;
                   start3 : TOutputIterator; const itemJoiner : IBinaryFunctor); overload;
 
 { ===================== mutating algorithms ======================== }
-{ @discard
-
+{@discard
   mutating algorithms do not change the values of the items, but
   change their relative order; they cannot be used with defined-order
   containers (an exception will be raised) }

@@ -148,7 +148,7 @@ type
       { returns true if the given item is present in the set; }
       { @postcondition Result <=> aitem in self }
       function Has(aitem : ItemType) : Boolean; virtual; abstract;
-      { returns the number of items in the set equal to <aitem> }
+      { returns the number of items in the set equal to <aitem>; }
       { @postcondition Result >= 0 }
       { @postcondition Result <= Size }
       { @postcondition not RepeatedItems implies Result <= 1 }
@@ -167,7 +167,7 @@ type
       { @postcondition Result implies Size = old Size + 1 }
       { @postcondition Result implies Count(pos.Item) = old Count(old pos.Item) + 1 }
       function Insert(aitem : ItemType) : Boolean; overload; virtual; abstract;
-      { removes the item at <pos> from the set }
+      { removes the item at <pos> from the set; }
       { @precondition pos is valid and not pos.IsFinish }
       { @postcondition Size = old Size - 1 }
       { @postcondition Count(pos.Item) = old Count(old pos.Item) - 1 }
@@ -199,7 +199,7 @@ type
       { @postcondition Result.Equal(Finish) or Result.Item <> aitem }
       function UpperBound(aitem : ItemType) : TSetIterator; virtual; abstract;
       { returns the range <LowerBound, UpperBound), works faster than
-        calling these two functions separately }
+        calling these two functions separately; }
       { @postcondition Result.First = LowerBound(aitem) }
       { @postcondition Result.Second = UpperBound(aitem) }
       function EqualRange(aitem : ItemType) : TSetIteratorRange; virtual; abstract;
@@ -232,17 +232,17 @@ type
      adtsplaytree.TSplayTree, adt23tree.T23Tree }
    TSortedSetAdt = class (TSetAdt)
       { returns the item that comes first in the order defined in the
-        set }
+        set; }
       { @precondition not Empty }
       { @postcondition foreach x in self holds Result <= x }
       function First : ItemType; virtual;
-      { removes the first item from the sorted set and returns it }
+      { removes the first item from the sorted set and returns it; }
       { @precondition not Empty }
       { @postcondition Size = old Size - 1 }
       { @postcondition Result = old First }
       function ExtractFirst : ItemType; virtual;
       { the same as @<ExtractFirst>, but disposes the item instead of
-        returning it }
+        returning it; }
       { @precondition not Empty }
       { @postcondition Size = old Size - 1 }
       procedure DeleteFirst;
