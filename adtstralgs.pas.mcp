@@ -392,6 +392,7 @@ begin
    tab := KmpReverseComputeTable(str2);
 
    len := Length(str2);
+   Result := nil;
    SetLength(Result, len + 2);
    filler := len + 2;
    for i := 0 to len do

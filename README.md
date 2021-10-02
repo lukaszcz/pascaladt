@@ -1,5 +1,6 @@
-PascalAdt is a library of data structures and algorithms for Free
-Pascal and Delphi, inspired by the C++ STL library.
+[PascalAdt](https://pascaladt.github.io) is a library of data
+structures and algorithms for Free Pascal inspired by the C++ STL
+library.
 
 Features
 --------
@@ -28,12 +29,15 @@ Installation and usage
 ----------------------
 * Compilation: `make`
 * Tests: `make test`
-* Installation `make install`
+* Installation: `make install`
+* [Demo](demo/customer/customer.pas) compilation: `make demo`
 
 Documentation
 -------------
 
-See [docsrc/tutorial.txt](docsrc/tutorial.txt) and [demo/customer/customer.pas](demo/customer/customer.pas).
+[PascalAdt documentation](https://pascaladt.github.io/pascaladt-docs/index.html) is available at the [PascalAdt webpage](https://pascaladt.github.io/). It includes a tutorial and the API documentation auto-generated from sources with the [SrcDoc](https://github.com/lukaszcz/srcdoc/) program.
+
+See also [docsrc/tutorial.txt](docsrc/tutorial.txt) and [demo/customer/customer.pas](demo/customer/customer.pas).
 
 Copyright and license
 ---------------------

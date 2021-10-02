@@ -16,67 +16,58 @@ type
       FAddress : String;
       FOrders : TListAdt;
    public
-      constructor Create(aFirstName, aSurname, aAddress : String);
+      constructor Create(aFirstName, aSurname, aAddress : String); overload;
+      constructor Create(aFirstName, aSurname : String); overload;
       destructor Destroy; override;
-      
+
       property FirstName : String read FFirstName write FFirstName;
       property Surname : String read FSurname write FSurname;
       property Address : String read FAddress write FAddress;
       property Orders : TListAdt read FOrders;
    end;
-   
-   TCustomerKey = class (TCustomer)
+
+   TOrder = class
    public
-      constructor Create(aFirstName, aSurname : String);
-   end;
-   
-   TOrder = record
       orderId : Cardinal;
       productName, price : String;
       customer : TCustomer;
    end;
-   POrder = ^TOrder;
-   
-   TOrderDisposer = class (TFunctor, IUnaryFunctor)
-   public
-      function Perform(ptr : Pointer) : Pointer;
-   end;
-   
+
    TCustomerComparer = class (TFunctor, IBinaryComparer)
    public
-      function Compare(ptr1, ptr2 : Pointer) : IndexType;
+      function Compare(obj1, obj2 : TObject) : Integer;
    end;
-   
+
    TCustomerHasher = class (TFunctor, IHasher)
    public
-      function Hash(ptr : Pointer) : UnsignedType;
+      function Hash(obj : TObject) : UnsignedType;
    end;
-   
+
    TOrderComparer = class (TFunctor, IBinaryComparer)
    public
-      function Compare(ptr1, ptr2 : Pointer) : IndexType;
+      function Compare(obj1, obj2 : TObject) : Integer;
    end;
-   
+
    TOrderCustomerComparer = class (TFunctor, IBinaryComparer)
    public
-      function Compare(ptr1, ptr2 : Pointer) : IndexType;
+      function Compare(obj1, obj2 : TObject) : Integer;
    end;
-   
+
    TOrderProductComparer = class (TFunctor, IUnaryPredicate)
    private
       FProduct : String;
    public
       constructor Create(product : String);
-      function Test(ptr : Pointer) : Boolean;
+      function Test(obj : TObject) : Boolean;
    end;
-   
 
-{ global variables }  
+
+{ global variables }
 var
    allOrders : TSortedSetAdt;
    allCustomers : THashSetAdt;
    unusedOrderId : Cardinal;
-   
+
 
 function CompareCustomers(customer1, customer2 : TCustomer) : IndexType;
 begin
@@ -93,6 +84,15 @@ begin
    FSurname := aSurname;
    FAddress := aAddress;
    FOrders := TSingleList.Create;
+   FOrders.OwnsItems := False;
+end;
+
+constructor TCustomer.Create(aFirstName, aSurname : String);
+begin
+   FirstName := aFirstName;
+   Surname := aSurname;
+   FAddress := '';
+   FOrders := nil;
 end;
 
 destructor TCustomer.Destroy;
@@ -100,41 +100,29 @@ begin
    FOrders.Free
 end;
 
-constructor TCustomerKey.Create(aFirstName, aSurname : String);
-begin
-   FirstName := aFirstName;
-   Surname := aSurname;
-end;
-
 { -------------------- functors --------------------- }
 
-function TOrderDisposer.Perform(ptr : Pointer) : Pointer;
+function TCustomerComparer.Compare(obj1, obj2 : TObject) : Integer;
 begin
-   Result := nil;
-   Dispose(POrder(ptr));
+   Result := CompareCustomers(TCustomer(obj1), TCustomer(obj2));
 end;
 
-function TCustomerComparer.Compare(ptr1, ptr2 : Pointer) : IndexType;
-begin
-   Result := CompareCustomers(TCustomer(ptr1), TCustomer(ptr2));
-end;
-
-function TCustomerHasher.Hash(ptr : Pointer) : UnsignedType;
+function TCustomerHasher.Hash(obj : TObject) : UnsignedType;
 var
    nameStr : AnsiString;
 begin
-   nameStr := TCustomer(ptr).FirstName + TCustomer(ptr).Surname;
+   nameStr := TCustomer(obj).FirstName + TCustomer(obj).Surname;
    Result := FNVHash(PChar(nameStr), Length(nameStr));
 end;
 
-function TOrderComparer.Compare(ptr1, ptr2 : Pointer) : IndexType;
+function TOrderComparer.Compare(obj1, obj2 : TObject) : Integer;
 begin
-   Result := POrder(ptr1)^.orderId - POrder(ptr2)^.orderId;
+   Result := TOrder(obj1).orderId - TOrder(obj2).orderId;
 end;
 
-function TOrderCustomerComparer.Compare(ptr1, ptr2 : Pointer) : IndexType;
+function TOrderCustomerComparer.Compare(obj1, obj2 : TObject) : Integer;
 begin
-   Result := CompareCustomers(POrder(ptr1)^.Customer, POrder(ptr2)^.Customer);
+   Result := CompareCustomers(TOrder(obj1).Customer, TOrder(obj2).Customer);
 end;
 
 constructor TOrderProductComparer.Create(product : String);
@@ -142,20 +130,21 @@ begin
    FProduct := product;
 end;
 
-function TOrderProductComparer.Test(ptr : Pointer) : Boolean;
+function TOrderProductComparer.Test(obj : TObject) : Boolean;
 begin
-   Result := CompareStr(POrder(ptr)^.ProductName, FProduct) = 0;
+   Result := CompareStr(TOrder(obj).ProductName, FProduct) = 0;
 end;
 
 
 { --------------------- routines ---------------------- }
 
-procedure PrintOrderWithoutCustomerInfo(ptr : Pointer);
+procedure PrintOrderWithoutCustomerInfo(obj : TObject);
 var
-   order : POrder;
+   order : TOrder;
 begin
-   order := POrder(ptr);
-   with order^ do
+   Assert(obj is TOrder);
+   order := TOrder(obj);
+   with order do
    begin
       WriteLn;
       WriteLn('Order ID: ', orderId);
@@ -163,26 +152,27 @@ begin
       WriteLn('Price: ', price);
    end;
 end;
-   
-procedure PrintOrder(ptr : Pointer);
+
+procedure PrintOrder(obj : TObject);
 var
-   order : POrder;
+   order : TOrder;
 begin
-   order := POrder(ptr);
+   Assert(obj is TOrder);
+   order := TOrder(obj);
    PrintOrderWithoutCustomerInfo(order);
-   with order^ do
+   with order do
    begin
       WriteLn('Customer name: ', customer.FirstName, ' ', customer.Surname);
       WriteLn('Customer address: ', customer.Address);
    end;
 end;
 
-procedure PrintCustomer(ptr : Pointer);
+procedure PrintCustomer(obj : TObject);
 var
    customer : TCustomer;
 begin
-   Assert(TObject(ptr) is TCustomer);
-   customer := TCustomer(ptr);
+   Assert(obj is TCustomer);
+   customer := TCustomer(obj);
    with customer do
    begin
       WriteLn;
@@ -196,25 +186,25 @@ begin
    end;
 end;
 
-procedure PrintCustomerName(ptr : Pointer);
+procedure PrintCustomerName(obj : TObject);
 var
    customer : TCustomer;
 begin
-   Assert(TObject(ptr) is TCustomer);
-   customer := TCustomer(ptr);
+   Assert(obj is TCustomer);
+   customer := TCustomer(obj);
    WriteLn(customer.Surname, ' ', customer.FirstName);
 end;
 
 procedure PrintCustomers;
 var
-   buff : PascalArrayType;
+   buff : TPascalArrayType;
    iter : TForwardIterator;
    a : TPascalArray;
    comparer : IBinaryComparer;
    i : Integer;
 begin
    SetLength(buff, allCustomers.Size);
-   
+
    iter := allCustomers.Start;
    i := 0;
    while not iter.IsFinish do
@@ -223,11 +213,14 @@ begin
       Inc(i);
       iter.Advance;
    end;
-   
+
    a := TPascalArray.Create(buff);
+   { It is necessary to indicate that a should not destroy its items.
+     By default all containers own their items. }
+   a.OwnsItems := false;
    try
       comparer := TCustomerComparer.Create;
-   
+
       Sort(a.Start, a.Finish, comparer);
       WriteLn('Registered customers:');
       ForEach(a.Start, a.Finish, Adapt(@PrintCustomerName));
@@ -250,10 +243,10 @@ end;
 
 procedure FindCustomer(firstName, surname : String);
 var
-   customerKey : TCustomerKey;
+   customerKey : TCustomer;
    customer : TCustomer;
 begin
-   customerKey := TCustomerKey.Create(firstName, surname);
+   customerKey := TCustomer.Create(firstName, surname);
    try
       customer := TCustomer(allCustomers.Find(customerKey));
       if customer <> nil then
@@ -308,13 +301,14 @@ end;
 
 procedure RemoveCustomer(firstName, surname : String);
 var
-   customerKey : TCustomerKey;
+   customerKey : TCustomer;
    orderKey : TOrder;
    iter : TForwardIterator;
    customer : TCustomer;
    i : Integer;
 begin
-   customerKey := TCustomerKey.Create(firstName, surname);
+   customerKey := TCustomer.Create(firstName, surname);
+   orderKey := TOrder.Create;
    try
       customer := TCustomer(allCustomers.Find(customerKey));
       if customer <> nil then
@@ -323,39 +317,45 @@ begin
          iter := customer.Orders.ForwardStart;
          while not iter.IsFinish do
          begin
-            orderKey.orderId := POrder(iter.Item)^.orderId;
-            allOrders.Delete(@orderKey);
+            orderKey.orderId := TOrder(iter.Item).orderId;
+            allOrders.Delete(orderKey);
             iter.Delete;
          end;
-         
+
          { remove the customer himself }
          i := allCustomers.Delete(customerKey);
          { in no way may this function return 0 since the desired
            customer was already found }
          Assert(i <> 0);
-         
+
          WriteLn('Customer ', firstName, ' ', surname,
                  ' removed from the database.')
       end else
          WriteLn('No customer ', firstName, ' ', surname, ' in the database.');
    finally
       customerKey.Free;
+      orderKey.Free;
    end;
 end;
 
 procedure FindOrder(orderId : Cardinal);
 var
-   order : POrder;
+   order : TOrder;
    orderKey : TOrder;
 begin
-   orderKey.orderId := orderId;
-   order := allOrders.Find(@orderKey);
-   if order <> nil then
-   begin
-      PrintOrder(order);
-   end else
-   begin
-      WriteLn('Invalid order ID.');
+   orderKey := TOrder.Create;
+   try
+      orderKey.orderId := orderId;
+      order := TOrder(allOrders.Find(orderKey));
+      if order <> nil then
+      begin
+         PrintOrder(order);
+      end else
+      begin
+         WriteLn('Invalid order ID.');
+      end;
+   finally
+      orderKey.Free;
    end;
 end;
 
@@ -368,7 +368,7 @@ begin
    iter := Find(allOrders.Start, allOrders.Finish, predicate);
    if iter.IsFinish then
       WriteLn('No orders for this product.')
-   else begin     
+   else begin
       while not iter.IsFinish do
       begin
          PrintOrder(iter.Item);
@@ -380,76 +380,82 @@ end;
 
 procedure AddOrder;
 var
-   order : POrder;
+   order : TOrder;
    surname, firstName : String;
-   customerKey : TCustomerKey;
+   customerKey : TCustomer;
 begin
-   New(order);
-   
+   order := TOrder.Create;
+
    try
       WriteLn('Enter order data.');
-      with order^ do
+      with order do
       begin
+         customer := nil;
          Write('Product name: '); ReadLn(productName);
-         Write('Price: '); ReadLn(price);      
+         Write('Price: '); ReadLn(price);
       end;
       Write('Customer first name: '); ReadLn(firstName);
       Write('Customer surname: '); ReadLn(surname);
-      
+
       { check if the specified customer is present in the database }
-      customerKey := TCustomerKey.Create(firstName, surname);
+      customerKey := TCustomer.Create(firstName, surname);
       try
-         order^.customer := TCustomer(allCustomers.Find(customerKey));
+         order.customer := TCustomer(allCustomers.Find(customerKey));
       finally
          customerKey.Free;
       end;
-      
-      if order^.customer <> nil then
+
+      if order.customer <> nil then
       begin
-         order^.orderId := unusedOrderId;
+         order.orderId := unusedOrderId;
          Inc(unusedOrderId);
-         order^.customer.Orders.PushBack(order);
+         order.customer.Orders.PushBack(order);
          if not allOrders.Insert(order) then
             WriteLn('Error! Impossible!');
          WriteLn('Order successfully added.');
-         WriteLn('Order ID: ', order^.orderId);
+         WriteLn('Order ID: ', order.orderId);
       end else
       begin
-         Dispose(order);
+         order.Destroy;
          WriteLn('Invalid customer specified.');
       end;
    except
-      { if an exception occurs the order is not automatically disposed
+      { if an exception occurs the order is not automatically destroyed
         (even if it occurs in allOrders.Insert) }
-      Dispose(order);
+      order.Destroy;
       raise;
    end;
 end;
 
 procedure RemoveOrder(orderId : Cardinal);
 var
-   order : POrder;
+   order : TOrder;
    orderKey : TOrder;
    comparer : IBinaryComparer;
 begin
-   orderKey.orderId := orderId;
-   order := POrder(allOrders.Find(@orderKey));
-   if order <> nil then
-   begin
-      { remove the order from the list of the customer associated with
-        it }
-      comparer := TOrderComparer.Create;
-      DeleteIf(order^.customer.Orders.ForwardStart, MAXINT,
-               EqualTo(comparer, order));
-      
-      { remove the order itself }
-      if allOrders.Delete(@orderKey) = 0 then
-         WriteLn('Error! Impossible!');
-      
-      WriteLn('Order ', orderId, ' successfully removed.');
-   end else
-   begin
-      WriteLn('Invaid order ID.');
+   orderKey := TOrder.Create;
+   try
+      orderKey.orderId := orderId;
+      order := TOrder(allOrders.Find(orderKey));
+      if order <> nil then
+      begin
+         { remove the order from the list of the customer associated with
+           it }
+         comparer := TOrderComparer.Create;
+         DeleteIf(order.customer.Orders.ForwardStart, MAXINT,
+                  EqualTo(comparer, order));
+
+         { remove the order itself }
+         if allOrders.Delete(orderKey) = 0 then
+            WriteLn('Error! Impossible!');
+
+         WriteLn('Order ', orderId, ' successfully removed.');
+      end else
+      begin
+         WriteLn('Invaid order ID.');
+      end;
+   finally
+      orderKey.Destroy;
    end;
 end;
 
@@ -526,16 +532,17 @@ begin
    allOrders := nil;
    allCustomers := nil;
    try
-      allOrders := TAvlTree.Create(TOrderComparer.Create, TOrderDisposer.Create);
-      allCustomers := TObjectHashTable.Create(TCustomerHasher.Create,
-                                              TCustomerComparer.Create);
+      allOrders := TAvlTree.Create;
+      allOrders.ItemComparer := TOrderComparer.Create;
+      allCustomers := THashTable.Create;
+      allCustomers.Hasher := TCustomerHasher.Create;
+      allCustomers.ItemComparer := TCustomerComparer.Create;
       unusedOrderId := 0;
-            
+
       Run;
-      
+
    finally
       allOrders.Free;
       allCustomers.Free;
-   end;    
+   end;
 end.
-

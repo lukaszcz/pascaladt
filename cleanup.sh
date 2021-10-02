@@ -42,10 +42,7 @@ if [ "$REPLY" = "yes" ]; then
     cd units
     rm -f `ls -1 | grep '~'`
     rm -f `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(cpu)'`;
-    cd cpu
-    rm -f `ls -1 | grep '~'`
-    rm -f `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(license.txt)'`;
-    cd ../../../demo
+    cd ../../demo
     rm -f `ls -1 | grep '~'`
     rm -f `ls -1 | egrep -v "${FILES_TO_RETAIN}"'|(customer)|(Makefile)'`;
     cd customer

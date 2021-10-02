@@ -4,6 +4,9 @@ This document provides an introduction to the PascalAdt library and
 briefly explains its basic functions using an example of a simple
 program dealing with a database of customers and their orders.
 
+An API reference documentation for PascalAdt is available at
+https://pascaladt.github.io/pascaladt-docs.
+
 I. What is PascalAdt?
 II. How to use it?
         1. The customer.pas program.
@@ -31,7 +34,7 @@ II. How to use it?
                5.3.3 TBidirectionalIterator.
                5.3.4 TRandomAccessIterator.
                5.3.5 TSetIterator.
-           5.4 The invalidation of iterators.
+           5.4 Invalidation of iterators.
            5.5 Ownership issues.
            5.6 Example.
         6. Algorithms.
@@ -50,9 +53,9 @@ The PascalAdt library provides abstract container interfaces like
 general interfaces for lists, maps, sets, etc. Each of these
 interfaces has several implementations to choose from. (Note: When we
 speak of interfaces we do not mean delphi interfaces, but plainly
-something which provides an interface to access sth. Delphi interfaces
-will be referred to explicitly as 'Delphi interfaces' to distinguish
-them from the general interfaces).
+something which provides an interface to access sth. Object Pascal
+interfaces will be referred to explicitly as 'Object Pascal
+interfaces' to distinguish them from the general interfaces).
 
 
 II. How to use it?
@@ -71,12 +74,8 @@ address and other such information stored in the database. We would
 also like to be able to view each customer's current orders, as well
 as view all orders at once or search for orders of a given product.
 
-Let's be a bit more specific and define the data types of an order and
-a customer.
-
-Violating most of the object-oriented design rules we may declare a
-simple record-like class to store a customer's data. It might look
-something like this:
+We declare a simple record-like class to store a customer's data. It
+might look something like this:
 
    TCustomer = class
    private
@@ -93,19 +92,14 @@ something like this:
       property Orders : TListAdt read FOrders;
    end;
 
-The reason why it is not a record is that there is a destructor needed
-to free the FOrders field. More on the type of this field later. For
-now, assume it is a list of the orders the customer have made. Other
-class members should be obvious.
-
 For the data type of an order we may take the following:
 
-   TOrder = record
+   TOrder = class
+   public
       orderId : Cardinal;
       productName, price : String;
       customer : TCustomer;
    end;
-   POrder = ^TOrder;
 
 A unique ID number, some product, its price and, of course, the
 customer placing the order is associated with each order.
@@ -119,15 +113,9 @@ issues.
 
 The PascalAdt library uses several types defined in adtdefs.inc as
 basic numeric types. The most important are: IndexType, SizeType and
-UnsignedType. IndexType represents an index or the difference of two
-indices. It is signed. By default, it is defined to be equivalent to
-Integer. SizeType represents a size and is signed in the current
-implementation in order to make it possible to compare it with
-IndexType without generating 64-bit code. However, only positive
-values should be stored in variables of this type. SizeType is
-currently defined equivalent to Integer. UnsignedType is unsigned,
-used mostly in conjunction with hashers. By default, it is equivalent
-to Cardinal.
+UnsignedType. IndexType is a signed type representing an index or the
+difference of two indices. SizeType represents a size. UnsignedType is
+unsigned, used mostly in conjunction with hashers.
 
 2.2 Terminology.
 
@@ -141,38 +129,50 @@ container or when the container is itself destroyed.
 If you look at the PascalAdt library sources, you notice that most of
 it is not implemented in *.pas files. This is because the sources are
 preprocessed with the MCP macro processor to generate several
-instances of each container for different item types. Most units are
+versions of each container for different item types. Most units are
 broken up into three files: adtunit.i, adtunit_impl.i and
 adtunit.pas.mcp. The files contain ordinary Pascal code with some MCP
 macros. The file adtunit.i contains the interface, adtunit_impl.i the
 implementation, and adtunit.pas.mcp puts these two together with
 unit uses, initialization and finalization code.
 
+We will be referring to unit names without indicating specific
+files. The most convenient reference for the units, classes and
+functions in the library is the online PascalAdt API reference
+documentation (https://pascaladt.github.io/pascaladt-docs).
+
 2.4 Containers.
 
-The PascalAdt library provides a variety of containers. They are all
-implemented as classes storing generic pointers. TContainerAdt is the
-ancestor of all containers, and the root of the container class
-hierarchy tree. It is defined in adtcontbase.i. No concrete
-container class is derived directly from TContainerAdt, though, but
-instead from some abstract class providing an interface for the
-implemented functionality. There are in fact many 'chains' of
-classes. In each of them, declarations are introduced gradually with
-each class introducing some new methods. For examle, one such chain
-might be TContainerAdt -> TQueueAdt -> TDequeAdt -> TListAdt ->
-TDoubleListAdt -> TRandomAccessContainerAdt -> TArrayAdt. The arrow
-means that the class on the right is derived from the one on the
-left. Here, TQueueAdt is an abstract class providing an interface of a
-queue, TDequeAdt an abstract class providing an interface of a
-double-ended queue, and so on. The suffix -Adt in the name of a class
-means that the class is an abstract container class providing some
-interface. Generally speaking, the abstract -Adt classes provide
-concepts and concrete classes provide specific implementations. For
-instance, there are two classes derived directly from TDoubleListAdt
-with almost the same methods, implementing the same functionality, but
-in two different ways. These are namely TDoubleList - a standard
-doubly-linked list - and TXorList - a memory-saving implementation of
-a doubly-linked list, but a somewhat messy one.
+The PascalAdt library provides a variety of containers. By default
+they store generic objects, i.e., the item type is
+TObject. TContainerAdt is the ancestor of all containers, and the root
+of the container class hierarchy tree. It is defined in
+adtcontbase.i. No concrete container class is derived directly from
+TContainerAdt, though, but instead from some abstract class providing
+an interface for the implemented functionality. There are in fact many
+'chains' of classes. In each of them, declarations are introduced
+gradually with each class introducing some new methods. For examle,
+one such chain might be TContainerAdt -> TQueueAdt -> TDequeAdt ->
+TListAdt -> TDoubleListAdt -> TRandomAccessContainerAdt ->
+TArrayAdt. The arrow means that the class on the right is derived from
+the one on the left. Here, TQueueAdt is an abstract class providing an
+interface of a queue, TDequeAdt an abstract class providing an
+interface of a double-ended queue, and so on. The suffix -Adt in the
+name of a class means that the class is an abstract container class
+providing some interface. Generally speaking, the abstract -Adt
+classes provide concepts and concrete classes provide specific
+implementations. For instance, there are two classes derived directly
+from TDoubleListAdt with almost the same methods, implementing the
+same functionality, but in two different ways. These are namely
+TDoubleList - a standard doubly-linked list - and TXorList - a
+memory-saving implementation of a doubly-linked list, but a somewhat
+messy one.
+
+For most containers there are also versions for strings and
+integers. These are prefixed with TString (or TInteger), e.g.,
+TStringDequeAdt instead of TDequeAdt. They inherit from
+TStringContainerAdt (or TIntegerContainerAdt) and their item type is
+String (or Integer) instead of TObject.
 
 All abstract -Adt classes, except for TContainerAdt, are defined in
 adtcont.i. TContainerAdt is defined in adtcontbase.i.
@@ -206,60 +206,52 @@ is guaranteed to be O(1).
    property OwnsItems : Boolean read FOwnsItems write SetOwnsItems;
 
 Indicates whether the container owns its items. In other words,
-whether the items should be disposed with the disposer when removed
-from the container. Always true after the creation.
+whether the items should be destroyed when removed from the container
+(this includes destroying them when the container itself is
+destroyed). Always true after creation.
 
 2.6 Functors.
 
-As was already mentioned, the containers store generic pointers. It is
-possible to have the items automatically freed upon deletion from the
-container, but you have to provide the information how to free the
-items by passing a functor to do the job. Functors are classes which
-act like routines. In the PascalAdt library they are implemented as
-Object Pascal interfaces.
-
-Functors are not only used to dispose items, but also for various
-other purposes. The most common are: comparers, hashers, predicates.
+Functors are classes which act like routines. In the PascalAdt library
+they are implemented as Object Pascal interfaces. Functors are most
+commonly used as comparers, hashers or predicates.
 
 All functor interfaces are defined in adtfunct.i. The most important
 of them include:
 
    IUnaryFunctor = interface (IFunctor)
-      function Perform(ptr : Pointer) : Pointer;
+      function Perform(obj : TObject) : TObject;
    end;
 
-Used primarily as a disposer.
+Used primarily with sequence algorithms.
 
    IBinaryComparer = interface (IFunctor)
-      function Compare(ptr1, ptr2 : Pointer) : Integer;
+      function Compare(obj1, obj2 : TObject) : Integer;
    end;
 
 Used to compare two items. Returns 0 if they are equal, a negative
 number if ptr1 < ptr2, and a positive number if ptr1 > ptr2.
 
    IHasher = interface (IFunctor)
-      function Hash(ptr : Pointer) : UnsignedType;
+      function Hash(obj : TObject) : UnsignedType;
    end;
 
-Hashes an item passed.
+Hashes a given item.
 
 3. Sets and maps.
 
 3.1 Basic information.
 
-Let's get down to earth again, and think what we need for our
-hypothetical customer.pas program. We would like to store all
-customers in a database and have possibly fast access to any customer
-by their name. We need some sort of a map. The abstract map interface
-is TMapAdt. Take a look at its declaration in adtcont.i and you will
-see that there is a small problem with using a map. Namely, it
-requires two kinds of objects to be stored - the keys and the proper
-items. But we need only one. To get around this 'problem' we shall use
-a set - TSetAdt. Actually, most maps are implemented by means of a
-set. This is not difficult since you only have to store the key and
-the item in one object and use an appropriate comparer which takes
-only the key into account. There is even a wrapper class in
-adtmap.i providing the TMapAdt interface for any TSetAdt.
+Let's think what we need for our hypothetical customer.pas program. We
+would like to store all customers in a database and have possibly fast
+access to any customer by their name. We need some sort of a map. The
+abstract map interface is TMapAdt. Take a look at its declaration in
+adtcont and you will see that there is a small problem with using a
+map. Namely, it requires two kinds of objects to be stored - the keys
+and the proper items. But we need only one. To get around this, we
+shall use a set - TSetAdt. Actually, most maps are implemented by
+means of a set. There is even a wrapper class in adtmap providing
+the TMapAdt interface for any TSetAdt.
 
 Let's be more specific now and choose a particular implementation for
 our set. Let it be a hash table. There are presently two
@@ -281,11 +273,13 @@ An object of this type is created in the begining of the main program
 block.
 
    begin
-      allOrders := nil;
-      allCustomers := nil;
+      // ...
       try
-         allCustomers := TObjectHashTable.Create(TCustomerHasher.Create,
-                                                 TCustomerComparer.Create);
+         // ...
+         allCustomers := THashTable.Create;
+         allCustomers.Hasher := TCustomerHasher.Create;
+         allCustomers.ItemComparer := TCustomerComparer.Create;
+
          // ...
 
          { do the main job }
@@ -297,23 +291,17 @@ block.
       end;
    end.
 
-Note that TObjectHashTable is used instead of THashTable. Strictly
-speaking, this is not necessary. It's just a mere typing convenience.
-The disposer appropriate for destroying objects is created
-automatically if you use a class named TObject-something.
-
-To create an object of the class THashTable two more functors are
-needed: the hasher and the disposer. Let's now look at their
-declarations.
+We need a custom hasher and comparer for the TCustomer class. Let's
+now look at their declarations.
 
    TCustomerComparer = class (TFunctor, IBinaryComparer)
    public
-      function Compare(ptr1, ptr2 : Pointer) : IndexType;
+      function Compare(obj1, obj2 : TObject) : Integer;
    end;
 
    TCustomerHasher = class (TFunctor, IHasher)
    public
-      function Hash(ptr : Pointer) : UnsignedType;
+      function Hash(obj : TObject) : UnsignedType;
    end;
 
 Both the classes inherit from TFunctor, which should be used as a base
@@ -330,27 +318,26 @@ The definitions of the methods are probably more interesting.
 
    // ...
 
-   function TCustomerComparer.Compare(ptr1, ptr2 : Pointer) : IndexType;
+   function TCustomerComparer.Compare(obj1, obj2 : TObject) : Integer;
    begin
-      Result := CompareCustomers(TCustomer(ptr1), TCustomer(ptr2));
+      Result := CompareCustomers(TCustomer(obj1), TCustomer(obj2));
    end;
 
-   function TCustomerHasher.Hash(ptr : Pointer) : UnsignedType;
+   function TCustomerHasher.Hash(obj : TObject) : UnsignedType;
    var
       nameStr : AnsiString;
    begin
-      nameStr := TCustomer(ptr).FirstName + TCustomer(ptr).Surname;
+      nameStr := TCustomer(obj).FirstName + TCustomer(obj).Surname;
       Result := FNVHash(PChar(nameStr), Length(nameStr));
    end;
 
 The job of comparing two TCustomer objects is done by a separate
-function as this function will be needed later in the program. The
-function simply compares first the surnames of the customers, and if
-they are the same then compares their names. The hasher uses a hashing
-function defined in adthashfunct.pas.mcp. The function implements a very
-simple and efficient FNV algorithm. This is the default for all
-pre-defined hashers in adthashfunct.pas.mcp, and should be used by your
-own ones.
+function which will also be needed later in the program. The function
+simply compares first the surnames of the customers, and if they are
+the same then compares their names. The hasher uses a hashing function
+defined in adthashfunct. The function implements a very simple and
+efficient FNV algorithm. This is the default for all pre-defined
+hashers in adthashfunct, and should be used by your own ones.
 
 Let's now choose a type for the container storing orders. To have an
 opportunity to better present the features of the PascalAdt library
@@ -359,9 +346,9 @@ a sorted set - TSortedSetAdt. This is the same as TSetAdt, but with an
 additional requirement that the items in the set are kept in a sorted
 order. So when you traverse the set with an iterator, on which later,
 the items come in a sorted sequence, in contrast to a hash table, in
-which they usually come in a random fashion. Various search trees fall
+which they usually come in a random order. Various search trees fall
 into the category of sorted sets. One of them, which guarantees an
-O(log(n)) time for all set operations is the AVL-tree(1) - TAvlTree.
+O(log(n)) time for all set operations, is the AVL-tree(1) - TAvlTree.
 
 (1) The name comes from the initials of the names of the tree's
     Russian inventors: Adelson-Velskii and Landis.
@@ -372,48 +359,27 @@ following.
    var
       allOrders : TSortedSetAdt;
    // ...
-   allOrders := TAvlTree.Create(TOrderComparer.Create, TOrderDisposer.Create);
+   allOrders := TAvlTree.Create;
+   allOrders.ItemComparer := TOrderComparer.Create;
    // ...
 
-Note that TObjectAvlTree cannot be used because we are storing
-pointers to records, not objects. A disposer must be separately
-defined for freeing the record pointers and passed to
-TAvlTree.Create. A comparer is needed as well.
-
-   TOrderDisposer = class (TFunctor, IUnaryFunctor)
-   public
-      function Perform(ptr : Pointer) : Pointer;
-   end;
-
-   // ...
+A comparer must be separately defined for comparing the TOrder
+objects.
 
    TOrderComparer = class (TFunctor, IBinaryComparer)
    public
-      function Compare(ptr1, ptr2 : Pointer) : IndexType;
+      function Compare(obj1, obj2 : TObject) : Integer;
    end;
 
    // ...
 
-   function TOrderDisposer.Perform(ptr : Pointer) : Pointer;
+   function TOrderComparer.Compare(obj1, obj2 : TObject) : Integer;
    begin
-      Result := nil;
-      Dispose(POrder(ptr));
-   end;
-
-   // ...
-
-   function TOrderComparer.Compare(ptr1, ptr2 : Pointer) : IndexType;
-   begin
-      Result := POrder(ptr1)^.orderId - POrder(ptr2)^.orderId;
+      Result := TOrder(obj1).orderId - TOrder(obj2).orderId;
    end;
 
 In the comparer, the orders are compared according to their unique
-IDs. What might be confusing is that the disposer's method is defined
-to be a function. This is so because the functor used as a disposer
-interface is actually a general functor defined to transform the
-argument into something and return the result of the
-transformation. In the case of a disposer it transforms the argument
-into nothing - the nil pointer.
+IDs.
 
 3.2 Searching for items.
 
@@ -424,31 +390,36 @@ trick.
 
    procedure FindOrder(orderId : Cardinal);
    var
-      order : POrder;
+      order : TOrder;
       orderKey : TOrder;
    begin
-      orderKey.orderId := orderId;
-      order := allOrders.Find(@orderKey);
-      if order <> nil then
-      begin
-         PrintOrder(order);
-      end else
-      begin
-         WriteLn('Invalid order ID.');
-     end;
+      orderKey := TOrder.Create;
+      try
+         orderKey.orderId := orderId;
+         order := TOrder(allOrders.Find(orderKey));
+         if order <> nil then
+         begin
+            PrintOrder(order);
+         end else
+         begin
+            WriteLn('Invalid order ID.');
+         end;
+      finally
+         orderKey.Free;
+      end;
    end;
 
 The TSetAdt.Find() method takes one argument which is an item that
 should be found. Or more precisely, an item equal to the item searched
 according to the comparer passed to the container's constructor. It
-return the first item equal to the argument or nil if there is no such
-item. Note that as the argument a pointer to a static variable is
-used, whose only initialized field is orderId. This is perfectly legal
-since our comparer uses this field only and does not care about the
-others. Also, the container owns only the items which are actually
-inserted into the container, not all that are passed to some of its
-methods. It, therefore, does not try to dispose the argument, but the
-only thing it does with it is to pass it to the comparer's method.
+returns the first item equal to the argument or nil if there is no
+such item. Note that as the argument we use a TOrder object whose only
+initialized field is orderId. This is perfectly legal since our
+comparer uses this field only and does not access the others. Also,
+the container owns only the items which are actually inserted into the
+container, not all that are passed to some of its methods. It,
+therefore, does not try to destroy the argument, but the only thing it
+does with it is to pass it to the comparer's method.
 
 3.3 Inserting items.
 
@@ -457,15 +428,15 @@ database.
 
    procedure AddOrder;
    var
-      order : POrder;
+      order : TOrder;
       surname, firstName : String;
-      customerKey : TCustomerKey;
+      customerKey : TCustomer;
    begin
-      New(order);
+      order := TOrder.Create;
 
       try
          WriteLn('Enter order data.');
-         with order^ do
+         with order do
          begin
             Write('Product name: '); ReadLn(productName);
             Write('Price: '); ReadLn(price);
@@ -474,109 +445,107 @@ database.
          Write('Customer surname: '); ReadLn(surname);
 
          { check if the specified customer is present in the database }
-         customerKey := TCustomerKey.Create(firstName, surname);
+         customerKey := TCustomer.Create(firstName, surname);
          try
-            order^.customer := TCustomer(allCustomers.Find(customerKey));
+            order.customer := TCustomer(allCustomers.Find(customerKey));
          finally
             customerKey.Free;
          end;
 
-         if order^.customer <> nil then
+         if order.customer <> nil then
          begin
-            order^.orderId := unusedOrderId;
+            order.orderId := unusedOrderId;
             Inc(unusedOrderId);
-            order^.customer.Orders.PushBack(order);
+            order.customer.Orders.PushBack(order);
             if not allOrders.Insert(order) then
                WriteLn('Error! Impossible!');
             WriteLn('Order successfully added.');
-            WriteLn('Order ID: ', order^.orderId);
+            WriteLn('Order ID: ', order.orderId);
          end else
          begin
-            Dispose(order);
+            order.Destroy;
             WriteLn('Invalid customer specified.');
          end;
       except
-         { if an exception occurs the order is not automatically disposed
+         { if an exception occurs the order is not automatically destroyed
            (even if it occurs in allOrders.Insert) }
-         Dispose(order);
+         order.Destroy;
          raise;
       end;
    end;
 
-First, a TOrder record is allocated dynamically and assigned to the
-variable named order. Next, the user is prompted for the data
-necessary for the order. Then it is checked whether the specified
-customer exists. This is roughly the same as when searching in
-allOrders, but an object of the class TCustomerKey is used. This class
-is derived from TCustomer, and it takes only two arguments - the ones
-used by the comparer - the first name and the surname. Note that
-because comparerKey is not a static variable and is not owned by
-allCustomers it should be destroyed by the caller. Hence the try
-... finally clause.
+First, a TOrder object is created and assigned to the variable named
+order. Next, the user is prompted for the data necessary for the
+order. Then it is checked whether the specified customer exists. This
+is roughly the same as when searching in allOrders. Note that
+comparerKey is not owned by allCustomers, so it should be destroyed by
+the caller. Hence the try ... finally clause.
 
 If the customer is found then the order is assigned a unique ID,
 pushed at the back of the list of orders in the customer object
 (ignore it for now), and inserted into the allOrders set. The function
-used to insert items into a set is, surprisingly, named Insert. It
-returns true if the item is successfully inserted, false
-otherwise. When an item may not be inserted succesfully? To answer
-this question we need to know about one property declared in TSetAdt,
-namely, RepeatedItems. It may be set by the user and is true if
-multiple items, i.e. all pairwise equal according to the used
-comparer, are allowed. If they are not allowed Insert may return false
-to indicate that its argument is already present in the container. If
-RepeatedItems is true it always returns true. RepeatedItems is false
-by default, but our order IDs are supposed to be unique, so it is
-impossible for Insert to return false in this case, anyway. Note that
-if some error occurs while inserting an item Insert does not return
-false but raises an exception. Inserting a duplicated item is not
-considered to be an error. So when Insert returns false it means 'You
-are trying to insert a duplicated item while RepeatedItems is set to
-false' and never anything else.
+used to insert items into a set is named Insert. It returns true if
+the item is successfully inserted, false otherwise. When an item may
+not be inserted succesfully? To answer this question we need to know
+about one property declared in TSetAdt, namely, RepeatedItems. It may
+be set by the user and is true if multiple items, i.e. all pairwise
+equal according to the used comparer, are allowed. If they are not
+allowed, Insert may return false to indicate that its argument is
+already present in the container. If RepeatedItems is true it always
+returns true. RepeatedItems is false by default, but our order IDs are
+supposed to be unique, so it is impossible for Insert to return false
+in this case, anyway. Note that if some error occurs while inserting
+an item Insert does not return false but raises an
+exception. Inserting a duplicated item is not considered to be an
+error. So when Insert returns false it means 'You are trying to insert
+a duplicated item while RepeatedItems is set to false' and never
+anything else.
 
 3.4 Removing items.
 
-Without further ado, let's take a look at the procedure removing an
-order.
+Let's take a look at the procedure removing an order.
 
    procedure RemoveOrder(orderId : Cardinal);
    var
-      order : POrder;
+      order : TOrder;
       orderKey : TOrder;
       comparer : IBinaryComparer;
    begin
-      orderKey.orderId := orderId;
-      order := POrder(allOrders.Find(@orderKey));
-      if order <> nil then
-      begin
-         { remove the order from the list of the customer associated with
-           it }
-         comparer := TOrderComparer.Create;
-         DeleteIf(order^.customer.Orders.ForwardStart, MAXINT,
-                  EqualTo(comparer, order));
+      orderKey := TOrder.Create;
+      try
+         orderKey.orderId := orderId;
+         order := TOrder(allOrders.Find(orderKey));
+         if order <> nil then
+         begin
+            { remove the order from the list of the customer associated with
+              it }
+            comparer := TOrderComparer.Create;
+            DeleteIf(order.customer.Orders.ForwardStart, MAXINT,
+                     EqualTo(comparer, order));
 
-         { remove the order itself }
-         if allOrders.Delete(@orderKey) = 0 then
-            WriteLn('Error! Impossible!');
+            { remove the order itself }
+            if allOrders.Delete(orderKey) = 0 then
+               WriteLn('Error! Impossible!');
 
-         WriteLn('Order ', orderId, ' successfully removed.');
-      end else
-      begin
-         WriteLn('Invaid order ID.');
+            WriteLn('Order ', orderId, ' successfully removed.');
+         end else
+         begin
+            WriteLn('Invaid order ID.');
+         end;
+      finally
+         orderKey.Destroy;
       end;
    end;
 
 Ignore the DeleteIf() line for now and concentrate on the ones
 below. The TSetAdt.Delete() method is used to remove an item from the
-set. As with Find() we have to provide a pointer to TOrder record with
-only necessary fields filled in. Delete removes all items equal to the
-argument and returns the number of items actually removed. If
-OwnsItems is true and a non-nil disposer was passed to the constructor
-then the items are also disposed upon removal. In the case of
-RepeatedItems being false only two returns are possible: 0 and
-1. Since in this particular function Delete() is invoked only if
-Find() returns a non-nil pointer, then it is impossible for it to
-return 0.
+set. As with Find(), we have to provide a TOrder with only necessary
+fields filled in. Delete removes all items equal to the argument and
+returns the number of items actually removed. If OwnsItems is true
+then the items are also destroyed upon removal. If RepeatedItems is
+false only two returns are possible: 0 and 1. Since in this particular
+function Delete() is invoked only if Find() returns a non-nil pointer,
+it is impossible for it to return 0.
 
 4. Lists.
 
@@ -600,10 +569,12 @@ list is created in the constructor of TCustomer.
    begin
       // ...
       FOrders := TSingleList.Create;
+      FOrders.OwnsItems := False;
    end;
 
-This time no disposer is used because the orders are already owned by
-the allOrders object, so they would be freed twice.
+The OwnsItems property of FOrders needs to be set to False because the
+orders are already owned by the allOrders container. Otherwise, the
+order objects would be freed twice.
 
 4.2 Inserting items.
 
@@ -611,7 +582,7 @@ Let's go back to the AddOrder routine, or rather the part of it
 dealing with updating the list of a customer's orders.
 
    // ...
-   order^.customer.Orders.PushBack(order);
+   order.customer.Orders.PushBack(order);
    // ...
 
 The procedure PushBack pushes an item at the back of a list. There is
@@ -621,21 +592,21 @@ be discussed later.
 
 5. Iterators.
 
-Very well, but we still do not know how to enumerate items of a
-container. That is not much of a problem for sets but a grave
-disadvantage for things like lists, in which the only way of accessing
-items is to somehow traverse the whole container. But there is a way
-out of this predicament - iterators.
+We still do not know how to enumerate items of a container. That is
+not much of a problem for sets but a grave disadvantage for things
+like lists, in which the only way of accessing items is to somehow
+traverse the whole container. The way to achieve this is with
+iterators.
 
 5.1. Basic information.
 
 If you happen to be familiar with the C++ STL library or just with the
 a bit more sophisticated concepts of object-oriented programming you
-already know what iterators are. They basically represent a position
-within a container viewed as a sequence of items. Incidentally, most
-of the data structures like trees or priority queues, which are not
-traditionally percieved as sequences, may be considered to be such
-with some necessary restrictions.
+already know what iterators are. They represent a position within a
+container viewed as a sequence of items. Incidentally, most of the
+data structures like trees or priority queues, which are not
+traditionally seen as sequences, may be considered to be such with
+some necessary restrictions.
 
 In other words, iterators are in a way enchanced pointers. They point
 to some item, allow to move to the next, but offer some additional
@@ -645,7 +616,7 @@ features, and sometimes impose restrictions.
 
 A pair of iterators denotes a range if both of the iterators belong to
 the same container and the first in the pair is closer to the
-beginning of the sequence than second one. Alternatively, they may
+beginning of the sequence than the second one. Alternatively, they may
 both point to the same item. In that case they denote an empty range.
 
 The first iterator in the pair is referred to as the 'start iterator'
@@ -658,18 +629,17 @@ Almost every container has two methods - Start and Finish - returning
 an iterator to the first item in the container and an iterator to the
 one-beyond-last position, respectively. The one-beyond-last position
 is an invalid position. You cannot access an item at this position. It
-only serves as a mean of indicating the end of the range comprising
-the whole container.
+only serves to indicate the end of the range comprising the whole
+container.
 
 5.3. Simplified class hierarchy.
 
 All abstract iterator classes serving as general interfaces are
-defined in adtiters.i. There are numerous other concrete iterators
+defined in adtiters. There are numerous other concrete iterators
 implementing the methods defined in those abstract ones. They are
-scattered over various units. In this section of this peculiar mix of
-a tutorial and a quick reference we provide a simplified description
-of the class hierarchy of the abstract iterator classes and a brief
-synopsis of each of their methods.
+scattered over various units. In this section, we provide a simplified
+description of the class hierarchy of abstract iterator classes and a
+brief synopsis of each of their methods.
 
 5.3.1. TIterator.
 
@@ -678,7 +648,7 @@ methods, the most important of which are:
 
    property Item : Pointer read GetItem write SetItem;
 
-The Item property provides an access to the item to which the iterator
+The Item property provides access to the item to which the iterator
 points.
 
    function Owner : TContainerAdt; virtual; abstract;
@@ -694,7 +664,7 @@ however, that it is assumed that they do point into the same container
 and this case is not checked. So it is an error to try to test whether
 two iterators belonging to two different containers are equal with
 this function. If at some point in your code you are not sure whether
-two iterators belong to the same container or not always check it by
+two iterators belong to the same container or not, always check it by
 comparing what their Owner functions return.
 
    procedure ExchangeItem(iter : TIterator); virtual; abstract;
@@ -706,28 +676,28 @@ have different owners.
 
 TForwardIterator is probably the most commonly used kind of
 iterator. It represents an iterator which allows moving forward, like
-in a singly-linked list. Some of its more notable methods include:
+in a singly-linked list. Some of its methods include:
 
    procedure Advance; overload; virtual; abstract;
 
 The Advance procedure moves the iterator one position forward.
 
-   procedure Insert(ptr : Pointer); overload; virtual; abstract;
+   procedure Insert(obj : TObject); overload; virtual; abstract;
 
-In general, Insert is defined to insert ptr somewhere in the container
-and move to where ptr has been inserted. It is not precisely defined
-where this 'somewhere' is, in general. In particular, all descendants
-of TListAdt insert just before the position they point to.
+In general, Insert is defined to insert obj somewhere in the container
+and move to where obj has been inserted. It is not precisely defined
+where this 'somewhere' is. All descendants of TListAdt insert just
+before the position they point to.
 
    function Extract : Pointer; virtual; abstract;
 
 The Extract function returns the item pointed to by the iterator,
 removes it from the container and advances to the next position. It
-does not dispose the item even if OwnsItems is true, only returns it.
+does not destroy the item even if OwnsItems is true, only returns it.
 
    procedure Delete; overload;
 
-Delete is the same as Extract, but disposes the item instead of
+Delete is the same as Extract, but destroys the item instead of
 returning it.
 
    function IsFinish : Boolean; virtual; abstract;
@@ -738,7 +708,7 @@ container. That is, if it points to the one-beyond-last position.
 5.3.3. TBidirectionalIterator.
 
 TBidirectionalIterator represents an iterator allowing to move in two
-directions, one step at once, like in a doubly-linked list. It
+directions, one step at a time, like in a doubly-linked list. It
 introduces only one procedure, namely Retreat, which moves the
 iterator one position backwards.
 
@@ -753,9 +723,9 @@ new methods. Most important of them follow.
 Advances self by i positions forward. If i is negative goes abs(i)
 positions backward.
 
-   property Items[ind : IndexType] : Pointer; default;
+   property Items[ind : IndexType] : TObject; default;
 
-Provides an access to an item at the distance ind from self. So, for
+Provides access to the item at the distance ind from self. So, for
 instance, iter[0] is roughly equivatent to iter.Item, iter[5] to
 iter.Advance(5); iter.Item; iter.Advance(-5);.
 
@@ -773,14 +743,11 @@ a set is internally defined, i.e. the items cannot be moved around at
 will, it is illegal to change the item in such a way that the value of
 its 'key' changes. Additionally, items cannot be exchanged.
 
-5.4. The invalidation of iterators.
+5.4. Invalidation of iterators.
 
 Iterators may become invalid as a side effect of invoking some
-container methods. In this meaning of the word, invalid iterators
-should not be accessed at all. Sometimes the finish iterator is
-referred to as an invalid iterator, even not yet invalidated. It then
-only means that its item should not be accessed, but the iterator
-itself is by all means valid.
+container methods. Invalid iterators should not be accessed at
+all.
 
 The methods that invalidate iterators are precisely those that change
 something in the internal structure of a container. Any container
@@ -799,8 +766,9 @@ yourself. It is actually desirable for users to destroy iterators by
 themselves as they are freed only periodically and only when it is
 impossible that they may be accessed by the user, which usually
 happens to be when some method invalidates them. It should be pointed
-out that iterators may be destroyed only if they are valid. Invalid
-iterators should be treated as if they were already destroyed.
+out that it is legal for the user to destroy iterators only if they
+are valid. Invalid iterators should be treated as if they were already
+destroyed.
 
 5.6. Example.
 
@@ -838,9 +806,9 @@ contains, say, 50 000 items. Each time the comparison is made the
 Finish function creates one iterator. This iterator is not destroyed,
 because there are no methods invalidating iterators called within the
 loop. So we finally end up with 50 000 unfreed and unused iterators
-eating up the memory until some invalidating method destroys them.
+eating up memory until some invalidating method destroys them.
 
-To remedy this situation one might decide to change the above loop
+To remedy this situation, one might decide to change the above loop
 into the following.
 
    finish := allOrders.Finish;
@@ -850,10 +818,10 @@ into the following.
       iter.Advance;
    end;
 
-Pretty nice. Not bad. Slightly less efficient than the version with
+This is slightly less efficient than the version with
 IsFinish but completely correct. However, assume that we want to
 change the loop so that the items are deleted once they are
-printed. The obvious way to do this shown below.
+printed. The obvious way to do this is:
 
    finish := allOrders.Finish;
    while not iter.Equal(finish) do
@@ -879,17 +847,17 @@ implemented to deal with ranges and not whole containers. This gives
 much greater flexibility and generality, but undoubtedly complicates
 things a bit.
 
-All algorithms are defined in adtalgs.i.
+All sequence algorithms are defined in adtalgs.
 
 To get started let's look at the PrintCustomer routine, which prints
 the data associated with a customer.
 
-   procedure PrintCustomer(ptr : Pointer);
+   procedure PrintCustomer(obj : TObject);
    var
       customer : TCustomer;
    begin
-      Assert(TObject(ptr) is TCustomer);
-      customer := TCustomer(ptr);
+      Assert(obj is TCustomer);
+      customer := TCustomer(obj);
       with customer do
       begin
          WriteLn;
@@ -911,7 +879,7 @@ functors. The ForEach algorithm simply applies its third argument,
 which is an IUnaryFunctor, to every item in the range denoted by its
 first two arguments. In this example, the third argument is a functor
 returned by the Adapt function. Adapt simply takes a pointer to an
-ordinary pascal function or procedure as an argument and returns a
+ordinary Pascal function or procedure as an argument and returns a
 functor which does exactly the same job as the argument. The returned
 functor just calls the routine through a pointer whenever it is
 invoked.
@@ -920,23 +888,23 @@ Note also that the methods used here to obtain the start and finish
 iterators are not, as usual, named Start and Finish, but ForwardStart
 and ForwardFinish, respectively. This is because there is nothing like
 covariant returns in Object Pascal, i.e. it is not possible to make a
-mehtod in a descendant class return a descendant of the return value
+method in a descendant class return a descendant of the return value
 type of the same method in an ancestor class. Therefore, if the method
 in TListAdt returning the start iterator, which at that stage can be
 only guaranteed to be a TForwardIterator, was named Start, then a
-method in a descendant class couldn't be either also named Start or
-return a descendant of TForwardIterator. Except for sets and maps, for
-which the descendants of TSetIterator or TMapIterator don't differ
-much from their ancestors, all methods of any abstract container class
-returning iterators have the 'stem' of the name of the type of the
-returned iterator prepended to their names.
+method in a descendant class either can't be named Start as well or it
+must return a descendant of TForwardIterator. Except for sets and
+maps, for which the descendants of TSetIterator or TMapIterator don't
+differ much from their ancestors, all methods of any abstract
+container class returning iterators have the 'stem' of the name of the
+type of the returned iterator prepended to their names.
 
 If the above babble has made you tired, consider the following example
 to relax a bit.
 
    procedure PrintCustomers;
    var
-      buff : PascalArrayType;
+      buff : TPascalArrayType;
       iter : TForwardIterator;
       a : TPascalArray;
       comparer : IBinaryComparer;
@@ -954,6 +922,9 @@ to relax a bit.
       end;
 
       a := TPascalArray.Create(buff);
+      { It is necessary to indicate that 'a' should not destroy its items.
+        By default all containers own their items. }
+      a.OwnsItems := False;
       try
          comparer := TCustomerComparer.Create;
 
@@ -971,27 +942,25 @@ all the items in it the names would come up in a random fashion
 producing a list really hard to read. What we do is to copy the items
 into a buffer, sort them, and then print them out. We need the buffer
 because, as you remember, items in a hash tables cannot be moved
-around, their places are fixed.
+around - their places are fixed.
 
-PascalArrayType is defined in adtarray.i as array of
-Pointer. TPascalArray is a wrapper class which adapts an object pascal
-dynamic array to the TArrayAdt interface, thus enabling it to be used
-with the PascalAdt algorithms. We could choose the items in buff to be
-disposed automatically by passing a disposer to the constructor or
-creating a TObjectPascalArray. But this is not what we want here since
-the items are already owned by allCustomers.
+PascalArrayType is defined in adtarray as 'array of TObject'.
+TPascalArray is a wrapper class which adapts an Object Pascal dynamic
+array to the TArrayAdt interface, thus enabling it to be used with the
+PascalAdt sequence algorithms. Since the items are already owned by
+allCustomers, we need to set a.OwnsItems to False.
 
 Let's take a look at the Sort() routine. It takes a range to be sorted
-and a comparer as arguments. The Sort() routine is does not do the
+and a comparer as arguments. The Sort() routine does not do the
 sorting itself, but chooses an appropriate algorithm, QuickSort() or
 InsertionSort(), depending on the number of items in the range.
 
-Two lines below the ForEach() algorithm is used to print the names of
-the customers. It uses the PrintCustomerName routine defined
+Two lines further down, the ForEach() algorithm is used to print the
+names of the customers. It uses the PrintCustomerName routine defined
 elsewhere.
 
-Brief descriptions of all algorithms can be found in comments in
-adtalgs.i, together with the algorithms' definitions.
+Brief descriptions of all algorithms can be found in the documentation
+for the adtalgs module, together with the algorithms' definitions.
 
 7. Compositions of functors.
 
@@ -1002,34 +971,34 @@ the following lines.
    { remove the order from the list of the customer associated with
      it }
    comparer := TOrderComparer.Create;
-   DeleteIf(order^.customer.Orders.ForwardStart, MAXINT,
+   DeleteIf(order.customer.Orders.ForwardStart, MAXINT,
             EqualTo(comparer, order));
    // ...
 
-The algorithm used deletes all items for which the predicate passed as
-the last argument returns ture. It is unlike other algorithms in that
-it does not take a range, but the iterator starting a range and the
-number of items. If the end of the container comes before the
-specified number of items is visited then the algorithm exits. Here,
-MAXINT is specified, which has the effect of taking into account all
-positions starting from the first argument up to the end of the
-container.
+The DeleteIf() algorithm deletes all items for which the predicate
+passed as the last argument returns ture. It is unlike other
+algorithms in that it does not take a range, but the iterator starting
+a range and the number of items. If the end of the container comes
+before the specified number of items is visited, then the algorithm
+exits. Here, MAXINT is specified, which has the effect of taking into
+account all positions starting from the first argument up to the end
+of the container.
 
 But what is interesting here is the function EqualTo(). It is one of
-the numerous functions defined in adtfunct.i used to modify the
-behaviour of functors. EqualTo() returns an unary predicate which
-compares its argument against the second argument passed to EqualTo()
-using the comparer passed as the first one. It returns true if, and
-only if, the comparer returns 0. Other functions working in an
-analogous way include LessThan() and GreaterThan().
+the numerous functions in adtfunct used to modify the behaviour of
+functors. EqualTo() returns a unary predicate which compares its
+argument against the second argument passed to EqualTo(), using the
+comparer passed as the first one. It returns true if, and only if, the
+comparer returns 0. Other functions which work in an analogous way
+include LessThan() and GreaterThan().
 
-There are numerous other functor functions, i.e. functions operating
+There are numerous other functor functions, i.e., functions operating
 on functors and modifying their behaviour. Several examples
 follow. Negate() takes a predicate pred and returns a predicate
-returning true if and only if pred returns false. Bind1st and Bind2nd
-take a binary functor or predicate f and a pointer p, and return an
-unary functor or predicate, respectively, which acts as if f was
-called with one of the arguments being p and the second one the
+returning true if and only if pred returns false. Bind1st() and
+Bind2nd() take a binary functor or predicate f and an object obj, and
+return an unary functor or predicate, respectively, which acts as if f
+was called with one of the arguments being obj and the second one the
 argument passed to the unary functor. The Compose- family of functions
 makes it possible to create a functor composed of one or more
 functors.
@@ -1052,7 +1021,7 @@ Each time a functor function is called a new object is created, so as
 a result of this call six objects are created. That's not the main
 problem, though. The problem is that there are six additional virtual
 routine calls each time the resulting functor is invoked. This is
-probably insignificant if the original functors perform some length
+probably insignificant if the original functors perform some lengthy
 jobs anyway, but if they only perform some simple arithmetic
 operations and the resulting functor is later applied to a large
 number of items, then the overhead might be considerable.
@@ -1063,14 +1032,10 @@ create one functor.
 III. Where to find more information?
 
 The algorithms and container types discussed in this tutorial are only
-a fraction of what is available. As for now, no other documentation is
-available, except for numerous comments in the source files
-themselves. The comments are quite descriptive and provide much useful
-information. Although unorganised, they should be sufficient to use
-the PascalAdt library. I am currently working on a program extracting
-comments from Object Pascal source files and making an html file out
-of them, so a more convenient form of documentation may be available
-soon.
+a fraction of what is available. We refer to the online PascalAdt API
+reference for more information:
+
+https://pascaladt.github.io/pascaladt-docs/
 
 The full source code of the customer.pas program, with many functions
 not discussed here, is available in demo/customer/customer.pas.

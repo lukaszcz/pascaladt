@@ -110,10 +110,11 @@ ALLPASFILES := $(patsubst %.pas.mcp, %.pas, $(wildcard *.pas.mcp))
 ADTUNITS := $(patsubst %.pas, %$(obj_suffix), $(ALLPASFILES))
 TESTPROGS := $(patsubst %.pas, %$(prog_suffix), $(wildcard tests/*.pas))
 TESTUNITS := $(patsubst %.pas, %$(obj_suffix), $(wildcard tests/units/*.pas))
+DEMOPROGS := $(patsubst %.pas, %$(prog_suffix), $(wildcard demo/customer/*.pas))
 
 TOOLSDEPS := $(wildcard tools/*.pas tools/*.c tools/*.h)
 
-.PHONY : test install static dynamic smart all units tests debug windows docs clean cleandocs cleanprogs fastclean tools check
+.PHONY : test install static dynamic smart all units tests debug demo windows docs clean cleandocs cleanprogs fastclean tools check
 
 all : units tests
 
@@ -137,6 +138,8 @@ units : $(ADTUNITS)
 tests : units $(TESTPROGS) $(TESTUNITS)
 
 debug : units tests
+
+demo : units $(DEMOPROGS)
 
 windows : units
 
