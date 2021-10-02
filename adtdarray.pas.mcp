@@ -40,7 +40,7 @@ uses
 
 &# we need the following specializations even if not chosen by the user
 &define MCP_POINTER
-&define MCP_INTEGER
+&undefine MCP_NO_INTEGER
 
 &include adtdefs.inc
 

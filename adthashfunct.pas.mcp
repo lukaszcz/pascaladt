@@ -1,19 +1,19 @@
 (* This file is a part of the PascalAdt library, which provides
    commonly used algorithms and data structures for the FPC and Delphi
    compilers.
-   
+
    Copyright (C) 2004, 2005 by Lukasz Czajka
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -37,9 +37,9 @@ uses
 
 type
    THashFunction = function(ptr : Pointer; len : SizeType) : UnsignedType;
-   
+
    { ------ hasher functors for adaptating specific hash functions ------- }
-   
+
    THashAdaptor = class (TFunctor)
    protected
       hashFunc : THashFunction;
@@ -50,58 +50,46 @@ type
         set to nil }
       constructor Create; overload;
    end;
-   
-&ifdef MCP_POINTER   
+
+&ifdef MCP_POINTER
    TPCharHasher = class (THashAdaptor, IPointerHasher)
    public
       { interprets ptr as a PChar; }
       function Hash(ptr : Pointer) : UnsignedType;
    end;
 &endif
-   
+
    TAnsiStringHasher = class (THashAdaptor, IStringHasher)
    public
       { interprets ptr as a wrapper around an AnsiString used by the
         TAnsiString- containers; }
       function Hash(aitem : String) : UnsignedType;
    end;
-   
-(*   TShortStringHasher = class (THashAdaptor, IHasher)
-   public
-      { interprets ptr as a ShortString; }
-      function Hash(ptr : Pointer) : UnsignedType;
-   end;
-   
-   TStringAdtHasher = class (THashAdaptor, IHasher)
-   public
-      { interprets ptr as a TStringAdt; }
-      function Hash(ptr : Pointer) : UnsignedType;
-   end; *)
-   
-&ifdef MCP_INTEGER   
-   TIntegerHasher = class (THashAdaptor, IHasher)
+
+&ifndef MCP_NO_INTEGER
+   TIntegerHasher = class (THashAdaptor, IIntegerHasher)
    public
       { hashes an Integer }
       function Hash(aitem : Integer) : UnsignedType;
    end;
 &endif
-   
+
 &ifdef MCP_REAL
-   TRealHasher = class (THashAdaptor, IHasher)
+   TRealHasher = class (THashAdaptor, IRealHasher)
    public
       function Hash(aitem : Real) : UnsignedType;
    end;
 &endif
-   
+
 &ifdef MCP_POINTER
-   TPointerValueHasher = class (THashAdaptor, IHasher)
+   TPointerValueHasher = class (THashAdaptor, IPointerHasher)
    public
       { interprets ptr as a plain number, i.e. uses the value of the
         pointer to compute the result }
       function Hash(ptr : Pointer) : UnsignedType;
    end;
 
-   TMemoryHasher = class (THashAdaptor, IHasher)
+   TMemoryHasher = class (THashAdaptor, IPointerHasher)
    private
       len : SizeType;
    public
@@ -114,7 +102,7 @@ type
       function Hash(ptr : Pointer) : UnsignedType;
    end;
 &endif
-   
+
    { ----------------- functions returning hashers --------------------- }
    { note: it is more efficient to use one of these functions than to
      create a new hasher every time; calling any of those functions
@@ -122,20 +110,18 @@ type
    function AnsiStringHasher : IStringHasher;
 &ifdef MCP_POINTER
    function PCharHasher : IPointerHasher;
-&endif   
-//   function ShortStringHasher : IHasher;
-//   function StringAdtHasher : IHasher;
-&ifdef MCP_INTEGER   
+&endif
+&ifndef MCP_NO_INTEGER
    function IntegerHasher : IIntegerHasher;
-&endif   
-&ifdef MCP_REAL   
+&endif
+&ifdef MCP_REAL
    function RealHasher : IRealHasher;
-&endif   
-&ifdef MCP_POINTER   
+&endif
+&ifdef MCP_POINTER
    function PointerValueHasher : IPointerHasher;
 &endif
-   
-   
+
+
    { ----------------- specific hashing algorithms --------------------- }
 
    { this uses a very good, widely applicable FNV-1a algorithm; it has
@@ -164,15 +150,13 @@ uses
 
 var
    varAnsiStringHasher : IStringHasher;
-//   varShortStringHasher : IHasher;
-//   varStringAdtHasher : IHasher;
-&ifdef MCP_INTEGER   
+&ifndef MCP_NO_INTEGER
    varIntegerHasher : IIntegerHasher;
 &endif
 &ifdef MCP_REAL
    varRealHasher : IRealHasher;
 &endif
-&ifdef MCP_POINTER   
+&ifdef MCP_POINTER
    varPCharHasher : IPointerHasher;
    varPointerValueHasher : IPointerHasher;
 &endif
@@ -209,26 +193,7 @@ begin
       Result := hashFunc(PChar(aitem), Length(aitem));
 end;
 
-(*
-function TShortStringHasher.Hash(ptr : Pointer) : UnsignedType;
-begin
-   if not Assigned(hashFunc) then
-      Result := FNVHash(ptr, Length(PShortString(ptr)^))
-   else
-      Result := hashFunc(ptr, Length(PShortString(ptr)^));
-end;
-
-
-function TStringAdtHasher.Hash(ptr : Pointer) : UnsignedType;
-begin
-{   if hashFunc = nil then
-      Result := FNVHash(ptr, Length(AnsiString(ptr)))
-   else
-    Result := hashFunc(PChar(AnsiString(ptr)), Length(AnsiString(ptr)));}
-   Result := 0;
-end;
-*)
-&ifdef MCP_INTEGER
+&ifndef MCP_NO_INTEGER
 function TIntegerHasher.Hash(aitem : Integer) : UnsignedType;
 begin
    if not Assigned(hashFunc) then
@@ -237,7 +202,7 @@ begin
       Result := hashFunc(@aitem, SizeOf(Integer));
 end;
 &endif
-   
+
 &ifdef MCP_REAL
 function TRealHasher.Hash(aitem : Real) : UnsignedType;
 begin
@@ -247,8 +212,8 @@ begin
       Result := hashFunc(@aitem, SizeOf(Real));
 end;
 &endif
-   
-   
+
+
 &ifdef MCP_POINTER
 function TPointerValueHasher.Hash(ptr : Pointer) : UnsignedType;
 begin
@@ -292,25 +257,14 @@ begin
    Result := varPCharHasher;
 end;
 &endif
-   
-   (*
-function ShortStringHasher : IHasher;
-begin
-   Result := varShortStringHasher;
-end;
 
-function StringAdtHasher : IHasher;
-begin
-   Result := varStringAdtHasher;
-end;*)
-   
-&ifdef MCP_INTEGER   
+&ifndef MCP_NO_INTEGER
 function IntegerHasher : IIntegerHasher;
 begin
    Result := varIntegerHasher;
 end;
 &endif
-   
+
 &ifdef MCP_REAL
 function RealHasher : IRealHasher;
 begin
@@ -335,7 +289,7 @@ var
    pch : PChar;
 begin
    pch := PChar(ptr);
-   
+
    Result := UnsignedType(FNV_OFFSET_BASIS);
    while len <> 0 do
    begin
@@ -350,7 +304,7 @@ var
    pch : PChar;
 begin
    pch := PChar(ptr);
-   
+
    Result := 0;
    while len <> 0 do
    begin
@@ -364,7 +318,7 @@ begin
    Result := Result xor (Result shr 11);
    Inc(Result, Result shl 15);
 end;
-   
+
 function BobJenkinsHash(ptr : Pointer; len : SizeType) : UnsignedType;
 const
    GOLDEN_RATIO = $9e3779b9;
@@ -380,47 +334,47 @@ var
       Dec(a, b);
       Dec(a, c);
       a := a xor (c shr 13);
-      
+
       Dec(b, c);
       Dec(b, a);
       b := b xor (a shl 8);
-      
+
       Dec(c, a);
       Dec(c, b);
       c := c xor (b shr 13);
-      
+
       Dec(a, b);
       Dec(a, c);
       a := a xor (c shr 12);
-      
+
       Dec(b, c);
       Dec(b, a);
       b := b xor (a shl 16);
-      
+
       Dec(c, a);
       Dec(c, b);
       c := c xor (b shr 5);
-      
+
       Dec(a, b);
       Dec(a, c);
       a := a xor (c shr 3);
-      
+
       Dec(b, c);
       Dec(b, a);
       b := b xor (a shl 10);
-      
+
       Dec(c, a);
       Dec(c, b);
       c := c xor (b shr 15);
    end;
-   
+
 begin
    originalLength := len;
    pch := PChar(ptr);
    a := GOLDEN_RATIO;
    b := GOLDEN_RATIO;
    c := 0;
-   
+
    while len >= 12 do
    begin
       Inc(a, Ord(pch^));
@@ -431,7 +385,7 @@ begin
       Inc(pch);
       Inc(a, Ord(pch^) shl 24);
       Inc(pch);
-      
+
       Inc(b, Ord(pch^));
       Inc(pch);
       Inc(b, Ord(pch^) shl 8);
@@ -440,7 +394,7 @@ begin
       Inc(pch);
       Inc(b, Ord(pch^) shl 24);
       Inc(pch);
-      
+
       Inc(c, Ord(pch^));
       Inc(pch);
       Inc(c, Ord(pch^) shl 8);
@@ -449,24 +403,24 @@ begin
       Inc(pch);
       Inc(c, Ord(pch^) shl 24);
       Inc(pch);
-      
+
       Mix;
-      
+
       Dec(len, 12);
    end;
-   
+
    Inc(c, originalLength);
-   
+
    if len >= 1 then
    begin
       Inc(a, Ord(pch^));
       Inc(pch);
-   
+
       if len >= 2 then
       begin
          Inc(a, Ord(pch^) shl 8);
          Inc(pch);
-   
+
          if len >= 3 then
          begin
             Inc(a, Ord(pch^) shl 16);
@@ -476,37 +430,37 @@ begin
             begin
                Inc(a, Ord(pch^) shl 24);
                Inc(pch);
-   
+
                if len >= 5 then
                begin
                   Inc(b, Ord(pch^));
                   Inc(pch);
-   
+
                   if len >= 6 then
                   begin
                      Inc(b, Ord(pch^) shl 8);
                      Inc(pch);
-   
+
                      if len >= 7 then
                      begin
                         Inc(b, Ord(pch^) shl 16);
                         Inc(pch);
-                        
+
                         if len >= 8 then
                         begin
                            Inc(b, Ord(pch^) shl 24);
                            Inc(pch);
-                           
+
                            if len >= 9 then
                            begin
                               Inc(c, Ord(pch^) shl 8);
                               Inc(pch);
-                              
+
                               if len >= 10 then
                               begin
                                  Inc(c, Ord(pch^) shl 16);
                                  Inc(pch);
-                                 
+
                                  if len >= 11 then
                                  begin
                                     Inc(c, Ord(pch^) shl 24);
@@ -521,17 +475,15 @@ begin
          end;
       end;
    end;
-   
+
    Mix;
-   
+
    Result := c;
 end;
 
 initialization
    varAnsiStringHasher := TAnsiStringHasher.Create;;
-//   varShortStringHasher := TShortStringHasher.Create;
-//   varStringAdtHasher := TStringAdtHasher.Create;
-&ifdef MCP_INTEGER
+&ifndef MCP_NO_INTEGER
    varIntegerHasher := TIntegerHasher.Create;
 &endif
 &ifdef MCP_REAL

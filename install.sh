@@ -173,15 +173,15 @@ if [ $INSTALL_DEBUG == 1 ]; then
 fi
 
 MCPOPTS=
+read -n 1 -p "Generate template instantiations for Integer? (y/n) "
+echo
+if [ "$REPLY" == "n" ]; then
+    MCPOPTS="-dMCP_NO_INTEGER $MCPOPTS"
+fi
 read -n 1 -p "Generate template instantiations for Pointer? (n/y) "
 echo
 if [ "$REPLY" == "y" ]; then
     MCPOPTS="-dMCP_POINTER $MCPOPTS"
-fi
-read -n 1 -p "Generate template instantiations for Integer? (n/y) "
-echo
-if [ "$REPLY" == "y" ]; then
-    MCPOPTS="-dMCP_INTEGER $MCPOPTS"
 fi
 read -n 1 -p "Generate template instantiations for Cardinal? (n/y) "
 echo

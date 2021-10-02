@@ -1,19 +1,19 @@
 (* This file is a part of the PascalAdt library, which provides
    commonly used algorithms and data structures for the FPC and Delphi
    compilers.
-   
+
    Copyright (C) 2004 by Lukasz Czajka
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -33,10 +33,10 @@ type
       obj : TObject;
       next : PGCNode;
    end;
-   
+
    { a handle to an object registered in TGrabageCollector }
    TCollectorObjectHandle = PGCNode;
-   
+
    { A quasi-(grabage collector). This is used in container classes to
      keep track of their iterators. The idea is that each container
      object creates its own TGrabageCollector and uses it to track its
@@ -64,8 +64,8 @@ type
       IsInMethod : Boolean;
 {$ifdef TEST_PASCAL_ADT }
       FRegistered : Cardinal;
-{$endif TEST_PASCAL_ADT }  
-      
+{$endif TEST_PASCAL_ADT }
+
       procedure PreallocateNodes(howmany : Cardinal);
    public
       constructor Create;
@@ -92,33 +92,10 @@ type
       property IsInGrabageCollector : Boolean read IsInMethod;
 {$ifdef TEST_PASCAL_ADT }
       property RegisteredObjects : Cardinal read FRegistered;
-{$endif TEST_PASCAL_ADT }      
+{$endif TEST_PASCAL_ADT }
    end;
-   
-   { an object implementing reference-counting; no class should
-     inherit from this one; this is now unused since interfaces were
-     introduced to Free Pascal; @obsolete }
-   TReferenceCountedObject = class
-   private
-      obj : TObject;
-      refs : SizeType;
-   public
-      { sets reference count to 1 and o to be the underlying object }
-      constructor Create(o : TObject);
-      { this is overriden to make Destroy work like RemoveReference }
-      procedure FreeInstance; override;
-      { increments reference count }
-      procedure AddReference;
-      { decrements reference count; if it reaches 0 then destroys the
-        underlying object }
-      procedure RemoveReference;
-      { returns by how many objects self is referenced }
-      function References : SizeType;
-      { returns the underlying object }
-      function GetObject : TObject;
-   end;
-      
-   
+
+
 implementation
 
 uses
@@ -135,7 +112,7 @@ var
    node : PGCNode;
 begin
    Assert(FinishNode^.Next = nil, msgInternalError);
-   
+
    node := FinishNode;
    for i := 1 to howmany do
    begin
@@ -165,9 +142,9 @@ begin
    if IsInMethod then
       Exit;
    IsInMethod := true;
-   
+
    try
-      
+
       while StartNode <> FinishNode do
       begin
          StartNode^.obj.Free; { to avoid destroying nil objs }
@@ -181,7 +158,7 @@ begin
          Dispose(StartNode);
          StartNode := nnode;
       end;
-   
+
    finally
       IsInMethod := false;
    end;
@@ -195,19 +172,19 @@ begin
       Result := nil;
       Exit;
    end;
-   
+
    if FinishNode^.Next = nil then
    begin
       PreallocateNodes(FCapacity);
       FCapacity := FCapacity + FCapacity;
    end;
-   FinishNode^.obj := obj;   
+   FinishNode^.obj := obj;
    Result := FinishNode;
    FinishNode := FinishNode^.Next;
-   
+
 {$ifdef TEST_PASCAL_ADT }
    Inc(FRegistered);
-{$endif TEST_PASCAL_ADT }      
+{$endif TEST_PASCAL_ADT }
 end;
 
 function TGrabageCollector.
@@ -218,7 +195,7 @@ begin
       Result := nil;
       Exit;
    end;
-   
+
    with PGCNode(handle)^ do
    begin
       Result := obj;
@@ -242,7 +219,7 @@ begin
    if IsInMethod then
       Exit;
    IsInMethod := true;
-   
+
    try
       node := StartNode;
       while node <> FinishNode do
@@ -254,60 +231,15 @@ begin
             obj := nil;
 {$ifdef TEST_PASCAL_ADT }
             Dec(FRegistered);
-{$endif TEST_PASCAL_ADT }      
+{$endif TEST_PASCAL_ADT }
          end;
          node := node^.Next;
       end;
       FinishNode := StartNode;
-     
+
    finally
       IsInMethod := false;
    end;
 end;
-
-{ -------------------------- TReferenceCountedObject --------------------------- }
-
-constructor TReferenceCountedObject.Create(o : TObject);
-begin
-   inherited Create;
-   refs := 1;
-   obj := o;
-end;
-
-procedure TReferenceCountedObject.FreeInstance;
-begin
-   Dec(refs);
-   if refs <= 0 then
-   begin
-      obj.Free;
-      inherited FreeInstance;
-   end;
-end;
-
-procedure TReferenceCountedObject.AddReference;
-begin
-   Inc(refs);
-end;
-
-procedure TReferenceCountedObject.RemoveReference;
-begin
-   Dec(refs);
-   if refs = 0 then
-   begin
-      obj.Free;
-      Destroy;
-   end;
-end;
-
-function TReferenceCountedObject.References : SizeType;
-begin
-   Result := refs;
-end;
-
-function TReferenceCountedObject.GetObject : TObject;
-begin
-   Result := obj;
-end;
-
 
 end.

@@ -113,7 +113,7 @@ hashtable_t *local_macros;
 hashtable_t *global_macros;
 /* user (command line) defines are never cleared and override all
    other defines and macros  */
-hashtable_t *user_defines; 
+hashtable_t *user_defines;
 
 /* Expand non-prefixed words? */
 int expand_non_prefixed_words = FALSE;
@@ -142,15 +142,15 @@ void read_word(char *name, int max_len)
   else
     alnum = FALSE;
   while (((alnum && (isalnum(c) || c == '_')) || (!alnum && !isspace(c))) &&
-	 c != '(' && c != ')' && c != macro_char && c != EOF)
+         c != '(' && c != ')' && c != macro_char && c != EOF)
     {
       name[i++] = c;
       c = mcp_getc();
       if (i >= max_len)
-	{
-	  sprintf(buf, "Name too long. Maximum length is %d.", max_len);
-	  fatal_error(buf, current_file, current_line);
-	}
+        {
+          sprintf(buf, "Name too long. Maximum length is %d.", max_len);
+          fatal_error(buf, current_file, current_line);
+        }
     }
   mcp_ungetc(c);
   name[i] = '\0';
@@ -172,50 +172,50 @@ void read_text(char *text, int max_len, int flag)
     {
       c = mcp_getc();
       if ((flag & TERMINATE_EOL) && c == '\n' && unclosed_brackets == 0)
-	break;
+        break;
       if ((flag & TERMINATE_WHITESPACE) && isspace(c) && unclosed_brackets == 0)
-	break;
-      if ((flag & TERMINATE_COMMA) && (c == ',' || c == ';') && 
-	  unclosed_brackets == 0)
-	{
-	  break;
-	}
+        break;
+      if ((flag & TERMINATE_COMMA) && (c == ',' || c == ';') &&
+          unclosed_brackets == 0)
+        {
+          break;
+        }
       if ((flag & TERMINATE_BRACKET) && c == ')')
-	{
-	  if (unclosed_brackets-- == 0)
-	    break;
-	}
+        {
+          if (unclosed_brackets-- == 0)
+            break;
+        }
 
       if (c == macro_char)
-	{
-	  str = parse_command(FALSE);
-	  text[i] = '\0';
-	  if (str != NULL)
-	    {
-	      if (i + strlen(str) + 1 > max_len)
-		{
-		  sprintf(buf, "Error. Name too long. Maximum length is %d.",
-			  max_len);
-		  fatal_error(buf, current_file, current_line);
-		}
-	      strcat(text, str);
-	      free(str);
-	      i = strlen(text);
-	    }
-	}
+        {
+          str = parse_command(FALSE);
+          text[i] = '\0';
+          if (str != NULL)
+            {
+              if (i + strlen(str) + 1 > max_len)
+                {
+                  sprintf(buf, "Error. Name too long. Maximum length is %d.",
+                          max_len);
+                  fatal_error(buf, current_file, current_line);
+                }
+              strcat(text, str);
+              free(str);
+              i = strlen(text);
+            }
+        }
       else
-	{
-	  if (c == '(')
-	    ++unclosed_brackets;
+        {
+          if (c == '(')
+            ++unclosed_brackets;
 
-	  if (i + 2 > max_len)
-	    {
-	      sprintf(buf, "Error. Name too long. Maximum length is %d.",
-		      max_len);
-	      fatal_error(buf, current_file, current_line);
-	    }
-	  text[i++] = c;
-	}
+          if (i + 2 > max_len)
+            {
+              sprintf(buf, "Error. Name too long. Maximum length is %d.",
+                      max_len);
+              fatal_error(buf, current_file, current_line);
+            }
+          text[i++] = c;
+        }
     }
   text[i] = '\0';
   if (c != '\n')
@@ -230,30 +230,30 @@ int skip_if_block_aux(int flags)
   while (c != EOF)
     {
       if (c == macro_char)
-	{
-	  read_word(word, MAX_NAME_LEN);
-	  if (strequal(word, "endif"))
-	    {
-	      if (--nest_level == 0 && flags & SKIP_TO_ENDIF)
-		return SKIP_TO_ENDIF;
-	    }
-	  else if (flags & SKIP_TO_ELSE && strequal(word, "else") && 
-		   nest_level == 1)
-	    {
-	      return SKIP_TO_ELSE;
-	    }
-	  
-	  else if (flags & SKIP_TO_ELSEIF && strequal(word, "elseif") && 
-		   nest_level == 1)
-	    {
-	      return SKIP_TO_ELSEIF;
-	    }
-	  else if (strequal(word, "ifdef") || strequal(word, "ifndef") ||
-		   strequal(word, "if"))
-	    {
-	      ++nest_level;
-	    }
-	}
+        {
+          read_word(word, MAX_NAME_LEN);
+          if (strequal(word, "endif"))
+            {
+              if (--nest_level == 0 && flags & SKIP_TO_ENDIF)
+                return SKIP_TO_ENDIF;
+            }
+          else if (flags & SKIP_TO_ELSE && strequal(word, "else") &&
+                   nest_level == 1)
+            {
+              return SKIP_TO_ELSE;
+            }
+
+          else if (flags & SKIP_TO_ELSEIF && strequal(word, "elseif") &&
+                   nest_level == 1)
+            {
+              return SKIP_TO_ELSEIF;
+            }
+          else if (strequal(word, "ifdef") || strequal(word, "ifndef") ||
+                   strequal(word, "if"))
+            {
+              ++nest_level;
+            }
+        }
       c = mcp_getc();
     }
   return SKIP_TO_ENDIF;
@@ -274,7 +274,7 @@ void push_local_stack()
   if (local_stack_top + 1 >= MAX_LOCAL_LEVELS)
     {
       fatal_error("Too many local levels (includes + invoked macros).",
-		  current_file, current_line);
+                  current_file, current_line);
     }
   ++local_stack_top;
   local_defines_stack[local_stack_top] = local_defines;
@@ -337,7 +337,7 @@ char *find_define(const char *name)
     {
       result = (char*) hashtable_search(local_defines, (void*) name);
       if (result == NULL)
-	result = (char*) hashtable_search(global_defines, (void*) name);
+        result = (char*) hashtable_search(global_defines, (void*) name);
     }
   return result;
 }
@@ -411,16 +411,16 @@ void parse_level_2(char *text)
       parse_exp(text);
       skip_whitespace();
       if ((c = mcp_getc()) != ')')
-	{
-	  mcp_ungetc(c);
-	  warning("Missing closing bracket: ).", current_file, current_line);
-	}
+        {
+          mcp_ungetc(c);
+          warning("Missing closing bracket: ).", current_file, current_line);
+        }
     }
   else
     {
       mcp_ungetc(c);
-      read_text(text, MAX_NAME_LEN, 
-		TERMINATE_EOL | TERMINATE_WHITESPACE | TERMINATE_BRACKET);
+      read_text(text, MAX_NAME_LEN,
+                TERMINATE_EOL | TERMINATE_WHITESPACE | TERMINATE_BRACKET);
     }
 }
 
@@ -442,70 +442,70 @@ void parse_level_1(char *text)
       skip_whitespace();
       c = mcp_getc();
       if (c == '=')
-	{
-	  if ((c = mcp_getc()) != '=')
-	    mcp_ungetc(c);
-	  parse_level_2(text2);
-	  if (strequal(text, text2))
-	    strcpy(text, "defined");
-	  else
-	    text[0] = '\0';
-	}
+        {
+          if ((c = mcp_getc()) != '=')
+            mcp_ungetc(c);
+          parse_level_2(text2);
+          if (strequal(text, text2))
+            strcpy(text, "defined");
+          else
+            text[0] = '\0';
+        }
       else if (c == '!')
-	{
-	  if ((c = mcp_getc()) != '=')
-	    {
-	      mcp_ungetc(c);
-	      warning("Expected =", current_file, current_line);
-	    }
-	  parse_level_2(text2);
-	  if (strcmp(text, text2) != 0)
-	    strcpy(text, "defined");
-	  else
-	    text[0] = '\0';
-	}
+        {
+          if ((c = mcp_getc()) != '=')
+            {
+              mcp_ungetc(c);
+              warning("Expected =", current_file, current_line);
+            }
+          parse_level_2(text2);
+          if (strcmp(text, text2) != 0)
+            strcpy(text, "defined");
+          else
+            text[0] = '\0';
+        }
       else if (c == '<')
-	{
-	  if ((c = mcp_getc()) == '=')
-	    {
-	      parse_level_2(text2);
-	      if (strcmp(text, text2) <= 0)
-		strcpy(text, "defined");
-	      else
-		text[0] = '\0';	      
-	    }
-	  else
-	    {
-	      mcp_ungetc(c);
-	      parse_level_2(text2);
-	      if (strcmp(text, text2) < 0)
-		strcpy(text, "defined");
-	      else
-		text[0] = '\0';
-	    }
-	}
+        {
+          if ((c = mcp_getc()) == '=')
+            {
+              parse_level_2(text2);
+              if (strcmp(text, text2) <= 0)
+                strcpy(text, "defined");
+              else
+                text[0] = '\0';
+            }
+          else
+            {
+              mcp_ungetc(c);
+              parse_level_2(text2);
+              if (strcmp(text, text2) < 0)
+                strcpy(text, "defined");
+              else
+                text[0] = '\0';
+            }
+        }
       else if (c == '>')
-	{
-	  if ((c = mcp_getc()) == '=')
-	    {
-	      parse_level_2(text2);
-	      if (strcmp(text, text2) >= 0)
-		strcpy(text, "defined");
-	      else
-		text[0] = '\0';	      
-	    }
-	  else
-	    {
-	      mcp_ungetc(c);
-	      parse_level_2(text2);
-	      if (strcmp(text, text2) > 0)
-		strcpy(text, "defined");
-	      else
-		text[0] = '\0';
-	    }
-	}
+        {
+          if ((c = mcp_getc()) == '=')
+            {
+              parse_level_2(text2);
+              if (strcmp(text, text2) >= 0)
+                strcpy(text, "defined");
+              else
+                text[0] = '\0';
+            }
+          else
+            {
+              mcp_ungetc(c);
+              parse_level_2(text2);
+              if (strcmp(text, text2) > 0)
+                strcpy(text, "defined");
+              else
+                text[0] = '\0';
+            }
+        }
       else
-	mcp_ungetc(c);
+        mcp_ungetc(c);
     }
 }
 
@@ -522,41 +522,41 @@ void parse_exp(char *text)
       mcp_ungetc(c);
       parse_level_1(text3);
       for (;;)
-	{
-	  skip_whitespace();
-	  c = mcp_getc();
-	  if (c == '|')
-	    {
-	      if ((c = mcp_getc()) != '|')
-		{
-		  mcp_ungetc(c);
-		  c = '|';
-		  break;
-		}
-	      parse_level_1(text2);
-	      if (text3[0] == '\0' && text2[0] != '\0')
-		strcpy(text3, text2);
-	    }
-	  else if (c == '&')
-	    {
-	      if ((c = mcp_getc()) != '&')
-		{
-		  mcp_ungetc(c);
-		  c = '&';
-		  break;
-		}
-	      parse_level_1(text2);
-	      if (text3[0] != '\0' && text2[0] == '\0')
-		text3[0] = '\0';
-	    }
-	  else
-	    break;
-	}
+        {
+          skip_whitespace();
+          c = mcp_getc();
+          if (c == '|')
+            {
+              if ((c = mcp_getc()) != '|')
+                {
+                  mcp_ungetc(c);
+                  c = '|';
+                  break;
+                }
+              parse_level_1(text2);
+              if (text3[0] == '\0' && text2[0] != '\0')
+                strcpy(text3, text2);
+            }
+          else if (c == '&')
+            {
+              if ((c = mcp_getc()) != '&')
+                {
+                  mcp_ungetc(c);
+                  c = '&';
+                  break;
+                }
+              parse_level_1(text2);
+              if (text3[0] != '\0' && text2[0] == '\0')
+                text3[0] = '\0';
+            }
+          else
+            break;
+        }
 
       if (strlen(text) + strlen(text3) >= MAX_NAME_LEN)
-	{
-	  fatal_error("Name too long.", current_file, current_line);
-	}
+        {
+          fatal_error("Name too long.", current_file, current_line);
+        }
       strcat(text, text3);
     }
   mcp_ungetc(c);
@@ -586,48 +586,48 @@ char *read_macro()
       /* a multi-line macro */
       c = mcp_getc();
       while (c != EOF && !encountered_endm)
-	{
-	  if (c == macro_char && !was_last_macro_char)
-	    {
-	      endm[0] = mcp_getc();
-	      endm[1] = mcp_getc();
-	      endm[2] = mcp_getc();
-	      endm[3] = mcp_getc();
-	      endm[4] = '\0';
-	      c2 = mcp_getc();
-	      if (strequal(endm, "endm") && isspace(c2))
-		{
-		  encountered_endm = TRUE;
-		  break;
-		}
-	      mcp_ungetc(c2);
-	      mcp_ungets(endm);
-	      was_last_macro_char = TRUE;
-	    } 
-	  else
-	    was_last_macro_char = FALSE;
+        {
+          if (c == macro_char && !was_last_macro_char)
+            {
+              endm[0] = mcp_getc();
+              endm[1] = mcp_getc();
+              endm[2] = mcp_getc();
+              endm[3] = mcp_getc();
+              endm[4] = '\0';
+              c2 = mcp_getc();
+              if (strequal(endm, "endm") && isspace(c2))
+                {
+                  encountered_endm = TRUE;
+                  break;
+                }
+              mcp_ungetc(c2);
+              mcp_ungets(endm);
+              was_last_macro_char = TRUE;
+            }
+          else
+            was_last_macro_char = FALSE;
 
-	  if (buffer_size < i + POP_COMMAND_LEN + 3)
-	    {
-	      buffer = checked_realloc(buffer, buffer_size *= 2);
-	    }
-	  buffer[i++] = c;
+          if (buffer_size < i + POP_COMMAND_LEN + 3)
+            {
+              buffer = checked_realloc(buffer, buffer_size *= 2);
+            }
+          buffer[i++] = c;
 
-	  c = mcp_getc();
-	}
+          c = mcp_getc();
+        }
     }
   else
     {
       /* a one-line macro */
       while (c != '\n' && c != EOF)
-	{
-	  if (buffer_size < i + POP_COMMAND_LEN + 3)
-	    {
-	      buffer = checked_realloc(buffer, buffer_size *= 2);
-	    }
-	  buffer[i++] = c;
-	  c = mcp_getc();
-	}
+        {
+          if (buffer_size < i + POP_COMMAND_LEN + 3)
+            {
+              buffer = checked_realloc(buffer, buffer_size *= 2);
+            }
+          buffer[i++] = c;
+          c = mcp_getc();
+        }
       encountered_endm = TRUE;
     }
   buffer[i] = '\0';
@@ -659,36 +659,36 @@ void invoke_macro(char *text)
   if ((c = mcp_getc()) == '(')
     {
       max_args_count = INITIAL_ARG_NUM;
-      arguments = (struct argument*) checked_malloc(INITIAL_ARG_NUM * 
-						    sizeof(struct argument));
+      arguments = (struct argument*) checked_malloc(INITIAL_ARG_NUM *
+                                                    sizeof(struct argument));
       skip_whitespace();
       c = mcp_getc();
       while (c != ')' && c != EOF)
-	{
-	  if (c == ',' || c == ';')
-	    skip_whitespace();
-	  else
-	    mcp_ungetc(c);
+        {
+          if (c == ',' || c == ';')
+            skip_whitespace();
+          else
+            mcp_ungetc(c);
 
-	  arg = new_string();
-	  read_text(arg, MAX_NAME_LEN, TERMINATE_COMMA | TERMINATE_BRACKET);
+          arg = new_string();
+          read_text(arg, MAX_NAME_LEN, TERMINATE_COMMA | TERMINATE_BRACKET);
 
-	  ++i;
-	  name = new_string();
-	  sprintf(name, "arg%d", i);
-	  
-	  if (i > max_args_count)
-	    {
-	      arguments = (struct argument*) 
-		checked_realloc(arguments, 
-				(max_args_count *= 2)*sizeof(struct argument));
-	    }  
-	  ++last_arg;
-	  arguments[last_arg].name = name;
-	  arguments[last_arg].arg = arg;
+          ++i;
+          name = new_string();
+          sprintf(name, "arg%d", i);
 
-	  c = mcp_getc();
-	}
+          if (i > max_args_count)
+            {
+              arguments = (struct argument*)
+                checked_realloc(arguments,
+                                (max_args_count *= 2)*sizeof(struct argument));
+            }
+          ++last_arg;
+          arguments[last_arg].name = name;
+          arguments[last_arg].arg = arg;
+
+          c = mcp_getc();
+        }
     }
   else
     mcp_ungetc(c);
@@ -709,7 +709,7 @@ void invoke_macro(char *text)
   if (arguments != NULL)
     {
       for (i = 0; i <= last_arg; ++i)
-	add_local_define(arguments[i].name, arguments[i].arg);
+        add_local_define(arguments[i].name, arguments[i].arg);
       free(arguments);
     }
 
@@ -727,14 +727,14 @@ char *expand(const char *name, int b_output, int b_warn)
   if ((text = find_define(name)) != NULL)
     {
       if (b_output)
-	{
-	  fputs(text, output);
-	}
+        {
+          fputs(text, output);
+        }
       else
-	{
-	  str = (char*) checked_malloc(strlen(text) + 1);
-	  strcpy(str, text);
-	}
+        {
+          str = (char*) checked_malloc(strlen(text) + 1);
+          strcpy(str, text);
+        }
     }
   else if ((text = find_macro(name)) != NULL)
     {
@@ -743,29 +743,29 @@ char *expand(const char *name, int b_output, int b_warn)
   else
     {
       if (b_warn)
-	{
-	  /* Copy to output, but give a warning. */
-	  sprintf(buf, "Undefined name: %s. Copying to output.", name);
-	  warning(buf, current_file, current_line);
-	}
+        {
+          /* Copy to output, but give a warning. */
+          sprintf(buf, "Undefined name: %s. Copying to output.", name);
+          warning(buf, current_file, current_line);
+        }
       if (b_output)
-	{
-	  if (b_warn)
-	    putc(macro_char, output);
-	  fputs(name, output);
-	}
+        {
+          if (b_warn)
+            putc(macro_char, output);
+          fputs(name, output);
+        }
       else
-	{
-	  str = (char*) checked_malloc(strlen(name) + 3);
-	  if (b_warn)
-	    {
-	      str[0] = macro_char;
-	      str[1] = '\0';
-	    }
-	  else
-	    str[0] = '\0';
-	  strcat(str, name);
-	}
+        {
+          str = (char*) checked_malloc(strlen(name) + 3);
+          if (b_warn)
+            {
+              str[0] = macro_char;
+              str[1] = '\0';
+            }
+          else
+            str[0] = '\0';
+          strcat(str, name);
+        }
     }
   return str;
 }
@@ -783,30 +783,30 @@ char *parse_command(int b_output)
   if (c == '<')
     { /* parse a quoted text */
       if (!b_output)
-	{
-	  i = 0;
-	  str_size = MAX_NAME_LEN;
-	  str = (char*) checked_malloc(MAX_NAME_LEN);
-	}
+        {
+          i = 0;
+          str_size = MAX_NAME_LEN;
+          str = (char*) checked_malloc(MAX_NAME_LEN);
+        }
 
       while ((c = mcp_getc()) != '>' && c != EOF)
-	{
-	  if (b_output)
-	    putc(c, output);
-	  else
-	    {
-	      if (i + 2 >= str_size)
-		str = (char*) checked_realloc(str, str_size *= 2);
-	      str[i++] = c;
-	    }
-	}
+        {
+          if (b_output)
+            putc(c, output);
+          else
+            {
+              if (i + 2 >= str_size)
+                str = (char*) checked_realloc(str, str_size *= 2);
+              str[i++] = c;
+            }
+        }
       if (c != '>')
-	{
-	  error("Expected >", current_file, current_line);
-	}
-      
+        {
+          error("Expected >", current_file, current_line);
+        }
+
       if (!b_output)
-	  str[i] = '\0';
+          str[i] = '\0';
 
       return str;
     }
@@ -818,14 +818,14 @@ char *parse_command(int b_output)
       name[i++] = c;
       c = mcp_getc();
       if (i >= MAX_NAME_LEN)
-	{
-	  sprintf(buf, "Name too long. Maximum length is %d.",
-		  MAX_NAME_LEN);
-	  fatal_error(buf, current_file, current_line);
-	}
+        {
+          sprintf(buf, "Name too long. Maximum length is %d.",
+                  MAX_NAME_LEN);
+          fatal_error(buf, current_file, current_line);
+        }
     }
   name[i] = '\0';
-	  
+
   if (i == 0 && c == '\n')
     { /* a quoted newline */
       return NULL;
@@ -833,21 +833,21 @@ char *parse_command(int b_output)
   else if (i == 0 && c == macro_char)
     { /* a quoted 'macro char' */
       if (b_output)
-	{
-	  putc(macro_char, output);
-	  return NULL;
-	}
+        {
+          putc(macro_char, output);
+          return NULL;
+        }
       else
-	{
-	  str = (char*) checked_malloc(2);
-	  str[0] = macro_char;
-	  str[1] = '\0';
-	  return str;
-	}
+        {
+          str = (char*) checked_malloc(2);
+          str[0] = macro_char;
+          str[1] = '\0';
+          return str;
+        }
     }
   else if (c != macro_char)
     mcp_ungetc(c);
-    
+
   if (strequal(name, "include"))
     {
       read_text(filename, MAX_FILENAME_LEN, TERMINATE_WHITESPACE | TERMINATE_EOL);
@@ -866,7 +866,7 @@ char *parse_command(int b_output)
       read_text(text, MAX_NAME_LEN, TERMINATE_EOL);
       add_global_define(defname, text);
       /* skip whitespace in order to skip a redundant \n if it follows
-	 immediately */
+         immediately */
       skip_whitespace();
     }
   else if (strequal(name, "local-define"))
@@ -877,7 +877,7 @@ char *parse_command(int b_output)
       read_text(text, MAX_NAME_LEN, TERMINATE_EOL);
       add_local_define(defname, text);
       /* skip whitespace in order to skip a redundant \n if it follows
-	 immediately */
+         immediately */
       skip_whitespace();
     }
   else if (strequal(name, "macro"))
@@ -933,45 +933,44 @@ char *parse_command(int b_output)
       read_word(name, MAX_NAME_LEN);
       skip_whitespace();
       if (!is_defined(name))
-	{
-	  skip_if_block(SKIP_TO_ELSE | SKIP_TO_ENDIF);
-	}
+        {
+          skip_if_block(SKIP_TO_ELSE | SKIP_TO_ENDIF);
+        }
     }
   else if (strequal(name, "ifndef"))
     {
       read_word(name, MAX_NAME_LEN);
       skip_whitespace();
       if (is_defined(name))
-	{
-	  skip_if_block(SKIP_TO_ELSE | SKIP_TO_ENDIF);
-	}
+        {
+          skip_if_block(SKIP_TO_ELSE | SKIP_TO_ENDIF);
+        }
     }
   else if (strequal(name, "if"))
     {
       for(;;)
-	{
-	  skip_whitespace();
-	  if ((c = mcp_getc()) != '(')
-	    {
-	      mcp_ungetc(c);
-	      error("Expected (", current_file, current_line);
-	    }
-	  parse_exp(name);
-	  if ((c = mcp_getc()) != ')')
-	    {
-	      mcp_ungetc(c);
-	      error("Expected )", current_file, current_line);
-	    }
-	  skip_whitespace();
-	  if (name[0] != '\0')
-	    break;
-	  if (skip_if_block(
-			    SKIP_TO_ELSEIF | SKIP_TO_ELSE | SKIP_TO_ENDIF) != 
-	      SKIP_TO_ELSEIF)
-	    {
-	      break;
-	    }
-	}
+        {
+          skip_whitespace();
+          if ((c = mcp_getc()) != '(')
+            {
+              mcp_ungetc(c);
+              error("Expected (", current_file, current_line);
+            }
+          parse_exp(name);
+          if ((c = mcp_getc()) != ')')
+            {
+              mcp_ungetc(c);
+              error("Expected )", current_file, current_line);
+            }
+          skip_whitespace();
+          if (name[0] != '\0')
+            break;
+          if (skip_if_block(SKIP_TO_ELSEIF | SKIP_TO_ELSE | SKIP_TO_ENDIF) !=
+              SKIP_TO_ELSEIF)
+            {
+              break;
+            }
+        }
     }
   else if (strequal(name, "else") || strequal(name, "elseif"))
     {
@@ -992,32 +991,32 @@ char *parse_command(int b_output)
     { /* a comment */
       c = mcp_getc();
       while (c != '\n')
-	c = mcp_getc();
+        c = mcp_getc();
     }
   else if (strequal(name, "("))
     {
       str = (char*) checked_malloc(MAX_NAME_LEN + 1);
       parse_exp(str);
       if ((c = mcp_getc()) != ')')
-	{
-	  mcp_ungetc(c);
-	  error("Missing closing bracket: )", current_file, current_line);
-	}
+        {
+          mcp_ungetc(c);
+          error("Missing closing bracket: )", current_file, current_line);
+        }
       if (b_output)
-	{
-	  fputs(str, output);
-	  free(str);
-	  str = NULL;
-	}
+        {
+          fputs(str, output);
+          free(str);
+          str = NULL;
+        }
       skip_non_eol_whitespace(); /* non-eol to work in &define */
     }
   else if (strequal(name, "NULL"))
     {
       if (!b_output)
-	{
-	  str = (char*) checked_malloc(1);
-	  str[0] = '\0';
-	}
+        {
+          str = (char*) checked_malloc(1);
+          str[0] = '\0';
+        }
       skip_non_eol_whitespace(); /* non-eol to work in &define */
     }
   else /* text substitution */
@@ -1043,22 +1042,22 @@ void process_stream()
     {
       c = mcp_getc();
       if (c == macro_char)
-	{
-	  str = parse_command(TRUE);
-	  if (str != NULL)
-	    {
-	      fputs(str, output);
-	      free(str);
-	    }
-	}
+        {
+          str = parse_command(TRUE);
+          if (str != NULL)
+            {
+              fputs(str, output);
+              free(str);
+            }
+        }
       else if (expand_non_prefixed_words && (isalpha(c) || c == '_'))
-	{
-	  mcp_ungetc(c);
-	  read_word(name, MAX_NAME_LEN);
-	  expand(name, TRUE, FALSE);
-	}
+        {
+          mcp_ungetc(c);
+          read_word(name, MAX_NAME_LEN);
+          expand(name, TRUE, FALSE);
+        }
       else if (c != EOF)
-	putc(c, output);
+        putc(c, output);
     }
 }
 
@@ -1100,7 +1099,7 @@ void init_before_toplevel_file()
 void close_output()
 {
   if (output != stdout && output != NULL)
-    fclose(output);  
+    fclose(output);
 }
 
 void cleanup()
@@ -1132,117 +1131,117 @@ int main(int argc, char **argv)
   int i, j, k, len;
 
   init();
-  
+
   /* process options */
   i = 1;
   while (i != argc && argv[i][0] == '-')
     {
       if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
-	{
-	  print_usage();
-	  fprintf(stderr, 
-		  "Processes simple macros in input files or from stdin.\n");
-	  fprintf(stderr,
-		  "Writes output from an input file to an output file with\n");
-	  fprintf(stderr,
-		  "the same name, but with .out appended. If reading from\n");
-	  fprintf(stderr,
-		  "stdin then writes to stdout. If an input file has the\n");
-	  fprintf(stderr,
-		  "extension .mcp then the name of the output file is the\n");
-	  fprintf(stderr,
-		  "name of the input file without '.mcp'.\n");
-	  fprintf(stderr, "\n");
-	  fprintf(stderr, 
-		  "For more information see the README file in the\n");
-	  fprintf(stderr, "distribution package.\n");
-	  return 0;
-	}
+        {
+          print_usage();
+          fprintf(stderr,
+                  "Processes simple macros in input files or from stdin.\n");
+          fprintf(stderr,
+                  "Writes output from an input file to an output file with\n");
+          fprintf(stderr,
+                  "the same name, but with .out appended. If reading from\n");
+          fprintf(stderr,
+                  "stdin then writes to stdout. If an input file has the\n");
+          fprintf(stderr,
+                  "extension .mcp then the name of the output file is the\n");
+          fprintf(stderr,
+                  "name of the input file without '.mcp'.\n");
+          fprintf(stderr, "\n");
+          fprintf(stderr,
+                  "For more information see the README file in the\n");
+          fprintf(stderr, "distribution package.\n");
+          return 0;
+        }
       else if (strcmp(argv[i], "--version") == 0)
-	{
-	  fprintf(stderr, "mcp 0.1.0\n\n");
-	  fprintf(stderr, "Copyright (C) 2005 by Lukasz Czajka\n");
-	  fprintf(stderr, 
-		  "This program is Free Software. It comes WITHOUT ANY WARRANTY.\n");
-	  fprintf(stderr, "See the COPYING file for details.\n");
-	  return 0;
-	}
-      else if (strlen(argv[i]) >= 2 && ((argv[i][0] == '-' && argv[i][1] == 'd') || 
-					strcmp(argv[i], "--define") == 0))
-	{ /* a global define */
-	  if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--define") == 0)
-	    {
-	      ++i;
-	      if (i >= argc)
-		{
-		  fprintf(stderr, "Expected an argument to the -d option.\n");
-		  error_exit();
-		}
-	      ps = argv[i]; 
-	    }
-	  else
-	    ps = argv[i] + 2;
-	  
-	  len = strlen(ps);
-	  defname = new_string();
-	  text = new_string();
-	  k = -1;
-	  for (j = 0; j < len; ++j)
-	    {
-	      if (ps[j] == '=')
-		{
-		  if (j + 1 >= MAX_NAME_LEN)
-		    {
-		      toplevel_fatal_error("Name too long.");
-		    }
-		  strncpy(defname, ps, j);
-		  defname[j] = '\0';
-		  k = j + 1;
-		  break;
-		}
-	    }
-	  if (k != -1 && k != len)
-	    {
-	      if (len - k + 2 >= MAX_NAME_LEN)
-		{
-		  toplevel_fatal_error("Name too long.");
-		}
-	      strcpy(text, ps + k);
-	    }
-	  else
-	    {
-	      if (j + 1 >= MAX_NAME_LEN)
-		{
-		  toplevel_fatal_error("Name too long.");		  
-		}
-	      strcpy(defname, ps);
-	      text[0] = '\0';
-	    }
-	  add_user_define(defname, text);
-	}
-      else if (strcmp(argv[i], "-n") == 0 || 
-	       strcmp(argv[i], "--non-prefixed") == 0)
-	{
-	  global_expand_non_prefixed = TRUE;
-	}
+        {
+          fprintf(stderr, "mcp 0.1.0\n\n");
+          fprintf(stderr, "Copyright (C) 2005 by Lukasz Czajka\n");
+          fprintf(stderr,
+                  "This program is Free Software. It comes WITHOUT ANY WARRANTY.\n");
+          fprintf(stderr, "See the COPYING file for details.\n");
+          return 0;
+        }
+      else if (strlen(argv[i]) >= 2 && ((argv[i][0] == '-' && argv[i][1] == 'd') ||
+                                        strcmp(argv[i], "--define") == 0))
+        { /* a global define */
+          if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--define") == 0)
+            {
+              ++i;
+              if (i >= argc)
+                {
+                  fprintf(stderr, "Expected an argument to the -d option.\n");
+                  error_exit();
+                }
+              ps = argv[i];
+            }
+          else
+            ps = argv[i] + 2;
+
+          len = strlen(ps);
+          defname = new_string();
+          text = new_string();
+          k = -1;
+          for (j = 0; j < len; ++j)
+            {
+              if (ps[j] == '=')
+                {
+                  if (j + 1 >= MAX_NAME_LEN)
+                    {
+                      toplevel_fatal_error("Name too long.");
+                    }
+                  strncpy(defname, ps, j);
+                  defname[j] = '\0';
+                  k = j + 1;
+                  break;
+                }
+            }
+          if (k != -1 && k != len)
+            {
+              if (len - k + 2 >= MAX_NAME_LEN)
+                {
+                  toplevel_fatal_error("Name too long.");
+                }
+              strcpy(text, ps + k);
+            }
+          else
+            {
+              if (j + 1 >= MAX_NAME_LEN)
+                {
+                  toplevel_fatal_error("Name too long.");
+                }
+              strcpy(defname, ps);
+              text[0] = '\0';
+            }
+          add_user_define(defname, text);
+        }
+      else if (strcmp(argv[i], "-n") == 0 ||
+               strcmp(argv[i], "--non-prefixed") == 0)
+        {
+          global_expand_non_prefixed = TRUE;
+        }
       else if (strcmp(argv[i], "--ignore-case") == 0)
-	{
-	  ignore_case = TRUE;
-	}
+        {
+          ignore_case = TRUE;
+        }
       else if (strcmp(argv[i], "--") == 0)
-	{ /* end of options */
-	  ++i;
-	  break;
-	}
+        { /* end of options */
+          ++i;
+          break;
+        }
       else if (strcmp(argv[i], "-") == 0)
-	{ /* a file name - stdin */
-	  break;
-	}
+        { /* a file name - stdin */
+          break;
+        }
       else
-	{
-	  print_usage();
-	  error_exit();
-	}
+        {
+          print_usage();
+          error_exit();
+        }
       ++i;
     }
 
@@ -1258,45 +1257,45 @@ int main(int argc, char **argv)
     {
       /* process file names */
       for (; i != argc; ++i)
-	{
-	  if (strcmp(argv[i], "-") == 0)
-	    {
-	      output = stdout;
-	    }
-	  else
-	    {
-	      len = strlen(argv[i]);
+        {
+          if (strcmp(argv[i], "-") == 0)
+            {
+              output = stdout;
+            }
+          else
+            {
+              len = strlen(argv[i]);
 
-	      str = (char*) checked_malloc(len + 5);
-	      if (str == NULL)
-		{
-		  perror("Out of memory.");
-		  abort();
-		}
-	      if (strcmp(argv[i] + len - 4, ".mcp") == 0)
-		{
-		  strncpy(str, argv[i], len - 4);
-		  str[len - 4] = '\0';
-		}
-	      else
-		sprintf(str, "%s.out", argv[i]);
+              str = (char*) checked_malloc(len + 5);
+              if (str == NULL)
+                {
+                  perror("Out of memory.");
+                  abort();
+                }
+              if (strcmp(argv[i] + len - 4, ".mcp") == 0)
+                {
+                  strncpy(str, argv[i], len - 4);
+                  str[len - 4] = '\0';
+                }
+              else
+                sprintf(str, "%s.out", argv[i]);
 
-	      close_output();
-	      output = fopen(str, "w");
-	      if (output == NULL)
-		{
-		  fprintf(stderr, "Cannot open file %s; %s\n", str, 
-			  strerror(errno));
-		  free(str);
-		  error_exit();
-		}
-	      free(str);
-	    }
-	  init_before_toplevel_file();
-	  push_input_stack(argv[i]);
-	  process_stream();
-	  pop_input_stack();
-	}
+              close_output();
+              output = fopen(str, "w");
+              if (output == NULL)
+                {
+                  fprintf(stderr, "Cannot open file %s; %s\n", str,
+                          strerror(errno));
+                  free(str);
+                  error_exit();
+                }
+              free(str);
+            }
+          init_before_toplevel_file();
+          push_input_stack(argv[i]);
+          process_stream();
+          pop_input_stack();
+        }
     }
 
   cleanup();

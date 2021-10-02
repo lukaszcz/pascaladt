@@ -106,7 +106,7 @@ type
         almost no overhead by calling two functions instead of one; if
         you need an iterator to that item use LowerBound or EqualRange
         instead }
-      { @pre ItemType <> TObject and ItemType <> Pointer implies Has(key)  }
+      { @precondition ItemType <> TObject and ItemType <> Pointer implies Has(key)  }
       function Find(key : KeyType) : ItemType; virtual; abstract;
       { returns the number of items in the map associated with <key> }
       function Count(key : KeyType) : SizeType; virtual; abstract;

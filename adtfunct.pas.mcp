@@ -42,7 +42,7 @@ interface
 
 &# we need the following specializations even if not chosen by the user
 &define MCP_POINTER
-&define MCP_INTEGER
+&undefine MCP_NO_INTEGER
 
 &include adtdefs.inc
 
@@ -247,7 +247,7 @@ initialization
 &ifdef MCP_POINTER
    varPointerIdentity := TPointerIdentity.Create;
 &endif
-&ifdef MCP_INTEGER
+&ifndef MCP_NO_INTEGER
    varIntegerIdentity := TIntegerIdentity.Create;
 &endif
 &ifdef MCP_CARDINAL

@@ -19,9 +19,10 @@ Features
 
 Requirements
 ------------
+* [Free Pascal](https://www.freepascal.org).
 * Linux (should work on other systems, but the installation and
   compilation scripts might need adjusting).
-* [Free Pascal](https://www.freepascal.org)
+* C compiler to compile the MCP macro processor.
 
 Installation and usage
 ----------------------

@@ -48,10 +48,33 @@ type
       property TestedCont : TStringContainerAdt read FCont write FCont;
    end;
 
+   TIntegerTester = class
+   protected
+      contName, iterName : String;
+      FCont : TIntegerContainerAdt;
+      { should create a container of a desired type; may return nil to
+        indicate that a given container type is not available for
+        testing; }
+      function CreateContainer : TIntegerContainerAdt; virtual;
+      { 1 by default, should be 2 for a map }
+      function ObjectsInOneItem : SizeType; virtual;
+      { the two following routines do nothing by default; }
+      procedure TestContainer(cont : TIntegerContainerAdt); virtual;
+      procedure BenchmarkContainer(cont : TIntegerContainerAdt); virtual;
+   public
+      constructor Create(acont, aiter : String; cont : TIntegerContainerAdt);
+      destructor Destroy; override;
+      { runs the tests }
+      procedure Test; virtual;
+      property TestedCont : TIntegerContainerAdt read FCont write FCont;
+   end;
+
 implementation
 
 uses
    adtcont;
+
+{ ---------------------------- TTester -------------------------------- }
 
 constructor TTester.Create(acont, aiter : String; cont : TContainerAdt);
 begin
@@ -181,6 +204,72 @@ begin
 end;
 
 procedure TStringTester.BenchmarkContainer(cont : TStringContainerAdt);
+begin
+   WriteLn('** Benchmark not available for ' + contName);
+end;
+
+
+{ ---------------------------- TIntegerTester -------------------------------- }
+
+constructor TIntegerTester.Create(acont, aiter : String; cont : TIntegerContainerAdt);
+begin
+   Assert(cont <> nil);
+   contName := acont;
+   iterName := aiter;
+   FCont := cont;
+end;
+
+destructor TIntegerTester.Destroy;
+begin
+   FCont.Free;
+end;
+
+function TIntegerTester.CreateContainer : TIntegerContainerAdt;
+begin
+   Result := FCont.CopySelf(nil);
+end;
+
+function TIntegerTester.ObjectsInOneItem : SizeType;
+begin
+   Result := 1;
+end;
+
+procedure TIntegerTester.Test;
+var
+   cont1 : TIntegerContainerAdt;
+begin
+   cont1 := CreateContainer;
+   if cont1 <> nil then
+   begin
+      testutils.iterName := iterName;
+      StartTest(contName);
+
+      TestContainer(cont1);
+
+      cont1.Destroy;
+
+      FinishTest;
+   end;
+
+   cont1 := CreateContainer;
+   if cont1 <> nil then
+   begin
+      StartTest('(benchmark) ' + contName);
+
+      BenchmarkContainer(cont1);
+
+      cont1.Destroy;
+
+      FinishTest;
+   end;
+end;
+
+procedure TIntegerTester.TestContainer(cont : TIntegerContainerAdt);
+begin
+   WriteLn('** Tests not available for ' + contName);
+end;
+
+procedure TIntegerTester.BenchmarkContainer(cont : TIntegerContainerAdt);
 begin
    WriteLn('** Benchmark not available for ' + contName);
 end;

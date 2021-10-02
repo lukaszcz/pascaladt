@@ -102,19 +102,19 @@ type
       procedure Swap(cont : TContainerAdt); virtual;
       { inserts aitem somewhere into the container; returns true if
         successful, false if aitem could not be inserted }
-      { @post Result implies Size = old Size + 1 }
-      { @post not Result implies Size = old Size }
+      { @postcondition Result implies Size = old Size + 1 }
+      { @postcondition not Result implies Size = old Size }
       function InsertItem(aitem : ItemType) : Boolean; virtual; abstract;
       { removes some item from the container and returns it }
-      { @pre CanExtract }
-      { @post Size = old Size - 1 }
+      { @precondition CanExtract }
+      { @postcondition Size = old Size - 1 }
       function ExtractItem : ItemType; virtual; abstract;
       { returns true if an item may be extracted by ExtractItem; this
         is not necessarily equivalent to not Empty }
-      { @post Empty implies not Result }
+      { @postcondition Empty implies not Result }
       function CanExtract : Boolean; virtual; abstract;
       { clears the container - removes all items; @complexity O(n). }
-      { @post Empty }
+      { @postcondition Empty }
       procedure Clear; virtual; abstract;
       { returns true if container is empty; equivalent to Size = 0,
         but may be faster; @complexity guaranteed worst-case O(1). }

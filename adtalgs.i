@@ -1,21 +1,21 @@
 {@discard
- 
+
   This file is a part of the PascalAdt library, which provides
   commonly used algorithms and data structures for the FPC and Delphi
   compilers.
-  
+
   Copyright (C) 2004, 2005 by Lukasz Czajka
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as
   published by the Free Software Foundation; either version 2.1 of the
   License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
@@ -55,7 +55,7 @@ type
       { returns the position before which items are inserted }
       property Pos : TForwardIterator read FPos;
    end;
-   
+
    { a base class for inserter iterators; implements the methods
      common to all inserters }
    TInserterBase = class (TOutputIterator)
@@ -83,7 +83,7 @@ type
       procedure Write(aitem : ItemType); override;
       function Owner : TContainerAdt; override;
    end;
-   
+
    { an output iterator inserting at the back of a queue; @see
      TFrontInserter, TInserter }
    TBackInserter = class (TInserterBase)
@@ -98,7 +98,7 @@ type
       procedure Write(aitem : ItemType); override;
       function Owner : TContainerAdt; override;
    end;
-   
+
    { an output iterator inserting at the front of a deque }
    TFrontInserter = class (TInserterBase)
    private
@@ -213,7 +213,9 @@ procedure Combine(const start1, finish1, start2 : TForwardIterator;
                   start3 : TOutputIterator; const itemJoiner : IBinaryFunctor); overload;
 
 { ===================== mutating algorithms ======================== }
-{ mutating algorithms do not change the values of the items, but
+{ @discard
+
+  mutating algorithms do not change the values of the items, but
   change their relative order; they cannot be used with defined-order
   containers (an exception will be raised) }
 
@@ -264,10 +266,10 @@ procedure RandomShuffle(start, finish : TRandomAccessIterator); overload;
   iter such that for each i in [start,iter) pred.Test(i.Item) is true,
   for each i in [iter, finish) pred.Test(i.Item) is false; @complexity
   O(n) }
-function Partition(start, finish : TBidirectionalIterator; 
+function Partition(start, finish : TBidirectionalIterator;
                    const pred : IUnaryPredicate) :
    TBidirectionalIterator; overload;
-function Partition(start, finish : TRandomAccessIterator; 
+function Partition(start, finish : TRandomAccessIterator;
                    const pred : IUnaryPredicate) :
    TRandomAccessIterator; overload;
 { the same as the ordinary Partition, but stable; i.e. does not change

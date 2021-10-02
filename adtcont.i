@@ -142,17 +142,17 @@ type
         This function is present only for TObject and Pointer generic
         specializations; if you need an iterator to that item use
         @<LowerBound> or @<EqualRange> instead }
-      { @post Result <> nil <=> Has(aitem) }
+      { @postcondition Result <> nil <=> Has(aitem) }
       function Find(aitem : ItemType) : ItemType; virtual; abstract;
 &endif &# end &_mcp_accepts_nil
       { returns true if the given item is present in the set; }
-      { @post Result <=> aitem in self }
+      { @postcondition Result <=> aitem in self }
       function Has(aitem : ItemType) : Boolean; virtual; abstract;
       { returns the number of items in the set equal to <aitem> }
-      { @post Result >= 0 }
-      { @post Result <= Size }
-      { @post not RepeatedItems implies Result <= 1 }
-      { @post Has(aitem) implies Result >= 1 }
+      { @postcondition Result >= 0 }
+      { @postcondition Result <= Size }
+      { @postcondition not RepeatedItems implies Result <= 1 }
+      { @postcondition Has(aitem) implies Result >= 1 }
       function Count(aitem : ItemType) : SizeType; virtual; abstract;
       { the same as below, but uses pos as a hint where to insert
         (only in implementations where it makes sense) }
@@ -163,45 +163,45 @@ type
         non-multi (without repeated items) set when an item equal to
         <aitem> is already in the set); if the item is not inserted it
         is not owned by the container and not disposed! }
-      { @post Result <=> ((not old Find(aitem)) or RepeatedItems) }
-      { @post Result implies Size = old Size + 1 }
-      { @post Result implies Count(pos.Item) = old Count(old pos.Item) + 1 }
+      { @postcondition Result <=> ((not old Find(aitem)) or RepeatedItems) }
+      { @postcondition Result implies Size = old Size + 1 }
+      { @postcondition Result implies Count(pos.Item) = old Count(old pos.Item) + 1 }
       function Insert(aitem : ItemType) : Boolean; overload; virtual; abstract;
       { removes the item at <pos> from the set }
-      { @pre pos is valid and not pos.IsFinish }
-      { @post Size = old Size - 1 }
-      { @post Count(pos.Item) = old Count(old pos.Item) - 1 }
+      { @precondition pos is valid and not pos.IsFinish }
+      { @postcondition Size = old Size - 1 }
+      { @postcondition Count(pos.Item) = old Count(old pos.Item) - 1 }
       procedure Delete(pos : TSetIterator); overload; virtual; abstract;
       { removes all items equal to <aitem> from the set; returns the
         number of deleted items }
-      { @post Result = old Count(aitem)  }
-      { @post Size = old Size - Result }
-      { @post Count(aitem) = 0 }
+      { @postcondition Result = old Count(aitem)  }
+      { @postcondition Size = old Size - Result }
+      { @postcondition Count(aitem) = 0 }
       function Delete(aitem : ItemType) : SizeType; overload; virtual; abstract;
       { removes all items equal to <aitem> from the set, but does not
         dispose them; returns the number of items removed; }
-      { @post Result = old Count(aitem)  }
-      { @post Size = old Size - Result }
-      { @post Count(aitem) = 0 }
-      { @post No items disposed }
+      { @postcondition Result = old Count(aitem)  }
+      { @postcondition Size = old Size - Result }
+      { @postcondition Count(aitem) = 0 }
+      { @postcondition No items disposed }
       function Extract(aitem : ItemType) : SizeType; virtual;
       { returns the first item >= aitem, or Finish if container is empty
         (for TSortedSetAdt); or returns the iterator starting the
         range of items equal to <aitem> (for any set) }
-      { @post not Result.Equal(Finish) implies
+      { @postcondition not Result.Equal(Finish) implies
               ((Result.Item = aitem and Prev(Result).Item <> aitem) or
                (Result.Item <> aitem and not Has(aitem)))  }
-      { @post Result.Equal(Finish) implies not Has(aitem) }
+      { @postcondition Result.Equal(Finish) implies not Has(aitem) }
       function LowerBound(aitem : ItemType) : TSetIterator; virtual; abstract;
       { returns the first item > aitem, or Finish if container is empty
         (for TSortedSetAdt); or returns the iterator that ends a range
         of items equal to <aitem> (for any set) }
-      { @post Result.Equal(Finish) or Result.Item <> aitem }
+      { @postcondition Result.Equal(Finish) or Result.Item <> aitem }
       function UpperBound(aitem : ItemType) : TSetIterator; virtual; abstract;
       { returns the range <LowerBound, UpperBound), works faster than
         calling these two functions separately }
-      { @post Result.First = LowerBound(aitem) }
-      { @post Result.Second = UpperBound(aitem) }
+      { @postcondition Result.First = LowerBound(aitem) }
+      { @postcondition Result.Second = UpperBound(aitem) }
       function EqualRange(aitem : ItemType) : TSetIteratorRange; virtual; abstract;
       { returns the functor used to compare the items }
       property ItemComparer : IBinaryComparer read FComparer write SetComparer;
@@ -221,9 +221,9 @@ type
       function CanExtract : Boolean; override;
 
 
-      { @inv not RepeatedItems implies foreach x in self holds
+      { @invariant not RepeatedItems implies foreach x in self holds
                                          not exists(y : y in self and x = y) }
-      { @inv Empty <=> Start.Equal(Finish) }
+      { @invariant Empty <=> Start.Equal(Finish) }
    end;
 
    { a set or multiset with sorted item; any container inheriting from
@@ -233,18 +233,18 @@ type
    TSortedSetAdt = class (TSetAdt)
       { returns the item that comes first in the order defined in the
         set }
-      { @pre not Empty }
-      { @post foreach x in self holds Result <= x }
+      { @precondition not Empty }
+      { @postcondition foreach x in self holds Result <= x }
       function First : ItemType; virtual;
       { removes the first item from the sorted set and returns it }
-      { @pre not Empty }
-      { @post Size = old Size - 1 }
-      { @post Result = old First }
+      { @precondition not Empty }
+      { @postcondition Size = old Size - 1 }
+      { @postcondition Result = old First }
       function ExtractFirst : ItemType; virtual;
       { the same as @<ExtractFirst>, but disposes the item instead of
         returning it }
-      { @pre not Empty }
-      { @post Size = old Size - 1 }
+      { @precondition not Empty }
+      { @postcondition Size = old Size - 1 }
       procedure DeleteFirst;
       { returns the priority queue interface to the set; destroying
         the interface does not destroy the set; you have to destroy
@@ -254,7 +254,7 @@ type
         queue }
       function PriorityQueueInterface : TPriorityQueueAdt; virtual;
 
-      { @inv self is sorted }
+      { @invariant self is sorted }
    end;
 
    { a sorted set that supports Concatenate and Split operations, so
@@ -263,17 +263,17 @@ type
       { concatenates aset with self; every item in one of the
         concatenated sets must be larger than or equal to every item
         in the other one; <aset> is _destroyed_ }
-      { @pre aset <> nil }
-      { @pre (foreach x, y : (x in aset and y in self) holds x <= y) or
+      { @precondition aset <> nil }
+      { @precondition (foreach x, y : (x in aset and y in self) holds x <= y) or
              (foreach x, y : (x in self and y in aset) holds x <= y) }
-      { @post foreach x : (x in old aset or x in old self) holds x in self }
+      { @postcondition foreach x : (x in old aset or x in old self) holds x in self }
       procedure Concatenate(aset : TConcatenableSortedSetAdt); virtual; abstract;
       { splits itself into two sets according to the item aitem; every
         item smaller than or equal to <aitem> is left in the original set,
         and every item larger than <aitem> goes to the newly created set
         which is returned by this function }
-      { @post foreach x : (x in old self and x <= aitem) holds x in self }
-      { @post foreach x : (x in old self and x > aitem) holds x in Result }
+      { @postcondition foreach x : (x in old self and x <= aitem) holds x in self }
+      { @postcondition foreach x : (x in old self and x > aitem) holds x in Result }
       function Split(aitem : ItemType) :
          TConcatenableSortedSetAdt; virtual; abstract;
    end;
@@ -315,8 +315,8 @@ type
         (i.e. the capacity is increased (decreased)); ex may be
         negative, but the resulting capacity of the set cannot be less
         than its minimal allowed value. }
-      { @pre Capacity * 2^ex >= MinCapacity }
-      { @post Capacity = approx. old Capacity * 2^ex }
+      { @precondition Capacity * 2^ex >= MinCapacity }
+      { @postcondition Capacity = approx. old Capacity * 2^ex }
       procedure Rehash(ex : SizeType); virtual; abstract;
       { returns the minimal allowed capacity for the set }
       function MinCapacity : SizeType; virtual; abstract;
@@ -327,23 +327,23 @@ type
         buckets or slots or whatever that influences the performance
         of the set; when assigning to this property the set rehashes
         itself to have the capacity closest to the given value; }
-      { @inv Capacity >= MinCapacity }
+      { @invariant Capacity >= MinCapacity }
       property Capacity : SizeType read GetCapacity write SetCapacity;
       { maximal value of (Size/Capacity)*100%; the default is 80%;
         this shouldn't be less than 50% }
-      { @inv MaxFillRatio >= 50% }
+      { @invariant MaxFillRatio >= 50% }
       property MaxFillRatio : SizeType read GetMaxFillRatio write SetMaxFillRatio;
       { the same as above, but minimal value; the default is 10%; this
         should be larger than MaxFillRatio/2 }
-      { @inv MinFillRatio > MaxFillRatio/2 }
+      { @invariant MinFillRatio > MaxFillRatio/2 }
       property MinFillRatio : SizeType read GetMinFillRatio write SetMinFillRatio;
       { if true then the table's capacity is decreased by half each
         time Size/Capacity goes below MinFillRatio; this may be useful
         for sparing memory; false by default }
       property AutoShrink : Boolean read FAutoShrink write FAutoShrink;
 
-      { @inv MinCapacity > 0 }
-      { @inv Capacity >= MinCapacity }
+      { @invariant MinCapacity > 0 }
+      { @invariant Capacity >= MinCapacity }
    end;
 
    { -------------------- tree containers ------------------------ }

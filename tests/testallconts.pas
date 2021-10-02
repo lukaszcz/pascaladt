@@ -21,6 +21,13 @@ begin
    t.Destroy;
 end;
 
+procedure TestUsing(t : TIntegerTester); overload;
+begin
+   Assert(t <> nil);
+   t.Test;
+   t.Destroy;
+end;
+
 begin
    if ParamCount = 1 then
       RandSeed := StrToInt(ParamStr(1))
@@ -60,6 +67,10 @@ begin
    TestUsing(TStringHashSetTester.Create('TStringScatterTable', 'TStringScatterTableIterator',
                                    TStringScatterTable.Create));
 
+   { -------------------- integer hash sets -------------------------- }
+   TestUsing(TIntegerSetTester.Create('TIntegerHashTable', 'TIntegerHashTableIterator',
+                                      TIntegerHashTable.Create));
+
    { ---------------- sets based on trees --------------------- }
    TestUsing(TSortedSetTester.Create('TSplayTree', 'TBinaryTreeIterator',
                                      TSplayTree.Create));
@@ -82,6 +93,17 @@ begin
                                      TStringBinarySearchTree.Create));
    TestUsing(TStringSetTester.Create('TString23Tree', 'TString23TreeIterator',
                                                  TString23Tree.Create));
+
+   { ---------------- integer sets based on trees --------------------- }
+   TestUsing(TIntegerSetTester.Create('TIntegerSplayTree', 'TIntegerBinaryTreeIterator',
+                                      TIntegerSplayTree.Create));
+   TestUsing(TIntegerSetTester.Create('TIntegerAvlTree', 'TIntegerBinaryTreeIterator',
+                                      TIntegerAvlTree.Create));
+   TestUsing(TIntegerSetTester.Create('TIntegerBinarySearchTree',
+                                      'TIntegerBinarySearchTreeIterator',
+                                      TIntegerBinarySearchTree.Create));
+   TestUsing(TIntegerSetTester.Create('TInteger23Tree', 'TInteger23TreeIterator',
+                                      TInteger23Tree.Create));
 
    { --------------------- priority queues -------------------- }
    TestUsing(TPriorityQueueTester.Create('TBinomialQueue',

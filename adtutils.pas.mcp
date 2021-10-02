@@ -1,18 +1,18 @@
 (* This file is a part of the PascalAdt library, which provides commonly
    used algorithms and data structures for the fpc and Delphi compilers.
-   
+
    Copyright (C) 2004-2006 by Lukasz Czajka
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public License
    as published by the Free Software Foundation; either version 2.1 of
    the License, or (at your option) any later version.
-   
+
    This library is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -27,7 +27,7 @@ interface
 
 &# this must always be generated - needed by adtdarray
 &define MCP_POINTER
-&define MCP_INTEGER
+&undefine MCP_NO_INTEGER
 
 &include adtdefs.inc
 
@@ -264,17 +264,17 @@ var
 begin
    if n = 0 then
       raise EInvalidArgument.Create('FloorLog2');
-   
+
    mask := $0FF;
    mask := mask shl (MSIGN_BIT - 7);
    Result := MSIGN_BIT;
-   
+
    while (n and mask) = 0 do
    begin
       mask := mask shr 8;
       Dec(Result, 8);
    end;
-   
+
    mask := 1 shl Result;
    while (n and mask) = 0 do
    begin
@@ -291,14 +291,13 @@ begin
    if Result <> 0 then
    begin
       mask := 1 shl (Result - 1);
-      
+
       while ((n and mask) = 0) and (mask <> 0) do
          mask := mask shr 1;
-      
+
       if mask <> 0 then
          Inc(Result);
    end;
 end;
 
 end.
-

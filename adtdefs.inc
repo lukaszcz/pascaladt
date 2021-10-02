@@ -135,7 +135,7 @@
 { @discard-recent-comments }
 
 type
-   { @header Type definitions. @until-next-comment }
+   { Type definitions. @until-next-comment }
    { Basic type definitions used within PascalAdt library.  }
    { PointerValueType and UnsignedType should be unsigned; SizeType
      may be signed or not; IndexType must be signed. IndexType must be
@@ -222,9 +222,9 @@ const
 &# arg1, arg2 - arguments to subtract
 &macro _mcp_diff
    &if (&_mcp_substractable)
-      &arg2& - &arg1&
+      IndexType(&arg2& - &arg1&)
    &else &# not meaningful
-      DefaultItem
+      0
    &endif
 &endm
 
@@ -241,7 +241,7 @@ const
    &if (&arg4& == String)
       &arg3& := CompareStr(&arg1&, &arg2&);
    &elseif (&arg4& == Integer || &arg4& == Cardinal || &arg4& == Real)
-      &arg3& := &arg1& - &arg2&;
+      &arg3& := IndexType(&arg1& - &arg2&);
    &else
       &arg3& := &arg5&.Compare(&arg1&, &arg2&);
    &endif
@@ -357,7 +357,7 @@ const
          &include &arg1&
       &endif
 
-      &ifdef MCP_INTEGER
+      &ifndef MCP_NO_INTEGER
          &define _mcp_prefix Integer
          &define ItemType Integer
          &include &arg1&
@@ -453,7 +453,7 @@ const
          &include &arg1&
       &endif
 
-      &ifdef MCP_INTEGER
+      &ifndef MCP_NO_INTEGER
          &define _mcp_map_prefix StringInteger
          &define _mcp_item_prefix Integer
          &define _mcp_key_prefix String
