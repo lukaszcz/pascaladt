@@ -4,7 +4,6 @@
 1. Compilation modes.
 2. Compiling with the Free Pascal Compiler.
 3. Compiling with Delphi.
-4. FPC and the heaptrace unit.
 
 1. Compilation modes.
 
@@ -71,7 +70,7 @@ that.
 
 Removes all files produced by the compiler.
 
-2. Compiling with Delphi.
+3. Compiling with Delphi.
 
 In the delphi/ subdirectory there is a package file
 pascaladt.dpk. Compile this package and install.
@@ -92,9 +91,3 @@ For memory tracing add:
 To compile in the test mode add: 
     TEST_PASCAL_ADT + the defines for debugging and memory tracing 
 
-4. FPC and the heaptrace unit.
-
-The library does not work correctly if compiled with FPC using the
-heaptrace unit. I don't know whether this is a bug in the compiler,
-the heaptrace unit or the library, but when heaptrace is not used
-everything seems to work just fine.
