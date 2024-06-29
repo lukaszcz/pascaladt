@@ -61,7 +61,7 @@ ifneq ($(findstring docs, $(MAKECMDGOALS)),)
 DOCS = true
 endif
 
-override OPTS += -Si -S2 -Sh -Futests/units
+override OPTS += -fPIC -Si -S2 -Sh -Futests/units
 
 ifdef SMART
 override OPTS += -CX
