@@ -120,31 +120,31 @@ else
     INCLUDE_DIR="/usr/local/include/"
 fi
 
-read -n 1 -p "Make a dynamic library? (y/n) "
-echo
-if [ "$REPLY" != n ]; then
+#read -n 1 -p "Make a dynamic library? (y/n) "
+#echo
+#if [ "$REPLY" != n ]; then
     MAKE_DYNAMIC=1
     XD="-XD"
-else
-    MAKE_DYNAMIC=0
-    XD=""
-fi
+#else
+#    MAKE_DYNAMIC=0
+#    XD=""
+#fi
 
-read -n 1 -p "Make a smartlinked static library? (n/y) "
-echo
-if [ "$REPLY" == "y" ]; then
-    MAKE_SMART=1
-else
+#read -n 1 -p "Make a smartlinked static library? (n/y) "
+#echo
+#if [ "$REPLY" == "y" ]; then
+#    MAKE_SMART=1
+#else
     MAKE_SMART=0
-fi
+#fi
 
-read -n 1 -p "Make a non-smartlinked static library? (n/y) "
-echo
-if [ "$REPLY" == "y" ]; then
-    MAKE_STATIC=1
-else
-    MAKE_STATIC=0
-fi
+#read -n 1 -p "Make a non-smartlinked static library? (n/y) "
+#echo
+#if [ "$REPLY" == "y" ]; then
+#    MAKE_STATIC=1
+#else
+#    MAKE_STATIC=0
+#fi
 
 read -n 1 -p "Install debug version also? (n/y) "
 echo
@@ -183,11 +183,11 @@ echo
 if [ "$REPLY" == "y" ]; then
     MCPOPTS="-dMCP_POINTER $MCPOPTS"
 fi
-read -n 1 -p "Generate template instantiations for Cardinal? (n/y) "
-echo
-if [ "$REPLY" == "y" ]; then
-    MCPOPTS="-dMCP_CARDINAL $MCPOPTS"
-fi
+#read -n 1 -p "Generate template instantiations for Cardinal? (n/y) "
+#echo
+#if [ "$REPLY" == "y" ]; then
+#    MCPOPTS="-dMCP_CARDINAL $MCPOPTS"
+#fi
 read -n 1 -p "Generate template instantiations for Real? (n/y) "
 echo
 if [ "$REPLY" == "y" ]; then
@@ -258,15 +258,15 @@ fi
 # compile and install the release version(s)
 
 if [ $MAKE_DYNAMIC == 1 ]; then
-    install_release dynamic ${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so " " "$*" "$MCPOPTS";
+    install_release dynamic ${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so " " "$*" "\"$MCPOPTS\"";
 fi
 
 if [ $MAKE_SMART == 1 ]; then
-    install_release smart ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a "-m 644" "$*" "$MCPOPTS";
+    install_release smart ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a "-m 644" "$*" "\"$MCPOPTS\"";
 fi
 
 if [ $MAKE_STATIC == 1 ]; then
-    install_release static ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a "-m 644" "$*" "$MCPOPTS";
+    install_release static ${STATIC_LIB_STEM}${VERSION_SUFFIX}.a "-m 644" "$*" "\"$MCPOPTS\"";
 fi
 
 if should_overwrite_ppu "" ; then
@@ -285,7 +285,7 @@ if [ $INSTALL_DEBUG == 1 ]; then
     DEBUG_LINK_PATH=${DEBUG_LIB_DIR}${DYNAMIC_LIB_STEM}.so
     DEBUG_LIB_PATH=${DEBUG_LIB_DIR}${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so
     checked_eval make fastclean
-    checked_eval make dynamic DEBUG=true OPTS="$*" VER="$VERSION_SUFFIX" MCP_OPTS="$MCPOPTS"
+    checked_eval make dynamic DEBUG=true OPTS="$*" VER="$VERSION_SUFFIX" MCP_OPTS="\"$MCPOPTS\""
     checked_eval install -m 644 $INSTALL_OPTS ${DYNAMIC_LIB_STEM}${VERSION_SUFFIX}.so ${DEBUG_LIB_DIR}
     if should_overwrite_ppu DEBUG_ ; then
         checked_eval install -m 664 $INSTALL_OPTS *.ppu ${DEBUG_INCLUDE_DIR}
