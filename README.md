@@ -42,6 +42,6 @@ See also [docsrc/tutorial.txt](docsrc/tutorial.txt) and [demo/customer/customer.
 Copyright and license
 ---------------------
 
-Copyright (C) 2004-2021 Lukasz Czajka
+Copyright (C) 2004-2024 Lukasz Czajka
 
 Distributed under LGPL 2.1. See [LICENSE](LICENSE).
