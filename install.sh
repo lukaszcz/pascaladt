@@ -6,7 +6,7 @@
 # VERSION is the number of the library version with nothing prepended
 # or appended
 
-VERSION="1.0.2"
+VERSION="1.0.3"
 
 # VERSION_SUFFIX must have a dash ("-") prepended and nothing should be
 # appended to the version number
