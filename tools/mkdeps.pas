@@ -276,7 +276,7 @@ begin
                end;
             end;
             WriteLn;
-            Write(TAB, 'echo "&include ', str, '.mcp\n');
+            Write(TAB, 'printf "&include ', str, '.mcp\n');
             for i := 1 to k - 1 do
             begin
                if FileExists(deps[i] + '.i') then
